@@ -196,7 +196,7 @@ public class TestMapDriver extends TestCase {
 	  confDriver.withMapper(mapper).withConfiguration(conf).
 	      withInput(NullWritable.get(),NullWritable.get()).
 	      withOutput(NullWritable.get(),NullWritable.get()).runTest();
-	  assertEquals(mapper.setupConfiguration.get("TestKey"), "TestValue");
+	  assertEquals("TestValue", mapper.setupConfiguration.get("TestKey"));
   }
 
   /**

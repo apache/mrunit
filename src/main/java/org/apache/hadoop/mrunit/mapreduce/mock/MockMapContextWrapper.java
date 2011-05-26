@@ -56,14 +56,14 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
     private Pair<KEYIN, VALUEIN> curInput;
     private MockOutputCollector<KEYOUT, VALUEOUT> output;
 
-    public MockMapContext(final List<Pair<KEYIN, VALUEIN>> in, final Counters counters)
+    public MockMapContext(final List<Pair<KEYIN, VALUEIN>> in, final Counters counters, Configuration conf)
         throws IOException, InterruptedException {
 
-      super(new Configuration(),
+      super(conf,
             new TaskAttemptID("mrunit-jt", 0, true, 0, 0),
             null, null, new MockOutputCommitter(), new MockReporter(counters), null);
       this.inputIter = in.iterator();
-      this.output = new MockOutputCollector<KEYOUT, VALUEOUT>();
+      this.output = new MockOutputCollector<KEYOUT, VALUEOUT>(getConfiguration());
     }
 
     @Override
@@ -114,8 +114,8 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
     }
   }
 
-  public MockMapContext getMockContext(List<Pair<KEYIN, VALUEIN>> inputs, Counters counters)
+  public MockMapContext getMockContext(List<Pair<KEYIN, VALUEIN>> inputs, Counters counters, Configuration conf)
       throws IOException, InterruptedException {
-    return new MockMapContext(inputs, counters);
+    return new MockMapContext(inputs, counters, conf);
   }
 }

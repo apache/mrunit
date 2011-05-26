@@ -30,7 +30,6 @@ import org.apache.hadoop.io.serializer.SerializationFactory;
 import org.apache.hadoop.io.serializer.Serializer;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mrunit.types.Pair;
-import org.apache.hadoop.util.ReflectionUtils;
 
 
 /**
@@ -47,19 +46,14 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
   private Configuration conf;
 
 
-  public MockOutputCollector() {
+  public MockOutputCollector(Configuration config) {
     collectedOutputs = new ArrayList<Pair<K, V>>();
 
     outBuffer = new DataOutputBuffer();
     inBuffer = new DataInputBuffer();
 
-    conf = new Configuration();
+    conf = config;
     serializationFactory = new SerializationFactory(conf);
-  }
-
-
-  private Object getInstance(Class klazz) {
-    return ReflectionUtils.newInstance(klazz, conf);
   }
 
 
@@ -70,7 +64,7 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
     }
 
     Class klazz = obj.getClass();
-    Object out = getInstance(klazz); // the output object to return.
+    Object out = null;
     Serializer s = serializationFactory.getSerializer(klazz);
     Deserializer ds = serializationFactory.getDeserializer(klazz);
 

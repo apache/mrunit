@@ -62,16 +62,16 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
 
     private MockOutputCollector<KEYOUT, VALUEOUT> output;
 
-    public MockReduceContext(final List<Pair<KEYIN, List<VALUEIN>>> in, final Counters counters)
+    public MockReduceContext(final List<Pair<KEYIN, List<VALUEIN>>> in, final Counters counters, Configuration conf)
         throws IOException, InterruptedException {
 
-      super(new Configuration(),
+      super(conf,
             new TaskAttemptID("mrunit-jt", 0, false, 0, 0),
             new MockRawKeyValueIterator(), null, null, null,
             new MockOutputCommitter(), new MockReporter(counters), null,
             (Class) Text.class, (Class) Text.class);
       this.inputIter = in.iterator();
-      this.output = new MockOutputCollector<KEYOUT, VALUEOUT>();
+      this.output = new MockOutputCollector<KEYOUT, VALUEOUT>(getConfiguration());
     }
 
 
@@ -178,8 +178,8 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
   }
 
   public MockReduceContext getMockContext(List<Pair<KEYIN, List<VALUEIN>>> inputs,
-      Counters counters)
+      Counters counters, Configuration conf)
       throws IOException, InterruptedException {
-    return new MockReduceContext(inputs, counters);
+    return new MockReduceContext(inputs, counters, conf);
   }
 }

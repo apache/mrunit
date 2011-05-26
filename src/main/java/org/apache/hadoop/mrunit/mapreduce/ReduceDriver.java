@@ -200,7 +200,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends ReduceDriverBase<K1, V1, K2, V
     try {
       MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper();
       MockReduceContextWrapper<K1, V1, K2, V2>.MockReduceContext context =
-          wrapper.getMockContext(inputs, getCounters());
+          wrapper.getMockContext(inputs, getCounters(), getConfiguration());
 
       myReducer.run(context);
       return context.getOutputs();

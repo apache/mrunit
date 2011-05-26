@@ -195,7 +195,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     try {
       MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper();
       MockMapContextWrapper<K1, V1, K2, V2>.MockMapContext context =
-          wrapper.getMockContext(inputs, getCounters());
+          wrapper.getMockContext(inputs, getCounters(), getConfiguration());
 
       myMapper.run(context);
       return context.getOutputs();
