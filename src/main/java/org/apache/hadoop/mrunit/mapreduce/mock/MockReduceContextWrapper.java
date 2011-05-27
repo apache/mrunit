@@ -83,13 +83,26 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
     private class InspectableIterable implements Iterable<VALUEIN> {
       private Iterable<VALUEIN> base;
       private VALUEIN lastVal;
+      private boolean used;
 
       public InspectableIterable(final Iterable<VALUEIN> baseCollection) {
         this.base = baseCollection;
+        this.used = false;
       }
 
       public Iterator<VALUEIN> iterator() {
-        return new InspectableIterator(this.base.iterator());
+        /*
+         * The iterator() method is called by the runtime to get an iterator
+         * over an Iteratable. If we always returned a new InspectableIterator,
+         * successive for each loops would pass over the data multiple times
+         * which is not Hadoop's normal behavior.
+         */
+        if (used) {
+          return new NullIterator();
+        } else {
+          used = true;
+          return new InspectableIterator(this.base.iterator());
+        }
       }
 
       public VALUEIN getLastVal() {
@@ -116,6 +129,27 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
         public void remove() {
           iter.remove();
         }
+      }
+    }
+
+    /*
+     * An iterator implementation that never returns data. This is to preserve
+     * Hadoop's behavior where iterating over the same reducer data more than
+     * once yields no data.
+     */
+    private class NullIterator extends
+        ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.ValueIterator implements
+        Iterator<VALUEIN> {
+
+      public VALUEIN next() {
+        return null;
+      }
+
+      public boolean hasNext() {
+        return false;
+      }
+
+      public void remove() {
       }
     }
 
