@@ -1,0 +1,46 @@
+This file contains the PGP keys of various developers.
+
+Users: pgp < KEYS
+  gpg --import KEYS
+Developers: 
+  pgp -kxa <your name> and append it to this file.
+  (pgpk -ll <your name> && pgpk -xa <your name>) >> this file.
+  (gpg --list-sigs <your name>
+    && gpg --armor --export <your name>) >> this file.
+
+pub   2048R/901791C2 2011-05-13
+uid                  Eric Sammer <esammer@apache.org>
+sig 3        901791C2 2011-05-13  Eric Sammer <esammer@apache.org>
+sub   2048R/5A095E3D 2011-05-13
+sig          901791C2 2011-05-13  Eric Sammer <esammer@apache.org>
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.4.11 (Darwin)
+
+mQENBE3MgckBCADPQYBITnVC0g99FipfrG//N09T5VYPLf5CxXM8nDunl7zXRJtQ
+GDXKpWd7iBv9ItmArpeFg3EfNJAcIXa7xMib/csjq9dxSWlQkwdlTpCwo8crXBMG
+SMHmXGdcHSR1DychvrSb0AOfvkQqKDBiCG3KgGiEQjEDX0o1EINKc+buuKsl8Dxb
+AQdojWdH3+Q6SvUp1ZgBeteFjYjL+yE29IpbmwQvFMt/258NaQEna2BiTPhJgVHT
+mc9/vUZ+X0c6QmMN9uGeiwkVvueWPYnOpSQLYTZGlUii4bkqfrTR440SqOjjOaVZ
+IOYIExVBHZSXEj8gTnkq/KUV+FKFCvGTmOQPABEBAAG0IEVyaWMgU2FtbWVyIDxl
+c2FtbWVyQGFwYWNoZS5vcmc+iQE4BBMBAgAiBQJNzIHJAhsDBgsJCAcDAgYVCAIJ
+CgsEFgIDAQIeAQIXgAAKCRDNFK1YkBeRwsIxCACw20H1GDfVBhoRYWX+FxamcO8Y
+xHaImrefyv4CgzHGvXTAK04+uVnPAjRMIrzi224fqOahViP0KEYxqTkpC1/aqmyS
+XhoA7t5pK4ModxpwfCf2CiPgQPzomdFp3TZWP8onyGejJiUaUPB4IM/goMh3U0mG
+MtHUvqI4+frREZtvBGOMKJXelT5eWEVjAhmu6mKLVLtsRpAzFLt0xm7qJDk+1TGc
+ybV2uIFLg+0xBbS6EyqvdC4Mumnr+A2HJJstXpQFdA83cwyokWIUm2d3+jOAXu/m
+swogSVGtceS2IZ3a7f4Cjp/QUS5Cbbxg3hjIMsi46A8rh6014cfiZ3F19dL4uQEN
+BE3MgckBCADa/4c64F+42jrSs4iaThe9rQNS/uMlrCZN2eH2bxTJsxEDHJHeJLjH
+Zi0FUOYjUwm4upak6vY/RhJFehIDkpggkipvbmHqc97tjdFnJbVJp4RNaUMRccBO
+bpelwSy8XhB0WmHAd9DigWdPMzFD7bnWTZcw8v2JFmSBPLgzWe0VsWidEUvfPKQd
+RtGBLS672a5tU/WK26QGvW1XRQU/2hSHVQ1if/QAMHG8/tSC0nwAO1zqlURKLAgn
+aUwddj0n3468SiS+6R4tfuriFbunUq5HHGnTfq6PPDOQMgD2UKz1Ju8gJBt+7a94
+gimCSGexvAlmZg5pqjK9GGBzelYGJvgvABEBAAGJAR8EGAECAAkFAk3MgckCGwwA
+CgkQzRStWJAXkcKZRgf/eECCZmSe1sSM0p1/Pp9IIUrx2pPy/xYpSIU7n6tkA0LO
++EndP8rZN7OHYH4RlSqTqRnEs/Rj96PO2gyw3aF8NayiR0f9yAssGOW7aW2xkRo3
+MIc1bUxScmCWNlAfwKPo6EHelEKR+ijErhN7SGNSwhndJ9Ec/lhIUVSUBqDYidw2
+GbPP0kNxAUdEGwmnY9j8y+/0oGxv8f8T3O2k5Hw/8oRwUqjDvgEAeDLQL3l3Gsm1
+0ST/wD4L/rGXG/06PyLXqUHBVceO96Trz5z44Z8UwgkIWvu0cJWsei/52YxTbJvS
+5KZh0txjkQcup8Glb+tZqQSivcSXwBgvfTFfQic7UQ==
+=sPyE
+-----END PGP PUBLIC KEY BLOCK-----
