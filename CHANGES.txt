@@ -1,0 +1,24 @@
+Release Notes - MRUnit - Version 0.5.0
+
+** Bug
+    * [MRUNIT-6] - Reverse MAPREDUCE-954 in trunk
+    * [MRUNIT-7] - Remove empty MockMapContext.java file accidentally added
+    * [MRUNIT-8] - Fix failing testConfiguration tests
+    * [MRUNIT-9] - Fix failing testDoubleIteration test
+    * [MRUNIT-10] - Version in pom should contain -incubating per policy
+
+** Improvement
+    * [MRUNIT-1] - Port build system to Maven
+    * [MRUNIT-11] - Test output should be redirected to files
+
+** New Feature
+    * [MRUNIT-3] - Add Apache RAT support to the build
+    * [MRUNIT-16] - Generate distribution artifacts from maven
+
+** Task
+    * [MRUNIT-4] - Create README, LICENSE, and other necessary files for independent release
+    * [MRUNIT-20] - Add a KEYS file containing dev pgp keys to the repo 
+    * [MRUNIT-21] - Add the ASF incubator disclaimer to the README
+    * [MRUNIT-22] - Add build instructions document
+    * [MRUNIT-23] - Create a CHANGES file
+
