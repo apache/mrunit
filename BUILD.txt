@@ -1,0 +1,33 @@
+Apache MRUnit Build Instructions
+
+REQUIREMENTS:
+
+- Java 1.6
+- Apache Maven 2.2.1 or higher
+- Access to the internet
+
+BUILDING:
+
+From the command line:
+
+$ mvn assembly:assembly
+
+This produces a file named mrunit-${VERSION}.tar.gz in the top level directory.
+
+If you wish you skip the unit tests (not advised):
+
+$ mvn assembly:assembly -DskipTests
+
+You can also clean the project by running:
+
+$ mvn clean
+
+From Eclipse:
+
+1. Install the m2eclipse plugin from http://m2eclipse.sonatype.org/
+2. Restart Eclipse
+3. Select File -> Import... -> Existing Maven Project...
+4. After the project has been imported, it may be necessary to right click the
+project in the project explorer and select Maven -> Update Project
+Configuration. This is also normally necessary if you change a build plugin or
+some other element of the build itself. See the m2eclipse docs for details.
