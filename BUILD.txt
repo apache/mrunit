@@ -10,13 +10,13 @@ BUILDING:
 
 From the command line:
 
-$ mvn assembly:assembly
+$ mvn package
 
 This produces a file named mrunit-${VERSION}.tar.gz in the top level directory.
 
 If you wish you skip the unit tests (not advised):
 
-$ mvn assembly:assembly -DskipTests
+$ mvn package -DskipTests
 
 You can also clean the project by running:
 
