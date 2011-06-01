@@ -82,6 +82,8 @@
             <configuration>
               <excludes>
                 <exclude>.git/**</exclude>
+                <exclude>BUILD.txt</exclude>
+                <exclude>CHANGES.txt</exclude>
               </excludes>
             </configuration>
           </execution>
