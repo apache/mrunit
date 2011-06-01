@@ -24,4 +24,5 @@ Release Notes - MRUnit - Version 0.5.0
     * [MRUNIT-22] - Add build instructions document
     * [MRUNIT-23] - Create a CHANGES file
     * [MRUNIT-24] - Fix RAT license check failures since adding CHANGES file
+    * [MRUNIT-25] - Updated BUILD instructions
 
