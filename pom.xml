@@ -25,10 +25,37 @@
   <artifactId>mrunit</artifactId>
   <version>0.5.0-incubating</version>
   <name>MRUnit</name>
+  <url>http://incubator.apache.org/mrunit/</url>
+
+  <description>
+    MRUnit is a Java library that helps developers unit test Apache Hadoop map
+    reduce jobs.
+  </description>
+
+  <organization>
+    <name>Apache Software Foundation</name>
+    <url>http://www.apache.org</url>
+  </organization>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://issues.apache.org/jira/browse/MRUNIT</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>http://builds.apache.org/job/mrunit-trunk/</url>
+  </ciManagement>
+
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/mrunit/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/mrunit/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/mrunit/trunk/</url>
+  </scm>
 
   <licenses>
     <license>
@@ -37,8 +64,54 @@
     </license>
   </licenses>
 
-  <build>
+  <mailingLists>
+    <mailingList>
+      <name>mrunit user</name>
+      <post>mrunit-user@incubator.apache.org</post>
+      <subscribe>mrunit-user-subscribe@incubator.apache.org</subscribe>
+      <unsubscribe>mrunit-user-unsubscribe@incubator.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/incubator-mrunit-user</archive>
+    </mailingList>
+    <mailingList>
+      <name>mrunit dev</name>
+      <post>mrunit-dev@incubator.apache.org</post>
+      <subscribe>mrunit-dev-subscribe@incubator.apache.org</subscribe>
+      <unsubscribe>mrunit-dev-unsubscribe@incubator.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/incubator-mrunit-dev</archive>
+    </mailingList>
+    <mailingList>
+      <name>mrunit commits</name>
+      <post>mrunit-commits@incubator.apache.org</post>
+      <subscribe>mrunit-commits-subscribe@incubator.apache.org</subscribe>
+      <unsubscribe>mrunit-commits-unsubscribe@incubator.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/incubator-mrunit-commits</archive>
+    </mailingList>
+  </mailingLists>
 
+  <developers>
+    <developer>
+      <id>kimballa.apache.org</id>
+      <email>kimballa@apache.org</email>
+      <name>Aaron Kimball</name>
+    </developer>
+    <developer>
+      <id>cos.apache.org</id>
+      <email>cos@apache.org</email>
+      <name>Konstantin Boudnik</name>
+    </developer>
+    <developer>
+      <id>gwu.apache.org</id>
+      <email>gwu@apache.org</email>
+      <name>Garrett Wu</name>
+    </developer>
+    <developer>
+      <id>esammer.apache.org</id>
+      <email>esammer@apache.org</email>
+      <name>Eric Sammer</name>
+    </developer>
+  </developers>
+
+  <build>
     <plugins>
 
       <plugin>
@@ -100,8 +173,21 @@
         </executions>
       </plugin>
 
-    </plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.0-beta-3</version>
+      </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8</version>
+        <configuration>
+        </configuration>
+      </plugin>
+
+    </plugins>
   </build>
 
   <dependencies>
@@ -150,5 +236,30 @@
     </dependency>
 
   </dependencies>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.4</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.8.1</version>
+      </plugin>
+        <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8</version>
+      </plugin>
+    </plugins>
+  </reporting>
 
 </project>
