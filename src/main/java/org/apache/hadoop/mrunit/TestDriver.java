@@ -133,11 +133,13 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   protected void validate(List<Pair<K2, V2>> outputs) throws RuntimeException {
 
     boolean success = true;
-
+    List<String> errors = new ArrayList<String>();
     // were we supposed to get output in the first place?
     // return false if we don't.
     if (expectedOutputs.size() == 0 && outputs.size() > 0) {
-      LOG.error("Expected no outputs; got " + outputs.size() + " outputs.");
+      String msg = "Expected no outputs; got " + outputs.size() + " outputs.";
+      LOG.error(msg);
+      errors.add(msg);
       success = false;
     }
 
@@ -174,9 +176,11 @@ public abstract class TestDriver<K1, V1, K2, V2> {
           if (null != expected) {
             expectedStr = expected.toString();
           }
-
-          LOG.error("Missing expected output " + expectedStr + " at position "
-              + i);
+          
+          String msg = "Missing expected output " + expectedStr + " at position "
+              + i + ".";
+          LOG.error(msg);
+          errors.add(msg);
         }
       }
 
@@ -184,7 +188,10 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     }
 
     if (!success) {
-      throw new RuntimeException();
+      StringBuilder buffer = new StringBuilder();
+      buffer.append(errors.size()).append(" Error(s): ");
+      formatValueList(errors, buffer);
+      throw new RuntimeException(buffer.toString());
     }
   }
 

@@ -332,9 +332,8 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
       outputs = run();
       validate(outputs);
     } catch (IOException ioe) {
-      LOG.error("IOException: " + ioe.toString());
-      LOG.debug("Setting success to false based on IOException");
-      throw new RuntimeException();
+      LOG.error(ioe);
+      throw new RuntimeException(ioe);
     }
   }
 }

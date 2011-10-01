@@ -166,9 +166,8 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
       reduceOutputs = run();
       validate(reduceOutputs);
     } catch (IOException ioe) {
-      LOG.error("IOException: " + ioe.toString());
-      LOG.debug("Setting success to false based on IOException");
-      throw new RuntimeException();
+      LOG.error(ioe);
+      throw new RuntimeException(ioe);
     }
   }
 

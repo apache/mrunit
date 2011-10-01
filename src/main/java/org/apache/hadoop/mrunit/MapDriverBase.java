@@ -185,9 +185,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
       outputs = run();
       validate(outputs);
     } catch (IOException ioe) {
-      LOG.error("IOException in mapper: " + ioe.toString());
+      LOG.error("IOException in mapper", ioe);
       LOG.debug("Setting success to false based on IOException");
-      throw new RuntimeException();
+      throw new RuntimeException("IOException in mapper: ", ioe);
     }
   }
 }
