@@ -6,6 +6,7 @@ Release Notes - MRUnit - Version 0.5.0
     * [MRUNIT-8] - Fix failing testConfiguration tests
     * [MRUNIT-9] - Fix failing testDoubleIteration test
     * [MRUNIT-10] - Version in pom should contain -incubating per policy
+    * [MRUNIT-33] - maven assembly fails with no assembly descriptors found
 
 ** Improvement
     * [MRUNIT-1] - Port build system to Maven
@@ -17,7 +18,8 @@ Release Notes - MRUnit - Version 0.5.0
     * [MRUNIT-16] - Generate distribution artifacts from maven
 
 ** Task
-    * [MRUNIT-4] - Create README, LICENSE, and other necessary files for independent release
+    * [MRUNIT-4] - Create README, LICENSE, and other necessary files for
+    * independent release
     * [MRUNIT-5] - Setup CI builds for MRUnit
     * [MRUNIT-20] - Add a KEYS file containing dev pgp keys to the repo 
     * [MRUNIT-21] - Add the ASF incubator disclaimer to the README
@@ -25,4 +27,4 @@ Release Notes - MRUnit - Version 0.5.0
     * [MRUNIT-23] - Create a CHANGES file
     * [MRUNIT-24] - Fix RAT license check failures since adding CHANGES file
     * [MRUNIT-25] - Updated BUILD instructions
-
+    * [MRUNIT-32] - Add Brock Noland's key to dist/KEYS file
