@@ -12,14 +12,14 @@ Release Notes - MRUnit - Version 0.5.0
     * [MRUNIT-1] - Port build system to Maven
     * [MRUNIT-11] - Test output should be redirected to files
     * [MRUNIT-17] - Bind maven assembly to package phase
+    * [MRUNIT-37] - Use maven deploy plugin
 
 ** New Feature
     * [MRUNIT-3] - Add Apache RAT support to the build
     * [MRUNIT-16] - Generate distribution artifacts from maven
 
 ** Task
-    * [MRUNIT-4] - Create README, LICENSE, and other necessary files for
-    * independent release
+    * [MRUNIT-4] - Create README, LICENSE, and other necessary files for independent release
     * [MRUNIT-5] - Setup CI builds for MRUnit
     * [MRUNIT-20] - Add a KEYS file containing dev pgp keys to the repo 
     * [MRUNIT-21] - Add the ASF incubator disclaimer to the README
