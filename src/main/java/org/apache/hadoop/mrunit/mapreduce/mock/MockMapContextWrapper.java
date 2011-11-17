@@ -18,19 +18,20 @@
 
 package org.apache.hadoop.mrunit.mapreduce.mock;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
-import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.TaskAttemptID;
-import org.apache.hadoop.mrunit.mock.MockOutputCollector;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 /**
  * o.a.h.mapreduce.Mapper.map() expects to use a Mapper.Context
@@ -42,80 +43,67 @@ import org.apache.hadoop.mrunit.types.Pair;
  * This wrapper class exists for that purpose.
  */
 public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
-    extends Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+    extends MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
-  public static final Log LOG = LogFactory.getLog(MockMapContextWrapper.class);
-
-  /**
-   * Mock context instance that provides input to and receives output from
-   * the Mapper instance under test.
-   */
-  public class MockMapContext extends Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context {
-
-    private Iterator<Pair<KEYIN, VALUEIN>> inputIter;
-    private Pair<KEYIN, VALUEIN> curInput;
-    private MockOutputCollector<KEYOUT, VALUEOUT> output;
-
-    public MockMapContext(final List<Pair<KEYIN, VALUEIN>> in, final Counters counters, Configuration conf)
-        throws IOException, InterruptedException {
-
-      super(conf,
-            new TaskAttemptID("mrunit-jt", 0, true, 0, 0),
-            null, null, new MockOutputCommitter(), new MockReporter(counters), null);
-      this.inputIter = in.iterator();
-      this.output = new MockOutputCollector<KEYOUT, VALUEOUT>(getConfiguration());
-    }
-
-    @Override
-    public InputSplit getInputSplit() {
-      return new MockInputSplit();
-    }
-
-    @Override
-    public KEYIN getCurrentKey() {
-      return curInput.getFirst();
-    }
-
-    @Override
-    public VALUEIN getCurrentValue() {
-      return curInput.getSecond();
-    }
-
-    @Override
-    public boolean nextKeyValue() throws IOException {
-      if (this.inputIter.hasNext()) {
-        this.curInput = this.inputIter.next();
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-    public void write(KEYOUT key, VALUEOUT value) throws IOException {
-      output.collect(key, value);
-    }
-
-    @Override
-    /** This method does nothing in the mock version. */
-    public void progress() {
-    }
-
-    @Override
-    /** This method does nothing in the mock version. */
-    public void setStatus(String status) {
-    }
-
-    /**
-     * @return the outputs from the MockOutputCollector back to
-     * the test harness.
+  protected static final Log LOG = LogFactory.getLog(MockMapContextWrapper.class);
+  protected final List<Pair<KEYIN, VALUEIN>> inputs;
+  protected Pair<KEYIN, VALUEIN> currentKeyValue;
+  protected final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;
+  
+  public MockMapContextWrapper(List<Pair<KEYIN, VALUEIN>> inputs,
+      Counters counters, Configuration conf) throws IOException, InterruptedException {
+    super(counters, conf);
+    this.inputs = inputs;
+    this.context = create();
+  }
+  
+  @SuppressWarnings({ "unchecked"})
+  private Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create() 
+  throws IOException, InterruptedException {
+    Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context =  mock(org.apache.hadoop.mapreduce.Mapper.Context.class);
+    
+    createCommon(context);
+    
+    /*
+     * In actual context code nextKeyValue() modifies 
+     * the current state so we can here as well.
      */
-    public List<Pair<KEYOUT, VALUEOUT>> getOutputs() {
-      return output.getOutputs();
-    }
+    when(context.nextKeyValue()).thenAnswer(new Answer<Boolean>() {
+      @Override
+      public Boolean answer(InvocationOnMock invocation) {
+        if(inputs.size() > 0) {
+          currentKeyValue = inputs.remove(0);
+          return true;
+        } else {
+          currentKeyValue = null;
+          return false;
+        }
+      }
+    });
+    when(context.getCurrentKey()).thenAnswer(new Answer<KEYIN>() {
+      @Override
+      public KEYIN answer(InvocationOnMock invocation) {
+        return currentKeyValue.getFirst();
+      }
+    });
+    when(context.getCurrentValue()).thenAnswer(new Answer<VALUEIN>() {
+      @Override
+      public VALUEIN answer(InvocationOnMock invocation) {
+        return currentKeyValue.getSecond();
+      }
+    });    
+    return context;
   }
 
-  public MockMapContext getMockContext(List<Pair<KEYIN, VALUEIN>> inputs, Counters counters, Configuration conf)
-      throws IOException, InterruptedException {
-    return new MockMapContext(inputs, counters, conf);
+  /**
+   * @return the outputs from the MockOutputCollector back to
+   * the test harness.
+   */
+  public List<Pair<KEYOUT, VALUEOUT>> getOutputs() {
+    return outputs;
+  }
+
+  public Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context getMockContext() {
+    return context;
   }
 }

@@ -193,12 +193,11 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     inputs.add(new Pair<K1, V1>(inputKey, inputVal));
 
     try {
-      MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper();
-      MockMapContextWrapper<K1, V1, K2, V2>.MockMapContext context =
-          wrapper.getMockContext(inputs, getCounters(), getConfiguration());
-
-      myMapper.run(context);
-      return context.getOutputs();
+      MockMapContextWrapper<K1, V1, K2, V2> wrapper = 
+        new MockMapContextWrapper<K1, V1, K2, V2>(inputs, getCounters(), getConfiguration());
+      
+      myMapper.run(wrapper.getMockContext());
+      return wrapper.getOutputs();
     } catch (InterruptedException ie) {
       throw new IOException(ie);
     }

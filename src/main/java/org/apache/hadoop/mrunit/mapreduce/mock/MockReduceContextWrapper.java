@@ -18,20 +18,22 @@
 
 package org.apache.hadoop.mrunit.mapreduce.mock;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counters;
-import org.apache.hadoop.mapreduce.ReduceContext;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.TaskAttemptID;
-import org.apache.hadoop.mrunit.mock.MockOutputCollector;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 /**
  * o.a.h.mapreduce.Reducer.reduce() expects to use a Reducer.Context
@@ -42,178 +44,98 @@ import org.apache.hadoop.mrunit.types.Pair;
  *
  * This wrapper class exists for that purpose.
  */
-public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
-    extends Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> 
+extends MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
-  public static final Log LOG = LogFactory.getLog(MockReduceContextWrapper.class);
+  protected static final Log LOG = LogFactory.getLog(MockReduceContextWrapper.class);
+  protected final List<Pair<KEYIN, List<VALUEIN>>> inputs;
+  protected Pair<KEYIN, List<VALUEIN>> currentKeyValue;
+  protected final Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;
 
-  /**
-   * Mock context instance that provides input to and receives output from
-   * the Mapper instance under test.
-   */
-  public class MockReduceContext extends Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context {
-
-    // The iterator over the input key, list(val).
-    private Iterator<Pair<KEYIN, List<VALUEIN>>> inputIter;
-
-    // The current key and list of values.
-    private KEYIN curKey;
-    private InspectableIterable curValueIterable;
-
-    private MockOutputCollector<KEYOUT, VALUEOUT> output;
-
-    public MockReduceContext(final List<Pair<KEYIN, List<VALUEIN>>> in, final Counters counters, Configuration conf)
-        throws IOException, InterruptedException {
-
-      super(conf,
-            new TaskAttemptID("mrunit-jt", 0, false, 0, 0),
-            new MockRawKeyValueIterator(), null, null, null,
-            new MockOutputCommitter(), new MockReporter(counters), null,
-            (Class) Text.class, (Class) Text.class);
-      this.inputIter = in.iterator();
-      this.output = new MockOutputCollector<KEYOUT, VALUEOUT>(getConfiguration());
-    }
-
-
-    /**
-     * A private iterable/iterator implementation that wraps around the 
-     * underlying iterable/iterator used by the input value list. This
-     * memorizes the last value we saw so that we can return it in getCurrentValue().
-     */
-    private class InspectableIterable implements Iterable<VALUEIN> {
-      private Iterable<VALUEIN> base;
-      private VALUEIN lastVal;
-      private boolean used;
-
-      public InspectableIterable(final Iterable<VALUEIN> baseCollection) {
-        this.base = baseCollection;
-        this.used = false;
-      }
-
-      public Iterator<VALUEIN> iterator() {
-        /*
-         * The iterator() method is called by the runtime to get an iterator
-         * over an Iteratable. If we always returned a new InspectableIterator,
-         * successive for each loops would pass over the data multiple times
-         * which is not Hadoop's normal behavior.
-         */
-        if (used) {
-          return new NullIterator();
-        } else {
-          used = true;
-          return new InspectableIterator(this.base.iterator());
-        }
-      }
-
-      public VALUEIN getLastVal() {
-        return lastVal;
-      }
-
-      private class InspectableIterator 
-          extends ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.ValueIterator
-          implements Iterator<VALUEIN> {
-        private Iterator<VALUEIN> iter;
-        public InspectableIterator(final Iterator<VALUEIN> baseIter) {
-          iter = baseIter;
-        }
-
-        public VALUEIN next() {
-          InspectableIterable.this.lastVal = iter.next();
-          return InspectableIterable.this.lastVal;
-        }
-
-        public boolean hasNext() {
-          return iter.hasNext();
-        }
-
-        public void remove() {
-          iter.remove();
-        }
-      }
-    }
-
-    /*
-     * An iterator implementation that never returns data. This is to preserve
-     * Hadoop's behavior where iterating over the same reducer data more than
-     * once yields no data.
-     */
-    private class NullIterator extends
-        ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.ValueIterator implements
-        Iterator<VALUEIN> {
-
-      public VALUEIN next() {
-        return null;
-      }
-
-      public boolean hasNext() {
-        return false;
-      }
-
-      public void remove() {
-      }
-    }
-
-    @Override
-    public boolean nextKey() {
-      if (inputIter.hasNext()) {
-        // Advance to the next key and list of values
-        Pair<KEYIN, List<VALUEIN>> p = inputIter.next();
-        curKey = p.getFirst();
-
-        // Reset the value iterator
-        curValueIterable = new InspectableIterable(p.getSecond());
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-    @Override
-    public boolean nextKeyValue() {
-      return nextKey();
-    }
-
-    @Override
-    public KEYIN getCurrentKey() {
-      return curKey;
-    }
-
-    @Override
-    public VALUEIN getCurrentValue() {
-      return curValueIterable.getLastVal();
-    }
-
-    @Override
-    public Iterable<VALUEIN> getValues() {
-      return curValueIterable;
-    }
-
-    public void write(KEYOUT key, VALUEOUT value) throws IOException {
-      output.collect(key, value);
-    }
-
-    @Override
-    /** This method does nothing in the mock version. */
-    public void progress() {
-    }
-
-    @Override
-    /** This method does nothing in the mock version. */
-    public void setStatus(String status) {
-    }
-
-    /**
-     * @return the outputs from the MockOutputCollector back to
-     * the test harness.
-     */
-    public List<Pair<KEYOUT, VALUEOUT>> getOutputs() {
-      return output.getOutputs();
-    }
+  public MockReduceContextWrapper(List<Pair<KEYIN, List<VALUEIN>>> inputs,
+      Counters counters, Configuration conf) throws IOException, InterruptedException {
+    super(counters, conf);
+    this.inputs = inputs;
+    this.context = create();
   }
-
-  public MockReduceContext getMockContext(List<Pair<KEYIN, List<VALUEIN>>> inputs,
-      Counters counters, Configuration conf)
-      throws IOException, InterruptedException {
-    return new MockReduceContext(inputs, counters, conf);
+  
+  
+  @SuppressWarnings({ "unchecked"})
+  private Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create() 
+  throws IOException, InterruptedException {
+        
+    Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context =  mock(org.apache.hadoop.mapreduce.Reducer.Context.class);
+    createCommon(context);
+    /*
+     * In actual context code nextKeyValue() modifies 
+     * the current state so we can here as well.
+     */
+    when(context.nextKey()).thenAnswer(new Answer<Boolean>() {
+      @Override
+      public Boolean answer(InvocationOnMock invocation) {
+        if(inputs.size() > 0) {
+          currentKeyValue = inputs.remove(0);
+          return true;
+        } else {
+          currentKeyValue = null;
+          return false;
+        }
+      }
+    });
+    when(context.getCurrentKey()).thenAnswer(new Answer<KEYIN>() {
+      @Override
+      public KEYIN answer(InvocationOnMock invocation) {
+        return currentKeyValue.getFirst();
+      }
+    });
+    when(context.getValues()).thenAnswer(new Answer<Iterable<VALUEIN>>() {
+      @Override
+      public Iterable<VALUEIN> answer(InvocationOnMock invocation) {
+        return makeOneUseIterator(currentKeyValue.getSecond().iterator());
+      }
+    });
+    return context;
+  }
+  
+  /**
+   * @return the outputs from the MockOutputCollector back to
+   * the test harness.
+   */
+  public List<Pair<KEYOUT, VALUEOUT>> getOutputs() {
+    return outputs;
+  }
+  
+  protected static <V> Iterable<V> makeOneUseIterator(final Iterator<V> parent) {
+    return new Iterable<V>() {
+      private Iterator<V> iter = new Iterator<V>() {
+        private boolean used;
+        @Override
+        public boolean hasNext() {
+          if(used) {
+            return false;
+          }
+          return parent.hasNext();
+        }
+        @Override
+        public V next() {
+          if(used) {
+            throw new IllegalStateException();
+          }
+          return parent.next();
+        }
+        @Override
+        public void remove() {
+          throw new IllegalStateException();
+        }        
+      };
+      @Override
+      public Iterator<V> iterator() {
+        return iter;
+      }
+    };
+  }
+  
+  public Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context getMockContext() {
+    return context;
   }
 }
