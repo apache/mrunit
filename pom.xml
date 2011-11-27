@@ -116,6 +116,11 @@
       <email>esammer@apache.org</email>
       <name>Eric Sammer</name>
     </developer>
+    <developer>
+      <id>brock.apache.org</id>
+      <email>brock@apache.org</email>
+      <name>Brock Noland</name>
+    </developer>
   </developers>
 
   <build>
