@@ -42,6 +42,7 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
+@SuppressWarnings("deprecation")
 public class TestMapReduceDriver extends TestCase {
 
   private static final int FOO_IN_A = 42;

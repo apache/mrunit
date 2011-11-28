@@ -22,6 +22,7 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.Counters.Counter;
 
+@SuppressWarnings("deprecation")
 public class MockReporter implements Reporter {
 
   private MockInputSplit inputSplit = new MockInputSplit();

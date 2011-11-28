@@ -39,6 +39,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * (k, v*) -> (k, v)* case from the Reducer, representing a single unit test.
  * Multiple input (k, v*) sets should go in separate unit tests.
  */
+@SuppressWarnings("deprecation")
 public class ReduceDriver<K1, V1, K2, V2> extends ReduceDriverBase<K1, V1, K2, V2> {
 
   public static final Log LOG = LogFactory.getLog(ReduceDriver.class);

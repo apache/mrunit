@@ -38,6 +38,7 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
+@SuppressWarnings("deprecation")
 public class TestReduceDriver extends TestCase {
 
   private static final int IN_A = 4;

@@ -50,6 +50,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * to the first Mapper. (K2, V2) refer to the types associated with the final
  * Reducer's output. No intermediate types are specified.
  */
+@SuppressWarnings("deprecation")
 public class PipelineMapReduceDriver<K1, V1, K2, V2>
     extends TestDriver<K1, V1, K2, V2> {
 

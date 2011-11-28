@@ -32,6 +32,7 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
+@SuppressWarnings("deprecation")
 public class TestMapDriver extends TestCase {
 
   private Mapper<Text, Text, Text, Text> mapper;

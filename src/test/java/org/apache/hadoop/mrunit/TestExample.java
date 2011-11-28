@@ -31,6 +31,7 @@ import org.junit.Test;
  *
  * This example is reproduced in the overview for the MRUnit javadoc.
  */
+@SuppressWarnings("deprecation")
 public class TestExample extends TestCase {
 
   private Mapper<Text, Text, Text, Text> mapper;

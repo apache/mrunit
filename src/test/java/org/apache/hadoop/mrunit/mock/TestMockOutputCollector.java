@@ -30,7 +30,7 @@ import org.apache.hadoop.mrunit.MapDriver;
 
 import org.junit.Test;
 
-
+@SuppressWarnings("deprecation")
 public class TestMockOutputCollector extends TestCase {
 
   /**

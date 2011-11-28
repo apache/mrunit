@@ -33,6 +33,7 @@ import org.junit.Test;
 /**
  * Test counters usage in various drivers.
  */
+@SuppressWarnings("deprecation")
 public class TestCounters extends TestCase {
 
   private static final String GROUP = "GROUP";

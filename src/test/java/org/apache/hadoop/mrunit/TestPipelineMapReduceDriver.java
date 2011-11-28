@@ -33,6 +33,7 @@ import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Test;
 
+@SuppressWarnings("deprecation")
 public class TestPipelineMapReduceDriver extends TestCase {
 
   private static final int FOO_IN_A = 42;

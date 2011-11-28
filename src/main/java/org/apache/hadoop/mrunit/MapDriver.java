@@ -39,6 +39,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * single (k, v) -> (k, v)* case from the Mapper, representing a single unit
  * test. Multiple input (k, v) pairs should go in separate unit tests.
  */
+@SuppressWarnings("deprecation")
 public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   public static final Log LOG = LogFactory.getLog(MapDriver.class);
