@@ -44,7 +44,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * the Mapper and before the Reducer.
  */
 @SuppressWarnings("deprecation")
-public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3>
+public class MapReduceDriver<K1, V1, K2 extends Comparable<?>, V2, K3, V3>
     extends MapReduceDriverBase<K1, V1, K2, V2, K3, V3> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriver.class);

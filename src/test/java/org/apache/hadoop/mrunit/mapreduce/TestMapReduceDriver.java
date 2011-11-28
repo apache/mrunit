@@ -260,9 +260,9 @@ public class TestMapReduceDriver extends TestCase {
   @Test
   public void testComparators() {
     // group comparator - group by first character
-    RawComparator groupComparator = new RawComparator() {
+    RawComparator<Text> groupComparator = new RawComparator<Text>() {
       @Override
-      public int compare(Object o1, Object o2) {
+      public int compare(Text o1, Text o2) {
         return o1.toString().substring(0, 1).compareTo(
             o2.toString().substring(0, 1));
       }
@@ -275,9 +275,9 @@ public class TestMapReduceDriver extends TestCase {
     };
     
     // value order comparator - order by second character
-    RawComparator orderComparator = new RawComparator() {
+    RawComparator<Text> orderComparator = new RawComparator<Text>() {
       @Override
-      public int compare(Object o1, Object o2) {
+      public int compare(Text o1, Text o2) {
         return o1.toString().substring(1, 2).compareTo(
             o2.toString().substring(1, 2));
       }

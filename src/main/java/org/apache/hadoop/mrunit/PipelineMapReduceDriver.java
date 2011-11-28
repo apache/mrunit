@@ -50,7 +50,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * to the first Mapper. (K2, V2) refer to the types associated with the final
  * Reducer's output. No intermediate types are specified.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "rawtypes"})
 public class PipelineMapReduceDriver<K1, V1, K2, V2>
     extends TestDriver<K1, V1, K2, V2> {
 
@@ -292,7 +292,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
     return this;
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({ "unchecked" })
   public List<Pair<K2, V2>> run() throws IOException {
     // inputs starts with the user-provided inputs.
     List<Pair<K1, V1>> inputs = this.inputList;

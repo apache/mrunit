@@ -51,7 +51,7 @@ public class MockReporter implements Reporter {
   }
 
   @Override
-  public void incrCounter(Enum key, long amount) {
+  public void incrCounter(Enum<?> key, long amount) {
     if (null != counters) {
       counters.incrCounter(key, amount);
     }
@@ -85,7 +85,7 @@ public class MockReporter implements Reporter {
   }
 
   @Override
-  public Counter getCounter(Enum key) {
+  public Counter getCounter(Enum<?> key) {
     Counters.Counter counter = null;
     if (counters != null) {
       counter = counters.findCounter(key);
