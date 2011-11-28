@@ -237,7 +237,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
   @SuppressWarnings("unchecked")
   public void addInputFromString(String input) {
     if (null == input) {
-      throw new IllegalArgumentException("null input given to setInput");
+      throw new IllegalArgumentException("null input");
     } else {
       Pair<Text, Text> inputPair = parseTabbedPair(input);
       if (null != inputPair) {
@@ -245,7 +245,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
         // know a better way to do this.
         addInput((Pair<K1, V1>) inputPair);
       } else {
-        throw new IllegalArgumentException("Could not parse input pair in addInput");
+        throw new IllegalArgumentException("Could not parse input pair");
       }
     }
   }
@@ -268,7 +268,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
   @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
-      throw new IllegalArgumentException("null input given to setOutput");
+      throw new IllegalArgumentException("null input");
     } else {
       Pair<Text, Text> outputPair = parseTabbedPair(output);
       if (null != outputPair) {
@@ -277,7 +277,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
         addOutput((Pair<K2, V2>) outputPair);
       } else {
         throw new IllegalArgumentException(
-            "Could not parse output pair in setOutput");
+            "Could not parse output pair");
       }
     }
   }

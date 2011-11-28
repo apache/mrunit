@@ -124,7 +124,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1
   @SuppressWarnings("unchecked")
   public void setInputFromString(String input) {
     if (null == input) {
-      throw new IllegalArgumentException("null input given to setInputFromString");
+      throw new IllegalArgumentException("null input");
     } else {
       Pair<Text, Text> inputPair = parseTabbedPair(input);
       if (null != inputPair) {
@@ -135,7 +135,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1
                 .toString()));
       } else {
         throw new IllegalArgumentException(
-            "Could not parse input pair in setInputFromString");
+            "Could not parse input pair");
       }
     }
   }
@@ -150,7 +150,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1
   @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
-      throw new IllegalArgumentException("null input given to setOutput");
+      throw new IllegalArgumentException("null input");
     } else {
       Pair<Text, Text> outputPair = parseTabbedPair(output);
       if (null != outputPair) {
@@ -158,7 +158,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1
         // this.
         addOutput((Pair<K2, V2>) outputPair);
       } else {
-        throw new IllegalArgumentException("Could not parse output pair in setOutput");
+        throw new IllegalArgumentException("Could not parse output pair");
       }
     }
   }
