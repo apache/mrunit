@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.mapred.Counters;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mrunit.mock.MockOutputCollector;
 import org.apache.hadoop.mrunit.mock.MockReporter;
@@ -193,9 +194,9 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     if (myMapper instanceof Configurable) {
       ((Configurable)myMapper).setConf(getConfiguration());
     }
-
+    myMapper.configure(new JobConf(getConfiguration()));    
     myMapper.map(inputKey, inputVal, outputCollector, reporter);
-
+    myMapper.close();
     return outputCollector.getOutputs();
   }
 

@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.Counters;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mrunit.mock.MockOutputCollector;
 import org.apache.hadoop.mrunit.mock.MockReporter;
@@ -196,9 +197,11 @@ public class ReduceDriver<K1, V1, K2, V2> extends ReduceDriverBase<K1, V1, K2, V
         new MockOutputCollector<K2, V2>(getConfiguration());
     MockReporter reporter = new MockReporter(MockReporter.ReporterType.Reducer, getCounters());
 
+    myReducer.configure(new JobConf(getConfiguration()));    
     myReducer.reduce(inputKey, getInputValues().iterator(), outputCollector,
             reporter);
-
+    myReducer.close();
+    
     List<Pair<K2, V2>> outputs = outputCollector.getOutputs();
     return outputs;
   }
