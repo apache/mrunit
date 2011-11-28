@@ -233,6 +233,7 @@ public class TestReduceDriver extends TestCase {
    */
   private static class DoubleIterReducer<K, V>
       extends Reducer<K, V, K, LongWritable> {
+    @SuppressWarnings("unused") 
     public void reduce(K key, Iterable<V> values, Context c)
         throws IOException, InterruptedException {
       long count = 0;

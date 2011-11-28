@@ -200,7 +200,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends ReduceDriverBase<K1, V1, K2, V
       MockReduceContextWrapper<K1, V1, K2, V2> wrapper = 
         new MockReduceContextWrapper<K1, V1, K2, V2>(inputs, getCounters(), getConfiguration());
       Reducer<K1, V1, K2, V2>.Context context = wrapper.getMockContext();
-      myReducer.run(wrapper.getMockContext());
+      myReducer.run(context);
       return wrapper.getOutputs();
     } catch (InterruptedException ie) {
       throw new IOException(ie);
