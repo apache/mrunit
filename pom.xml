@@ -30,7 +30,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.mrunit</groupId>
   <artifactId>mrunit</artifactId>
-  <version>0.5.0-incubating</version>
+  <version>0.8.0-incubating</version>
   <name>MRUnit</name>
   <url>http://incubator.apache.org/mrunit/</url>
 
