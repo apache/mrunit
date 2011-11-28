@@ -42,7 +42,7 @@ public class TestMapDriver extends TestCase {
   @Before
   public void setUp() {
     mapper = new Mapper<Text, Text, Text, Text>(); // default action is identity mapper.
-    driver = new MapDriver<Text, Text, Text, Text>(mapper);
+    driver = MapDriver.newMapDriver(mapper);
   }
 
   @Test

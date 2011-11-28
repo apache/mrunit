@@ -58,10 +58,7 @@ public class TestMapReduceDriver extends TestCase {
   public void setUp() throws Exception {
     mapper = new Mapper<Text, LongWritable, Text, LongWritable>(); // This is the IdentityMapper
     reducer = new LongSumReducer<Text>();
-    driver = new MapReduceDriver<Text, LongWritable,
-                                 Text, LongWritable,
-                                 Text, LongWritable>(
-                        mapper, reducer);
+    driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
     // for shuffle tests
     driver2 = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
   }

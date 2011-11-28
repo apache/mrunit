@@ -204,5 +204,27 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   public String toString() {
     return "MapDriver (" + myMapper + ")";
   }
+  
+  /**
+   * Returns a new MapDriver without having to specify
+   * the generic types on the right hand side of the object create
+   * statement.
+   * 
+   * @return new MapDriver
+   */
+  public static <K1, V1, K2, V2>  MapDriver<K1, V1, K2, V2> newMapDriver() {
+    return new MapDriver<K1, V1, K2, V2>();
+  }
+  /**
+   * Returns a new MapDriver without having to specify
+   * the generic types on the right hand side of the object create
+   * statement.
+   * 
+   * @param reducer passed to MapDriver constructor
+   * @return new MapDriver
+   */
+  public static <K1, V1, K2, V2>  MapDriver<K1, V1, K2, V2> newMapDriver(Mapper<K1, V1, K2, V2> mapper) {
+    return new MapDriver<K1, V1, K2, V2>(mapper);
+  }
 }
 

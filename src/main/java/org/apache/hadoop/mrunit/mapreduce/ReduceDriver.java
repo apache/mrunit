@@ -222,5 +222,27 @@ public class ReduceDriver<K1, V1, K2, V2> extends ReduceDriverBase<K1, V1, K2, V
     setConfiguration(configuration);
     return this;
   }
+  /**
+   * Returns a new ReduceDriver without having to specify
+   * the generic types on the right hand side of the object create
+   * statement.
+   * 
+   * @return new ReduceDriver
+   */
+  public static <K1, V1, K2, V2>  ReduceDriver<K1, V1, K2, V2> newReduceDriver() {
+    return new ReduceDriver<K1, V1, K2, V2>();
+  }
+  /**
+   * Returns a new ReduceDriver without having to specify
+   * the generic types on the right hand side of the object create
+   * statement.
+   * 
+   * 
+   * @param reducer passed to ReduceDriver constructor
+   * @return new ReduceDriver
+   */
+  public static <K1, V1, K2, V2>  ReduceDriver<K1, V1, K2, V2> newReduceDriver(Reducer<K1, V1, K2, V2> reducer) {
+    return new ReduceDriver<K1, V1, K2, V2>(reducer);
+  }
 }
 

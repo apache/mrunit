@@ -52,8 +52,7 @@ public class TestReduceDriver extends TestCase {
   @Before
   public void setUp() throws Exception {
     reducer = new LongSumReducer<Text>();
-    driver = new ReduceDriver<Text, LongWritable, Text, LongWritable>(
-                   reducer);
+    driver = ReduceDriver.newReduceDriver(reducer);
   }
 
   @Test

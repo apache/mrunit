@@ -310,4 +310,32 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<?>, V2, K3, V3>
     setKeyOrderComparator(orderComparator);
     return this;
   }
+  /**
+   * Returns a new MapReduceDriver without having to specify
+   * the generic types on the right hand side of the object create
+   * statement.
+   * 
+   * @param mapper passed to MapReduceDriver constructor
+   * @param reducer passed to MapReduceDriver constructor
+   * @return new MapReduceDriver
+   */
+  public static <K1, V1, K2 extends Comparable<?>, V2, K3, V3>  
+  MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver() {
+    return new MapReduceDriver<K1, V1, K2, V2, K3, V3>();
+  }
+  /**
+   * Returns a new MapReduceDriver without having to specify
+   * the generic types on the right hand side of the object create
+   * statement.
+   * 
+   * @param mapper passed to MapReduceDriver constructor
+   * @param reducer passed to MapReduceDriver constructor
+   * @return new MapReduceDriver
+   */
+  public static <K1, V1, K2 extends Comparable<?>, V2, K3, V3>  
+  MapReduceDriver<K1, V1, K2, V2, K3, V3> 
+  newMapReduceDriver(final Mapper<K1, V1, K2, V2> mapper,
+      final Reducer<K2, V2, K3, V3> reducer) {
+    return new MapReduceDriver<K1, V1, K2, V2, K3, V3>(mapper, reducer);
+  }
 }

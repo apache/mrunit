@@ -61,7 +61,7 @@ public class TestConfigureClose {
           OutputCollector<Text, Text> arg2, Reporter arg3) throws IOException {
       }
     };    
-    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>(reducer);
+    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver(reducer);
     driver.runTest();
     assertTrue(configureWasCalled.get());
     assertTrue(closeWasCalled.get());
