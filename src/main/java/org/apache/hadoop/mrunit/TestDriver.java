@@ -234,7 +234,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     return false;
   }
 
-  protected static void formatValueList(List values, StringBuilder sb) {
+  protected static void formatValueList(List<?> values, StringBuilder sb) {
     sb.append("(");
 
     if (null != values) {

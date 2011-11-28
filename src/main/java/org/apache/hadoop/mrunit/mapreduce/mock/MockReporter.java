@@ -50,7 +50,7 @@ public class MockReporter extends StatusReporter {
   }
 
   @Override
-  public Counter getCounter(Enum key) {
+  public Counter getCounter(Enum<?> key) {
     Counter counter = null;
     if (counters != null) {
       counter = counters.findCounter(key);

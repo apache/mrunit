@@ -233,6 +233,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
    * Forces the Mapper input types to Text.
    * @param input A string of the form "key \t val". Trims any whitespace.
    */
+  @SuppressWarnings("unchecked")
   public void addInputFromString(String input) {
     if (null == input) {
       throw new IllegalArgumentException("null input given to setInput");
@@ -263,6 +264,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
    * Forces the Reducer output types to Text.
    * @param output A string of the form "key \t val". Trims any whitespace.
    */
+  @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
       throw new IllegalArgumentException("null input given to setOutput");
@@ -289,9 +291,10 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
     return this;
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public List<Pair<K2, V2>> run() throws IOException {
     // inputs starts with the user-provided inputs.
-    List inputs = this.inputList;
+    List<Pair<K1, V1>> inputs = this.inputList;
 
     if (mapReducePipeline.size() == 0) {
       LOG.warn("No Mapper or Reducer instances in pipeline; this is a trivial test.");
@@ -308,8 +311,8 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
       mrDriver.setCounters(getCounters());
 
       // Add the inputs from the user, or from the previous stage of the pipeline.
-      for (Object input : inputs) {
-        mrDriver.addInput((Pair) input);
+      for (Pair<K1, V1> input : inputs) {
+        mrDriver.addInput(input);
       }
 
       // Run the MapReduce "job". The output of this job becomes
@@ -320,7 +323,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
     // The last list of values stored in "inputs" is actually the outputs.
     // Unfortunately, due to the variable-length list of MR passes the user 
     // can test, this is not type-safe.
-    return (List<Pair<K2, V2>>) inputs;
+    return (List) inputs;
   }
 
   @Override

@@ -123,6 +123,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
    * @param input
    *          A string of the form "key \t val".
    */
+  @SuppressWarnings("unchecked")
   public void setInputFromString(String input) {
     if (null == input) {
       throw new IllegalArgumentException("null input given to setInputFromString");
@@ -147,6 +148,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    */
+  @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
       throw new IllegalArgumentException("null input given to setOutput");

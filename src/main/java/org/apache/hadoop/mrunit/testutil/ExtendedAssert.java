@@ -30,7 +30,7 @@ public final class ExtendedAssert {
    * @param expected a list full of expected values
    * @param actual a list full of actual test values
    */
-  public static void assertListEquals(List expected, List actual) {
+  public static void assertListEquals(List<?> expected, List<?> actual) {
     if (expected.size() != actual.size()) {
       fail("Expected list of size " + expected.size() + "; actual size is "
           + actual.size());
@@ -40,9 +40,11 @@ public final class ExtendedAssert {
       Object t1 = expected.get(i);
       Object t2 = actual.get(i);
 
-      if (!t1.equals(t2)) {
-        fail("Expected element " + t1 + " at index " + i
-            + " != actual element " + t2);
+      boolean same = (t1 == t2) || (t1 != null && t1.equals(t2)) || (t2 != null && t2.equals(t1));
+      if (!same) {
+        fail("Expected element " + t1 + " (" + ((t2 == null) ? "unknown type" : t2.getClass().getName()) + 
+            ") at index " + i + " != actual element " + t2 + 
+            " (" + ((t2 == null) ? "unknown type" : t2.getClass().getName()) + ")");
       }
     }
   }

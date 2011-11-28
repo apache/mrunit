@@ -48,7 +48,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * This is designed to handle a single (k, v)* -> (k, v)* case from the
  * Mapper/Reducer pair, representing a single unit test.
  */
-public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3>
+public class MapReduceDriver<K1, V1, K2 extends Comparable<?>, V2, K3, V3>
     extends MapReduceDriverBase<K1, V1, K2, V2, K3, V3> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriver.class);

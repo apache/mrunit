@@ -23,6 +23,7 @@ import java.util.Comparator;
 /**
  * A very basic pair type.
  */
+@SuppressWarnings("unchecked")
 public class Pair<S, T> implements Comparable<Pair<S, T>> {
 
   private final S first;

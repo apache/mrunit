@@ -51,6 +51,7 @@ public abstract class MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     this.counters = counters;
   }
   
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   protected void createCommon(TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) throws IOException, InterruptedException {
     when(context.getCounter((Enum)any())).thenAnswer(new Answer<Counter>() {
       @Override

@@ -43,6 +43,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * This is designed to handle a single (k, v)* -> (k, v)* case from the
  * Mapper/Reducer pair, representing a single unit test.
  */
+@SuppressWarnings("rawtypes")
 public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3, V3>
     extends TestDriver<K1, V1, K3, V3> {
 
@@ -61,6 +62,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
     
     // create a simple comparator for key grouping and ordering
     Comparator<K2> simpleComparator = new Comparator<K2>() {
+      @SuppressWarnings("unchecked")
       @Override
       public int compare(K2 o1, K2 o2) {
         return o1.compareTo(o2);
@@ -119,6 +121,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
    * Forces the Mapper input types to Text.
    * @param input A string of the form "key \t val". Trims any whitespace.
    */
+  @SuppressWarnings("unchecked")
   public void addInputFromString(String input) {
     if (null == input) {
       throw new IllegalArgumentException("null input given to setInput");
@@ -139,6 +142,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
    * Forces the Reducer output types to Text.
    * @param output A string of the form "key \t val". Trims any whitespace.
    */
+  @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
       throw new IllegalArgumentException("null input given to setOutput");

@@ -57,6 +57,7 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
   }
 
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   private Object deepCopy(Object obj) throws IOException {
 
     if (null == obj) {
@@ -100,6 +101,7 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
   /**
    * Accepts another (key, value) pair as an output of this mapper/reducer.
    */
+  @SuppressWarnings("unchecked")
   public void collect(K key, V value) throws IOException {
     collectedOutputs.add(new Pair<K, V>((K) deepCopy(key), (V) deepCopy(value)));
   }
