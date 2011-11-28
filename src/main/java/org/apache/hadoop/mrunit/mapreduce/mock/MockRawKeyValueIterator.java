@@ -22,8 +22,6 @@ import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.util.Progress;
 import org.apache.hadoop.mapred.RawKeyValueIterator;
 
-import java.io.IOException;
-
 /**
  * Mock implementation of RawKeyValueIterator that does nothing.
  */

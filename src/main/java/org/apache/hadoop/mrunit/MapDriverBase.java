@@ -24,8 +24,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mrunit.mock.MockOutputCollector;
-import org.apache.hadoop.mrunit.mock.MockReporter;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -188,7 +186,6 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
       validate(outputs);
     } catch (IOException ioe) {
       LOG.error("IOException in mapper", ioe);
-      LOG.debug("Setting success to false based on IOException");
       throw new RuntimeException("IOException in mapper: ", ioe);
     }
   }

@@ -23,10 +23,8 @@ import junit.framework.TestCase;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.junit.Before;
 import org.junit.Test;
 
 /**

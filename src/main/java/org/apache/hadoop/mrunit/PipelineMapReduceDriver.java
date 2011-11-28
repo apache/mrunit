@@ -329,8 +329,6 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
   @Override
   public void runTest() throws RuntimeException {
     List<Pair<K2, V2>> outputs = null;
-    boolean succeeded;
-
     try {
       outputs = run();
       validate(outputs);

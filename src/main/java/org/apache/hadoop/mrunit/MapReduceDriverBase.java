@@ -164,8 +164,6 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
   @Override
   public void runTest() throws RuntimeException {
     List<Pair<K3, V3>> reduceOutputs = null;
-    boolean succeeded;
-
     try {
       reduceOutputs = run();
       validate(reduceOutputs);
