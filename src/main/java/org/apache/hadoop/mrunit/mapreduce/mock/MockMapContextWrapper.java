@@ -48,8 +48,8 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
   protected static final Log LOG = LogFactory.getLog(MockMapContextWrapper.class);
   protected final List<Pair<KEYIN, VALUEIN>> inputs;
   protected Pair<KEYIN, VALUEIN> currentKeyValue;
-  protected final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;
-  
+  protected final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;  
+
   public MockMapContextWrapper(List<Pair<KEYIN, VALUEIN>> inputs,
       Counters counters, Configuration conf) throws IOException, InterruptedException {
     super(counters, conf);

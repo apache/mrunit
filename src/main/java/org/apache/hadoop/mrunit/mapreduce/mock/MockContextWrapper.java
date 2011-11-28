@@ -20,6 +20,7 @@ package org.apache.hadoop.mrunit.mapreduce.mock;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.hadoop.mrunit.Serialization.copy;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -30,10 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.DataInputBuffer;
-import org.apache.hadoop.io.DataOutputBuffer;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
@@ -79,34 +76,14 @@ public abstract class MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
       public Object answer(InvocationOnMock invocation) {
           Object[] args = checkNotNull(invocation.getArguments());
           checkArgument(args.length == 2);
-          outputs.add(new Pair(copy(args[0]), copy(args[1])));
+          outputs.add(new Pair(copy(args[0], conf), copy(args[1], conf)));
           return null;
       }}).when(context).write((KEYOUT)any(), (VALUEOUT)any());
 
   }
+
   
-  public static Object copy(Object orig) {
-    if(orig instanceof Writable) {
-      if(orig instanceof NullWritable) {
-        return orig;
-      }
-      try {
-        Writable original =  (Writable) orig;
-        DataOutputBuffer out = new DataOutputBuffer();
-        original.write(out);
-        DataInputBuffer in = new DataInputBuffer();
-        byte[] buff = out.getData();
-        in.reset(buff, buff.length);
-        Writable copy;
-        copy = original.getClass().newInstance();
-        copy.readFields(in);
-        return copy;
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-    return orig;
-  }
+  
 
 }
 

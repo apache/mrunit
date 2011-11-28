@@ -196,7 +196,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends ReduceDriverBase<K1, V1, K2, V
         new MockOutputCollector<K2, V2>(getConfiguration());
     MockReporter reporter = new MockReporter(MockReporter.ReporterType.Reducer, getCounters());
 
-    myReducer.reduce(inputKey, inputValues.iterator(), outputCollector,
+    myReducer.reduce(inputKey, getInputValues().iterator(), outputCollector,
             reporter);
 
     List<Pair<K2, V2>> outputs = outputCollector.getOutputs();
