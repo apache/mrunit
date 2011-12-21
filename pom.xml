@@ -278,11 +278,6 @@
       <artifactId>mockito-all</artifactId>
       <version>1.8.5</version>
     </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>r09</version>
-    </dependency>
 
   </dependencies>
 

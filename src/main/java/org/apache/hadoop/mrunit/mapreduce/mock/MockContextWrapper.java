@@ -18,8 +18,6 @@
 
 package org.apache.hadoop.mrunit.mapreduce.mock;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.hadoop.mrunit.Serialization.copy;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -53,17 +51,15 @@ public abstract class MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     when(context.getCounter((Enum)any())).thenAnswer(new Answer<Counter>() {
       @Override
       public Counter answer(InvocationOnMock invocation) {
-        Object[] args = checkNotNull(invocation.getArguments());
-        checkArgument(args.length == 1);
+        Object[] args = invocation.getArguments();
         return counters.findCounter((Enum)args[0]);
       }
     });
     when(context.getCounter(anyString(), anyString())).thenAnswer(new Answer<Counter>() {
       @Override
       public Counter answer(InvocationOnMock invocation) {
-        Object[] args = checkNotNull(invocation.getArguments());
-        checkArgument(args.length == 2);
-        return counters.findCounter((String)checkNotNull(args[0]), (String)checkNotNull(args[1]));
+        Object[] args = invocation.getArguments();
+        return counters.findCounter((String)args[0], (String)args[1]);
       }
     });
     when(context.getConfiguration()).thenAnswer(new Answer<Configuration>() {
@@ -74,16 +70,11 @@ public abstract class MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     });
     doAnswer(new Answer<Object>() {
       public Object answer(InvocationOnMock invocation) {
-          Object[] args = checkNotNull(invocation.getArguments());
-          checkArgument(args.length == 2);
+          Object[] args = invocation.getArguments();
           outputs.add(new Pair(copy(args[0], conf), copy(args[1], conf)));
           return null;
       }}).when(context).write((KEYOUT)any(), (VALUEOUT)any());
 
   }
-
-  
-  
-
 }
 

@@ -19,6 +19,7 @@
 package org.apache.hadoop.mrunit.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -27,9 +28,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.junit.Test;
-
-import com.google.common.collect.Lists;
-
 
 public class TestReducerInputValueResuse extends TestCase {
 
@@ -64,7 +62,7 @@ public class TestReducerInputValueResuse extends TestCase {
     ReduceDriver<Text, LongWritable, Text, LongWritable> driver = 
         new ReduceDriver<Text, LongWritable, Text, LongWritable>();
     driver.setReducer(reducer);
-    List<LongWritable> values = Lists.newArrayList();
+    List<LongWritable> values = new ArrayList<LongWritable>();
     values.add(new LongWritable(1));
     values.add(new LongWritable(1));
     values.add(new LongWritable(1));
