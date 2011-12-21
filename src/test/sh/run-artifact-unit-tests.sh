@@ -22,5 +22,6 @@ MRUNIT_JAR=$(ls mrunit-*.jar)
 TEST_CLASSPATH=$(hadoop classpath | tr ':' '\n' | grep -vi 'mrunit' | tr '\n' ':')
 TEST_CLASSPATH=src/test/java/:$MRUNIT_JAR:$TEST_CLASSPATH
 find src/test/java/ -name '*.java' | xargs javac -classpath $TEST_CLASSPATH
-java -classpath $TEST_CLASSPATH org.junit.runner.JUnitCore org.apache.hadoop.mrunit.AllTests
+TEST_CLASSES=$(cd src/test/java/ && find . -name '*.java' | xargs grep -Fl '@Test' | perl -pe 's@^./@@g;s@.java@@g;s@/@.@g')
+java -classpath $TEST_CLASSPATH org.junit.runner.JUnitCore $TEST_CLASSES
 echo "MRUnit Tests Pass!"

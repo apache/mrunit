@@ -18,12 +18,11 @@
 package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.Mapper;
@@ -33,7 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("deprecation")
-public class TestMapDriver extends TestCase {
+public class TestMapDriver {
 
   private Mapper<Text, Text, Text, Text> mapper;
   private MapDriver<Text, Text, Text, Text> driver;

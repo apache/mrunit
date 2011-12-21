@@ -18,17 +18,16 @@
 package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Test;
 
-public class TestTestDriver extends TestCase {
+public class TestTestDriver {
 
   /**
    * Test method for

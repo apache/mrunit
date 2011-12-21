@@ -18,8 +18,7 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
-import junit.framework.TestCase;
-
+import static org.junit.Assert.*;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Text;
@@ -30,7 +29,7 @@ import org.junit.Test;
 /**
  * Test counters usage in various drivers.
  */
-public class TestCounters extends TestCase {
+public class TestCounters {
 
   private static final String GROUP = "GROUP";
   private static final String ELEM = "ELEM";

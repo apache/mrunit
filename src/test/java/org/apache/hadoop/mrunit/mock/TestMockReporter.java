@@ -17,13 +17,13 @@
  */
 package org.apache.hadoop.mrunit.mock;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.apache.hadoop.mapred.InputSplit;
 import org.junit.Test;
 
 @SuppressWarnings("deprecation")
-public class TestMockReporter extends TestCase {
+public class TestMockReporter {
 
   @Test
   public void testGetInputSplitForMapper() {

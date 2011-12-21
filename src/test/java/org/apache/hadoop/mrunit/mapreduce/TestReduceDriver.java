@@ -19,14 +19,13 @@
 package org.apache.hadoop.mrunit.mapreduce;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
+import static org.junit.Assert.*;
 
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
@@ -38,7 +37,7 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestReduceDriver extends TestCase {
+public class TestReduceDriver  {
 
   private static final int IN_A = 4;
   private static final int IN_B = 6;

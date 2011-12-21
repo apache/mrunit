@@ -17,11 +17,11 @@
  */
 package org.apache.hadoop.mrunit.types;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class TestPair extends TestCase {
+public class TestPair {
 
   public static final int VAL_A = 3;
   public static final int VAL_B = 4;

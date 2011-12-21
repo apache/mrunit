@@ -19,12 +19,11 @@
 package org.apache.hadoop.mrunit.mapreduce;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
@@ -34,7 +33,7 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestMapDriver extends TestCase {
+public class TestMapDriver  {
 
   private Mapper<Text, Text, Text, Text> mapper;
   private MapDriver<Text, Text, Text, Text> driver;

@@ -18,18 +18,19 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.junit.Test;
 
-public class TestReducerInputValueResuse extends TestCase {
+public class TestReducerInputValueResuse {
 
   private class TestReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
     public LongWritable outputValue = new LongWritable();

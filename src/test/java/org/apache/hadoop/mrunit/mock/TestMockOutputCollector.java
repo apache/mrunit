@@ -17,8 +17,6 @@
  */
 package org.apache.hadoop.mrunit.mock;
 
-import junit.framework.TestCase;
-
 import java.io.IOException;
 
 import org.apache.hadoop.io.Text;
@@ -31,7 +29,7 @@ import org.apache.hadoop.mrunit.MapDriver;
 import org.junit.Test;
 
 @SuppressWarnings("deprecation")
-public class TestMockOutputCollector extends TestCase {
+public class TestMockOutputCollector  {
 
   /**
    * A mapper that reuses the same key and val objects to emit multiple values

@@ -17,8 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-import junit.framework.TestCase;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
@@ -32,7 +30,7 @@ import org.junit.Test;
  * This example is reproduced in the overview for the MRUnit javadoc.
  */
 @SuppressWarnings("deprecation")
-public class TestExample extends TestCase {
+public class TestExample {
 
   private Mapper<Text, Text, Text, Text> mapper;
   private MapDriver<Text, Text, Text, Text> driver;
