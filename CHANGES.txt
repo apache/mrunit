@@ -1,3 +1,34 @@
+Release Notes - MRUnit - Version 0.8.0
+
+** Sub-task
+    * [MRUNIT-27] - Remove unused variables/imports
+    * [MRUNIT-28] - remove generic types compiler warnings
+    * [MRUNIT-29] - squash warnings for depreciated classes/methods
+
+** Bug
+    * [MRUNIT-19] - MRunit ReduceDriver does not fully replicate the reducers
+    * behaviour with reusing pointers over the iterator
+
+** Improvement
+    * [MRUNIT-14] - Support JobConfigurable and Closable interfaces
+    * [MRUNIT-15] - runTests() should throw meaningful error messages
+    * [MRUNIT-18] - Squash all compiler warnings
+    * [MRUNIT-30] - Methods {add,set}{Input,Output}FromString have poor error
+    * messages
+    * [MRUNIT-31] - Support Hadoop 0.22 and 0.23
+    * [MRUNIT-42] - Push -javadoc.jar and -sources.jar to maven
+    * [MRUNIT-44] - Remove AllTests classes
+    * [MRUNIT-47] - Change new ArrayList and new HashMap to List.newArrayList
+    * and Maps.newHashMap
+
+** New Feature
+    * [MRUNIT-43] - Driver methods should have static factory methods similar
+    * to Guava Lists.newArrayList()
+
+** Task
+    * [MRUNIT-2] - Create a project site
+
+
 Release Notes - MRUnit - Version 0.5.0
 
 ** Bug
