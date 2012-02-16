@@ -146,6 +146,13 @@
       </plugin>
 
       <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+            <classifier>${envClassifier}</classifier>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.2.1</version>
@@ -318,6 +325,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
               <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -370,14 +378,38 @@
       <id>hadoop-0.20</id>
       <activation>
         <property>
-          <name>!hadoop.version</name>
+          <name>hadoop.version</name>
+          <value>0.20</value>
         </property>
       </activation>
+      <properties>
+        <envClassifier>hadoop-0.20</envClassifier>
+      </properties>
       <dependencies>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-core</artifactId>
           <version>0.20.2</version>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>hadoop-1.0.0</id>
+      <activation>
+        <property>
+          <name>!hadoop.version</name>
+        </property>
+      </activation>
+      <properties>
+          <envClassifier>hadoop-1.0</envClassifier>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-core</artifactId>
+          <version>1.0.0</version>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </profile>
@@ -386,33 +418,43 @@
       <activation>
         <property>
           <name>hadoop.version</name>
+          <value>0.23</value>
         </property>
       </activation>
+      <properties>
+          <envClassifier>hadoop-0.23</envClassifier>
+          <specificHadoopVersion>0.23.1-SNAPSHOT</specificHadoopVersion>
+      </properties>
       <dependencies>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-common</artifactId>
-          <version>${hadoop.version}</version>
+          <version>${specificHadoopVersion}</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-mapreduce-client-common</artifactId>
-          <version>${hadoop.version}</version>
+          <version>${specificHadoopVersion}</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-mapreduce-client-core</artifactId>
-          <version>${hadoop.version}</version>
+          <version>${specificHadoopVersion}</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>org.codehaus.jackson</groupId>
           <artifactId>jackson-core-asl</artifactId>
           <version>1.8.2</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>org.codehaus.jackson</groupId>
           <artifactId>jackson-mapper-asl</artifactId>
           <version>1.8.2</version>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </profile>
