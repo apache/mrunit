@@ -1,3 +1,18 @@
+Release Notes - MRUnit - Version 0.8.1
+
+** Bug
+    * [MRUNIT-55] - Hadoop dependency should be 'provided'
+    * [MRUNIT-56] - 0.8.0 release does not work with Hadoop 0.23
+    * [MRUNIT-58] - Javadoc for org.apache.hadoop.mrunit Package Ends
+    * Prematurely
+
+** Improvement
+    * [MRUNIT-57] - profile for hadoop 1.0.0
+
+** Task
+    * [MRUNIT-59] - Only assemble tar.gz, not .zip
+
+
 Release Notes - MRUnit - Version 0.8.0
 
 ** Sub-task
