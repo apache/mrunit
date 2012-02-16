@@ -65,13 +65,13 @@ public class TestExample extends TestCase {
   private Mapper mapper;
   private MapDriver driver;
 
-  @Before
+  {@literal @Before}
   public void setUp() {
     mapper = new IdentityMapper();
     driver = new MapDriver(mapper);
   }
 
-  @Test
+  {@literal @Test}
   public void testIdentityMapper() {
     driver.withInput(new Text("foo"), new Text("bar"))
             .withOutput(new Text("foo"), new Text("bar"))
@@ -82,7 +82,7 @@ public class TestExample extends TestCase {
 <div class="paragraph"><p>In this example, we see an existing <tt>Mapper</tt> implementation (<tt>IdentityMapper</tt>)
 being tested. We made a class named <tt>TestExample</tt> designed to test this mapper
 implementation. In JUnit, each particular test is created in a separate method
-whose name begins with test, and is marked with the <tt>@Test</tt> annotation. All of
+whose name begins with test, and is marked with the <tt>{@literal @Test}</tt> annotation. All of
 the <tt>test*()</tt> methods are run in succession. Before each test method, the
 <tt>setUp()</tt> method (if one is present) is executed. After each test, a
 <tt>tearDown()</tt> method, if one exists, is executed. (In this example, no
