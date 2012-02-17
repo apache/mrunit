@@ -11,6 +11,7 @@ Release Notes - MRUnit - Version 0.8.1
 
 ** Task
     * [MRUNIT-59] - Only assemble tar.gz, not .zip
+    * [MRUNIT-60] - Remove special characters from classifers
 
 
 Release Notes - MRUnit - Version 0.8.0
