@@ -383,7 +383,7 @@
         </property>
       </activation>
       <properties>
-        <envClassifier>hadoop-0.20</envClassifier>
+        <envClassifier>hadoop020</envClassifier>
       </properties>
       <dependencies>
         <dependency>
@@ -395,14 +395,14 @@
       </dependencies>
     </profile>
     <profile>
-      <id>hadoop-1.0.0</id>
+      <id>hadoop-1.0</id>
       <activation>
         <property>
           <name>!hadoop.version</name>
         </property>
       </activation>
       <properties>
-          <envClassifier>hadoop-1.0</envClassifier>
+          <envClassifier>hadoop100</envClassifier>
       </properties>
       <dependencies>
         <dependency>
@@ -422,7 +422,7 @@
         </property>
       </activation>
       <properties>
-          <envClassifier>hadoop-0.23</envClassifier>
+          <envClassifier>hadoop023</envClassifier>
           <specificHadoopVersion>0.23.1-SNAPSHOT</specificHadoopVersion>
       </properties>
       <dependencies>
