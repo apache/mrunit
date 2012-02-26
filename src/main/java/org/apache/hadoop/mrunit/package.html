@@ -68,7 +68,7 @@ public class TestExample extends TestCase {
   {@literal @Before}
   public void setUp() {
     mapper = new IdentityMapper();
-    driver = new MapDriver(mapper);
+    driver = MapDriver.newMapDriver(mapper);
   }
 
   {@literal @Test}

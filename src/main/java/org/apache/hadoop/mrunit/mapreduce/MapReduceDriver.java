@@ -198,7 +198,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3>
     for (Pair<K1, V1> input : inputList) {
       LOG.debug("Mapping input " + input.toString() + ")");
 
-      mapOutputs.addAll(new MapDriver<K1, V1, K2, V2>(myMapper).withInput(
+      mapOutputs.addAll(MapDriver.newMapDriver(myMapper).withInput(
               input).withCounters(getCounters()).withConfiguration(configuration).run());
     }
 
@@ -213,7 +213,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3>
       LOG.debug("Reducing input (" + inputKey.toString() + ", "
           + sb.toString() + ")");
 
-      reduceOutputs.addAll(new ReduceDriver<K2, V2, K3, V3>(myReducer)
+      reduceOutputs.addAll(ReduceDriver.newReduceDriver(myReducer)
               .withCounters(getCounters()).withConfiguration(configuration)
               .withInputKey(inputKey).withInputValues(inputValues).run());
     }

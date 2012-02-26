@@ -253,8 +253,7 @@ public class TestReduceDriver {
   @Test
   public void testDoubleIteration() {
     reducer = new DoubleIterReducer<Text, LongWritable>();
-    driver = new ReduceDriver<Text, LongWritable, Text, LongWritable>(
-        reducer);
+    driver = ReduceDriver.newReduceDriver(reducer);
 
     driver
         .withInputKey(new Text("foo"))

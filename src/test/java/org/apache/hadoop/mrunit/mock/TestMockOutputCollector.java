@@ -57,7 +57,7 @@ public class TestMockOutputCollector  {
   @Test
   public void testRepeatedObjectUse() {
     Mapper<Text, Text, Text, Text> mapper = new RepeatMapper();
-    MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>(mapper);
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver(mapper);
 
     driver.withInput(new Text("inK"), new Text("inV"))
           .withOutput(new Text("1"), new Text("a"))

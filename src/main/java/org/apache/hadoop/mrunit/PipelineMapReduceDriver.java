@@ -307,7 +307,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
 
     for (Pair<Mapper, Reducer> job : mapReducePipeline) {
       // Create a MapReduceDriver to run this phase of the pipeline.
-      MapReduceDriver mrDriver = new MapReduceDriver(job.getFirst(), job.getSecond());
+      MapReduceDriver mrDriver = MapReduceDriver.newMapReduceDriver(job.getFirst(), job.getSecond());
 
       mrDriver.setCounters(getCounters());
 

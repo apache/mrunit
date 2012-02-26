@@ -187,8 +187,7 @@ public class TestMapDriver  {
   public void testConfiguration() {
 	  Configuration conf = new Configuration();
 	  conf.set("TestKey", "TestValue");
-	  MapDriver<NullWritable, NullWritable, NullWritable, NullWritable> confDriver 
-	      = new MapDriver<NullWritable, NullWritable, NullWritable, NullWritable>();
+	  MapDriver<NullWritable, NullWritable, NullWritable, NullWritable> confDriver = MapDriver.newMapDriver();
 	  ConfigurationMapper<NullWritable, NullWritable, NullWritable, NullWritable> mapper 
 	      = new ConfigurationMapper<NullWritable, NullWritable, NullWritable, NullWritable>();
 	  confDriver.withMapper(mapper).withConfiguration(conf).

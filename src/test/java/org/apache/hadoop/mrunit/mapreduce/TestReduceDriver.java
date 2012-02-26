@@ -251,8 +251,7 @@ public class TestReduceDriver  {
   @Test
   public void testDoubleIteration() {
     reducer = new DoubleIterReducer<Text, LongWritable>();
-    driver = new ReduceDriver<Text, LongWritable, Text, LongWritable>(
-        reducer);
+    driver = ReduceDriver.newReduceDriver(reducer);
 
     driver
         .withInputKey(new Text("foo"))
@@ -269,7 +268,7 @@ public class TestReduceDriver  {
 	  Configuration conf = new Configuration();
 	  conf.set("TestKey", "TestValue");
 	  ReduceDriver<NullWritable, NullWritable, NullWritable, NullWritable> confDriver 
-	      = new ReduceDriver<NullWritable, NullWritable, NullWritable, NullWritable>();
+	      = ReduceDriver.newReduceDriver();
 	  ConfigurationReducer<NullWritable, NullWritable, NullWritable, NullWritable> reducer 
 	      = new ConfigurationReducer<NullWritable, NullWritable, NullWritable, NullWritable>();
 	  confDriver.withReducer(reducer).withConfiguration(conf).

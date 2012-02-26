@@ -53,7 +53,7 @@ public class TestConfigureClose {
           Reporter reporter) throws IOException { 
       }
     };    
-    MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>(mapper);
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver(mapper);
     driver.runTest();
     assertTrue(configureWasCalled.get());
     assertTrue(closeWasCalled.get());

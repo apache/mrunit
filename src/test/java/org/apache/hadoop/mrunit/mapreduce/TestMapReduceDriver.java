@@ -59,7 +59,7 @@ public class TestMapReduceDriver  {
     reducer = new LongSumReducer<Text>();
     driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
     // for shuffle tests
-    driver2 = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
+    driver2 = MapReduceDriver.newMapReduceDriver();
   }
 
   @Test
@@ -238,7 +238,7 @@ public class TestMapReduceDriver  {
 	  conf.set("TestKey", "TestValue");
 	  
 	  MapReduceDriver<NullWritable, NullWritable, NullWritable, NullWritable, NullWritable, NullWritable> confDriver 
-	      = new MapReduceDriver<NullWritable, NullWritable, NullWritable, NullWritable, NullWritable, NullWritable>();
+	      = MapReduceDriver.newMapReduceDriver();
 	  
 	  ConfigurationMapper<NullWritable, NullWritable, NullWritable, NullWritable> mapper 
 	      = new ConfigurationMapper<NullWritable, NullWritable, NullWritable, NullWritable>();

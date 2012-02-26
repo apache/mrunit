@@ -60,8 +60,7 @@ public class TestReducerInputValueResuse {
   @Test
   public void testReduce() throws IOException {
     TestReducer reducer = new TestReducer();
-    ReduceDriver<Text, LongWritable, Text, LongWritable> driver = 
-        new ReduceDriver<Text, LongWritable, Text, LongWritable>();
+    ReduceDriver<Text, LongWritable, Text, LongWritable> driver = ReduceDriver.newReduceDriver();
     driver.setReducer(reducer);
     List<LongWritable> values = new ArrayList<LongWritable>();
     values.add(new LongWritable(1));

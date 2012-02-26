@@ -60,7 +60,7 @@ public class TestCounters {
   @Test
   public void testMapper() throws IOException {
     Mapper<Text, Text, Text, Text> mapper = new CounterMapper();
-    MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>(mapper);
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver(mapper);
     driver.withInput(new Text("foo"), new Text("bar")).run();
     assertEquals("Expected 1 counter increment", 1,
         driver.getCounters().findCounter(GROUP, ELEM).getValue());
@@ -69,7 +69,7 @@ public class TestCounters {
   @Test
   public void testReducer() throws IOException {
     Reducer<Text, Text, Text, Text> reducer = new CounterReducer();
-    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>(reducer);
+    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver(reducer);
     driver.withInputKey(new Text("foo"))
           .withInputValue(new Text("bar"))
           .run();
@@ -82,7 +82,7 @@ public class TestCounters {
     Mapper<Text, Text, Text, Text> mapper = new CounterMapper();
     Reducer<Text, Text, Text, Text> reducer = new CounterReducer();
     MapReduceDriver<Text, Text, Text, Text, Text, Text> driver =
-        new MapReduceDriver<Text, Text, Text, Text, Text, Text>(mapper, reducer);
+        MapReduceDriver.newMapReduceDriver(mapper, reducer);
 
     driver.withInput(new Text("foo"), new Text("bar"))
           .run();

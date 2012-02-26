@@ -63,7 +63,7 @@ public class TestMapReduceDriver {
     reducer = new LongSumReducer<Text>();
     driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
     // for shuffle tests
-    driver2 = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
+    driver2 = MapReduceDriver.newMapReduceDriver();
   }
 
   @Test
