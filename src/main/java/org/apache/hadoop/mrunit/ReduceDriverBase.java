@@ -57,7 +57,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * @return List of values
    */
   public List<V1> getInputValues() {
-    return new ValueClassInstanceReuseList<V1>(inputValues);
+    return new ValueClassInstanceReuseList<V1>(inputValues, getConfiguration());
   }
   /**
    * Sets the input key to send to the Reducer
@@ -208,10 +208,11 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   protected static class ValueClassInstanceReuseList<T> extends ArrayList<T> {
     private static final long serialVersionUID = 1L;
     private T value;
-    private final Configuration conf = new Configuration();
+    private final Configuration conf;
     @SuppressWarnings("unchecked")
-    public ValueClassInstanceReuseList(List<T> list) {
+    public ValueClassInstanceReuseList(List<T> list, Configuration conf) {
       super(list);
+      this.conf = conf;
       if (!list.isEmpty()) {
         T first = list.get(0);
         Class<T> klass = (Class<T>) first.getClass();
