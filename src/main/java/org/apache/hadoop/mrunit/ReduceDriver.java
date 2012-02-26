@@ -193,6 +193,10 @@ public class ReduceDriver<K1, V1, K2, V2> extends ReduceDriverBase<K1, V1, K2, V
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
+    if (myReducer == null) {
+      throw new IllegalStateException("No Reducer class was provided");
+    }
+
     MockOutputCollector<K2, V2> outputCollector =
         new MockOutputCollector<K2, V2>(getConfiguration());
     MockReporter reporter = new MockReporter(MockReporter.ReporterType.Reducer, getCounters());

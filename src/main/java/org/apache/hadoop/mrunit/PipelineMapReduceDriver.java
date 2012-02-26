@@ -305,6 +305,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
       LOG.warn("No inputs configured to send to MapReduce pipeline; this is a trivial test.");
     }
 
+    int stageNum = 1;
     for (Pair<Mapper, Reducer> job : mapReducePipeline) {
       // Create a MapReduceDriver to run this phase of the pipeline.
       MapReduceDriver mrDriver = MapReduceDriver.newMapReduceDriver(job.getFirst(), job.getSecond());
@@ -318,7 +319,12 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
 
       // Run the MapReduce "job". The output of this job becomes
       // the input to the next job.
-      inputs = mrDriver.run();
+      try {
+        inputs = mrDriver.run();
+      } catch (IllegalStateException e) {
+        throw new IllegalStateException(e.getMessage() + " for stage " + stageNum + " of " + mapReducePipeline.size());
+      }
+      stageNum++;
     }
 
     // The last list of values stored in "inputs" is actually the outputs.

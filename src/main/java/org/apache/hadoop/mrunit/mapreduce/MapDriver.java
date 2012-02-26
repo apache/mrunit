@@ -188,6 +188,10 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
+    if (myMapper == null) {
+      throw new IllegalStateException("No Mapper class was provided");
+    }
+
     List<Pair<K1, V1>> inputs = new ArrayList<Pair<K1, V1>>();
     inputs.add(new Pair<K1, V1>(inputKey, inputVal));
 
@@ -234,7 +238,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
    * the generic types on the right hand side of the object create
    * statement.
    * 
-   * @param reducer passed to MapDriver constructor
+   * @param mapper passed to MapDriver constructor
    * @return new MapDriver
    */
   public static <K1, V1, K2, V2>  MapDriver<K1, V1, K2, V2> newMapDriver(Mapper<K1, V1, K2, V2> mapper) {

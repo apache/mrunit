@@ -193,6 +193,10 @@ public class ReduceDriver<K1, V1, K2, V2> extends ReduceDriverBase<K1, V1, K2, V
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
+    if (myReducer == null) {
+      throw new IllegalStateException("No Reducer class was provided");
+    }
+
     List<Pair<K1, List<V1>>> inputs = new ArrayList<Pair<K1, List<V1>>>();
     inputs.add(new Pair<K1, List<V1>>(inputKey, getInputValues()));
 

@@ -185,28 +185,39 @@ public class TestMapDriver  {
   
   @Test
   public void testConfiguration() {
-	  Configuration conf = new Configuration();
-	  conf.set("TestKey", "TestValue");
-	  MapDriver<NullWritable, NullWritable, NullWritable, NullWritable> confDriver = MapDriver.newMapDriver();
-	  ConfigurationMapper<NullWritable, NullWritable, NullWritable, NullWritable> mapper 
-	      = new ConfigurationMapper<NullWritable, NullWritable, NullWritable, NullWritable>();
-	  confDriver.withMapper(mapper).withConfiguration(conf).
-	      withInput(NullWritable.get(),NullWritable.get()).
-	      withOutput(NullWritable.get(),NullWritable.get()).runTest();
-	  assertEquals("TestValue", mapper.setupConfiguration.get("TestKey"));
+    Configuration conf = new Configuration();
+    conf.set("TestKey", "TestValue");
+    MapDriver<NullWritable, NullWritable, NullWritable, NullWritable> confDriver 
+        = new MapDriver<NullWritable, NullWritable, NullWritable, NullWritable>();
+    ConfigurationMapper<NullWritable, NullWritable, NullWritable, NullWritable> mapper 
+        = new ConfigurationMapper<NullWritable, NullWritable, NullWritable, NullWritable>();
+    confDriver.withMapper(mapper).withConfiguration(conf).
+        withInput(NullWritable.get(),NullWritable.get()).
+        withOutput(NullWritable.get(),NullWritable.get()).runTest();
+    assertEquals("TestValue", mapper.setupConfiguration.get("TestKey"));
   }
 
   /**
    * Test mapper which stores the configuration object it was passed during its setup method
    */
   public static class ConfigurationMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
-	public Configuration setupConfiguration;
-	
-	@Override
-	protected void setup(Context context) throws IOException,
-			InterruptedException {
-		setupConfiguration = context.getConfiguration();
-	}
+    public Configuration setupConfiguration;
+
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+      setupConfiguration = context.getConfiguration();
+    }
+  }
+
+  @Test
+  public void testNoMapper() {
+    driver = MapDriver.newMapDriver();
+    try {
+      driver.runTest();
+      fail();
+    } catch (IllegalStateException e) {
+      assertEquals("No Mapper class was provided", e.getMessage());
+    }
   }
 }
 

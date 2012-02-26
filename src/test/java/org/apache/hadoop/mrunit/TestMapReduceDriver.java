@@ -345,5 +345,29 @@ public class TestMapReduceDriver {
     
     driver.runTest();
   }
+
+  @Test
+  public void testNoMapper() {
+    driver = MapReduceDriver.newMapReduceDriver();
+    driver.withReducer(reducer).withInput(new Text("a"), new LongWritable(0));
+    try {
+      driver.runTest();
+      fail();
+    } catch (IllegalStateException e) {
+      assertEquals("No Mapper class was provided", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testNoReducer() {
+    driver = MapReduceDriver.newMapReduceDriver();
+    driver.withMapper(mapper).withInput(new Text("a"), new LongWritable(0));
+    try {
+      driver.runTest();
+      fail();
+    } catch (IllegalStateException e) {
+      assertEquals("No Reducer class was provided", e.getMessage());
+    }
+  }
 }
 

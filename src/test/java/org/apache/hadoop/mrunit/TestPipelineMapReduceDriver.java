@@ -123,5 +123,33 @@ public class TestPipelineMapReduceDriver {
           .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
           .runTest();
   }
+
+  @Test
+  public void testNoMapper() {
+    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    driver.addMapReduce(null, new IdentityReducer<Text, Text>());
+    driver.addInput(new Text("a"), new Text("b"));
+    try {
+      driver.runTest();
+      fail();
+    } catch (IllegalStateException e) {
+      assertEquals("No Mapper class was provided for stage 1 of 1", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testNoReducer() {
+    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    driver.addMapReduce(new IdentityMapper<Text, Text>(), new IdentityReducer<Text, Text>());
+    driver.addMapReduce(new IdentityMapper<Text, Text>(), null);
+    driver.addMapReduce(new IdentityMapper<Text, Text>(), new IdentityReducer<Text, Text>());
+    driver.addInput(new Text("a"), new Text("b"));
+    try {
+      driver.runTest();
+      fail();
+    } catch (IllegalStateException e) {
+      assertEquals("No Reducer class was provided for stage 2 of 3", e.getMessage());
+    }
+  }
 }
 

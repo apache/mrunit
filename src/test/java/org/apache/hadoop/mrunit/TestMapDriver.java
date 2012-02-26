@@ -181,6 +181,16 @@ public class TestMapDriver {
       // expected.
     }
   }
-  
+
+  @Test
+  public void testNoMapper() {
+    driver = MapDriver.newMapDriver();
+    try {
+      driver.runTest();
+      fail();
+    } catch (IllegalStateException e) {
+      assertEquals("No Mapper class was provided", e.getMessage());
+    }
+  }
 }
 

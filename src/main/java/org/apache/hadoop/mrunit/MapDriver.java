@@ -187,6 +187,10 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
+    if (myMapper == null) {
+        throw new IllegalStateException("No Mapper class was provided");
+    }
+
     MockOutputCollector<K2, V2> outputCollector =
         new MockOutputCollector<K2, V2>(getConfiguration());
     MockReporter reporter = new MockReporter(MockReporter.ReporterType.Mapper, getCounters());
@@ -194,7 +198,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     if (myMapper instanceof Configurable) {
       ((Configurable)myMapper).setConf(getConfiguration());
     }
-    myMapper.configure(new JobConf(getConfiguration()));    
+    myMapper.configure(new JobConf(getConfiguration()));
     myMapper.map(inputKey, inputVal, outputCollector, reporter);
     myMapper.close();
     return outputCollector.getOutputs();

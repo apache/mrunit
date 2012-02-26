@@ -265,29 +265,39 @@ public class TestReduceDriver  {
   
   @Test
   public void testConfiguration() {
-	  Configuration conf = new Configuration();
-	  conf.set("TestKey", "TestValue");
-	  ReduceDriver<NullWritable, NullWritable, NullWritable, NullWritable> confDriver 
-	      = ReduceDriver.newReduceDriver();
-	  ConfigurationReducer<NullWritable, NullWritable, NullWritable, NullWritable> reducer 
-	      = new ConfigurationReducer<NullWritable, NullWritable, NullWritable, NullWritable>();
-	  confDriver.withReducer(reducer).withConfiguration(conf).
-	      withInput(NullWritable.get(),Arrays.asList(NullWritable.get())).
-	      withOutput(NullWritable.get(),NullWritable.get()).runTest();
-	  assertEquals(reducer.setupConfiguration.get("TestKey"), "TestValue");
+    Configuration conf = new Configuration();
+    conf.set("TestKey", "TestValue");
+    ReduceDriver<NullWritable, NullWritable, NullWritable, NullWritable> confDriver 
+        = new ReduceDriver<NullWritable, NullWritable, NullWritable, NullWritable>();
+    ConfigurationReducer<NullWritable, NullWritable, NullWritable, NullWritable> reducer 
+        = new ConfigurationReducer<NullWritable, NullWritable, NullWritable, NullWritable>();
+    confDriver.withReducer(reducer).withConfiguration(conf).
+        withInput(NullWritable.get(),Arrays.asList(NullWritable.get())).
+        withOutput(NullWritable.get(),NullWritable.get()).runTest();
+    assertEquals(reducer.setupConfiguration.get("TestKey"), "TestValue");
   }
 
   /**
    * Test reducer which stores the configuration object it was passed during its setup method
    */
   public static class ConfigurationReducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
-	public Configuration setupConfiguration;
-	
-	@Override
-	protected void setup(Context context) throws IOException,
-			InterruptedException {
-		setupConfiguration = context.getConfiguration();
-	}
+    public Configuration setupConfiguration;
+
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+      setupConfiguration = context.getConfiguration();
+    }
+  }
+
+  @Test
+  public void testNoReducer() {
+    driver = ReduceDriver.newReduceDriver();
+    try {
+      driver.runTest();
+      fail();
+    } catch (IllegalStateException e) {
+      assertEquals("No Reducer class was provided", e.getMessage());
+    }
   }
 }
 

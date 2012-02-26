@@ -264,5 +264,16 @@ public class TestReduceDriver {
         .withOutput(new Text("foo"), new LongWritable(4))
         .runTest();
   }
+
+  @Test
+  public void testNoReducer() {
+    driver = ReduceDriver.newReduceDriver();
+    try {
+      driver.runTest();
+      fail();
+    } catch (IllegalStateException e) {
+      assertEquals("No Reducer class was provided", e.getMessage());
+    }
+  }
 }
 

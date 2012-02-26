@@ -257,6 +257,9 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3>
   }
 
   public List<Pair<K3, V3>> run() throws IOException {
+    if (inputList.size() == 0) {
+      LOG.warn("No inputs configured to send to Mapper and Reducer; this is a trivial test.");
+    }
 
     List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
 
