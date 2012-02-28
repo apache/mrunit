@@ -25,10 +25,9 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.io.DataOutputBuffer;
-import org.apache.hadoop.io.serializer.Deserializer;
 import org.apache.hadoop.io.serializer.SerializationFactory;
-import org.apache.hadoop.io.serializer.Serializer;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mrunit.Serialization;
 import org.apache.hadoop.mrunit.types.Pair;
 
 
@@ -40,62 +39,17 @@ import org.apache.hadoop.mrunit.types.Pair;
 public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
 
   private ArrayList<Pair<K, V>> collectedOutputs;
-  private SerializationFactory serializationFactory;
-  private DataOutputBuffer outBuffer;
-  private DataInputBuffer inBuffer;
   private Configuration conf;
 
 
   public MockOutputCollector(Configuration config) {
     collectedOutputs = new ArrayList<Pair<K, V>>();
-
-    outBuffer = new DataOutputBuffer();
-    inBuffer = new DataInputBuffer();
-
     conf = config;
-    serializationFactory = new SerializationFactory(conf);
   }
 
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-  private Object deepCopy(Object obj) throws IOException {
-
-    if (null == obj) {
-      return null;
-    }
-
-    Class klazz = obj.getClass();
-    Object out = null;
-    Serializer s = serializationFactory.getSerializer(klazz);
-    Deserializer ds = serializationFactory.getDeserializer(klazz);
-
-    try {
-      s.open(outBuffer);
-      ds.open(inBuffer);
-
-      outBuffer.reset();
-      s.serialize(obj);
-
-      byte [] data = outBuffer.getData();
-      int len = outBuffer.getLength();
-      inBuffer.reset(data, len);
-
-      out = ds.deserialize(out);
-
-      return out;
-    } finally {
-      try {
-        s.close();
-      } catch (IOException ioe) {
-        // ignore this; we're closing.
-      }
-
-      try {
-        ds.close();
-      } catch (IOException ioe) {
-        // ignore this; we're closing.
-      }
-    }
+  private Object deepCopy(Object obj) {
+      return Serialization.copy(obj, conf);
   }
 
   /**
