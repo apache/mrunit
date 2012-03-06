@@ -212,7 +212,9 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3>
    * Identical to addInputFromString, but with a fluent programming style
    * @param input A string of the form "key \t val". Trims any whitespace.
    * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInputFromString(String input) {
     addInputFromString(input);
     return this;
@@ -222,7 +224,9 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3>
    * Identical to addOutputFromString, but with a fluent programming style
    * @param output A string of the form "key \t val". Trims any whitespace.
    * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputFromString(String output) {
     addOutputFromString(output);
     return this;

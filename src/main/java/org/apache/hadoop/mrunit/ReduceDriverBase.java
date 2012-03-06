@@ -137,7 +137,9 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param input
    *          A string of the form "key \t val,val,val". Trims any whitespace.
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   @SuppressWarnings("unchecked")
   public void setInputFromString(String input) {
     if (null == input) {
@@ -162,7 +164,9 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {

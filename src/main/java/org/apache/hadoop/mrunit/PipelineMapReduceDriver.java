@@ -233,7 +233,9 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
    * Expects an input of the form "key \t val"
    * Forces the Mapper input types to Text.
    * @param input A string of the form "key \t val". Trims any whitespace.
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   @SuppressWarnings("unchecked")
   public void addInputFromString(String input) {
     if (null == input) {
@@ -254,7 +256,9 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
    * Identical to addInputFromString, but with a fluent programming style
    * @param input A string of the form "key \t val". Trims any whitespace.
    * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   public PipelineMapReduceDriver<K1, V1, K2, V2> withInputFromString(String input) {
     addInputFromString(input);
     return this;
@@ -264,7 +268,9 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
    * Expects an input of the form "key \t val"
    * Forces the Reducer output types to Text.
    * @param output A string of the form "key \t val". Trims any whitespace.
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
@@ -286,7 +292,9 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2>
    * Identical to addOutputFromString, but with a fluent programming style
    * @param output A string of the form "key \t val". Trims any whitespace.
    * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   public PipelineMapReduceDriver<K1, V1, K2, V2> withOutputFromString(String output) {
     addOutputFromString(output);
     return this;

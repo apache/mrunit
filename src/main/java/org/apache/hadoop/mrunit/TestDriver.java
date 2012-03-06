@@ -160,6 +160,11 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       for (int i = 0; i < expectedOutputs.size(); i++) {
         Pair<K2, V2> expected = expectedOutputs.get(i);
 
+        String expectedStr = "(null)";
+        if (null != expected) {
+          expectedStr = expected.toString();
+        }
+
         boolean found = false;
         for (int j = 0; j < actuals.size() && !found; j++) {
           Pair<K2, V2> actual = actuals.get(j);
@@ -167,18 +172,27 @@ public abstract class TestDriver<K1, V1, K2, V2> {
           if (actual.equals(expected)) {
             // don't match against this actual output again
             actuals.remove(j);
+
+            found = true;
+          } else if (actual.getFirst().getClass() != expected.getFirst().getClass()) {
+            String msg = "Missing expected output " + expectedStr + ": Mismatch in key class: expected: " +
+                expected.getFirst().getClass() + " " + "actual: " + actual.getFirst().getClass();
+            LOG.error(msg);
+            errors.add(msg);
+
+            found = true;
+          } else if (actual.getSecond().getClass() != expected.getSecond().getClass()) {
+            String msg =  "Missing expected output " + expectedStr + ": Mismatch in value class: expected: " +
+                expected.getSecond().getClass() + " " + "actual: " + actual.getSecond().getClass();
+            LOG.error(msg);
+            errors.add(msg);
+
             found = true;
           }
         }
 
         if (!found) {
-          String expectedStr = "(null)";
-          if (null != expected) {
-            expectedStr = expected.toString();
-          }
-          
-          String msg = "Missing expected output " + expectedStr + " at position "
-              + i + ".";
+          String msg = "Missing expected output " + expectedStr + " at position " + i + ".";
           LOG.error(msg);
           errors.add(msg);
         }

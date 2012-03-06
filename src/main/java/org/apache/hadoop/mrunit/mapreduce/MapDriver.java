@@ -168,7 +168,9 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   public MapDriver<K1, V1, K2, V2> withInputFromString(String input) {
     setInputFromString(input);
     return this;
@@ -180,7 +182,9 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   public MapDriver<K1, V1, K2, V2> withOutputFromString(String output) {
     addOutputFromString(output);
     return this;

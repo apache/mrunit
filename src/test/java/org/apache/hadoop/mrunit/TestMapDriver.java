@@ -24,8 +24,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
@@ -190,6 +194,76 @@ public class TestMapDriver {
       fail();
     } catch (IllegalStateException e) {
       assertEquals("No Mapper class was provided", e.getMessage());
+    }
+  }
+
+  private static class NonTextWritableInput extends MapReduceBase implements Mapper<LongWritable, LongWritable, Text, Text> {
+
+    @Override
+    public void map(LongWritable key, LongWritable value,
+        OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+      output.collect(new Text("a"), new Text("b"));
+    }
+
+  }
+
+  @Test
+  public void testNonTextWritableWithInputFromString() {
+    MapDriver<LongWritable, LongWritable, Text, Text> driver = MapDriver.newMapDriver(new NonTextWritableInput());
+    driver.withInputFromString("a\tb");
+    try {
+      driver.runTest();
+      fail();
+    } catch (ClassCastException e) {
+      assertEquals("org.apache.hadoop.io.Text cannot be cast to org.apache.hadoop.io.LongWritable", e.getMessage());
+    }
+  }
+
+  private static class NonTextWritableOutputKey extends MapReduceBase implements Mapper<Text, Text, LongWritable, Text> {
+
+    @Override
+    public void map(Text key, Text value,
+        OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
+      output.collect(new LongWritable(1), new Text("a"));
+    }
+
+  }
+
+  @Test
+  public void testNonTextWritableKeyWithOutputFromString() {
+    MapDriver<Text, Text, LongWritable, Text> driver = MapDriver.newMapDriver(new NonTextWritableOutputKey());
+    driver.withInputFromString("a\tb");
+    driver.withOutputFromString("1\ta");
+    try {
+      driver.runTest();
+      fail();
+    } catch (RuntimeException e) {
+      assertEquals("1 Error(s): (Missing expected output (1, a): Mismatch in key class: " +
+          "expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable)", e.getMessage());
+    }
+  }
+
+  private static class NonTextWritableOutputValue extends MapReduceBase implements Mapper<Text, Text, Text, LongWritable> {
+
+    @Override
+    public void map(Text key, Text value,
+        OutputCollector<Text, LongWritable> output, Reporter reporter) throws IOException {
+      output.collect(new Text("a"), new LongWritable(1));
+    }
+
+  }
+
+  @Test
+  public void testNonTextWritableValueWithOutputFromString() {
+    MapDriver<Text, Text, Text, LongWritable> driver = MapDriver.newMapDriver(new NonTextWritableOutputValue());
+    driver.withInputFromString("a\tb");
+    driver.withOutputFromString("a\t1");
+    try {
+      driver.runTest();
+      fail();
+    } catch (RuntimeException e) {
+      assertEquals("1 Error(s): (Missing expected output (a, 1): Mismatch in value class: " +
+          "expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable)", e.getMessage());
     }
   }
 }

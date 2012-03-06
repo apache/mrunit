@@ -120,7 +120,9 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
    * Expects an input of the form "key \t val"
    * Forces the Mapper input types to Text.
    * @param input A string of the form "key \t val". Trims any whitespace.
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   @SuppressWarnings("unchecked")
   public void addInputFromString(String input) {
     if (null == input) {
@@ -141,7 +143,9 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
    * Expects an input of the form "key \t val"
    * Forces the Reducer output types to Text.
    * @param output A string of the form "key \t val". Trims any whitespace.
+   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
    */
+  @Deprecated
   @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
