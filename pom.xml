@@ -423,7 +423,7 @@
       </activation>
       <properties>
           <envClassifier>hadoop023</envClassifier>
-          <specificHadoopVersion>0.23.1-SNAPSHOT</specificHadoopVersion>
+          <specificHadoopVersion>0.23.1</specificHadoopVersion>
       </properties>
       <dependencies>
         <dependency>
