@@ -19,6 +19,8 @@ package org.apache.hadoop.mrunit.types;
 
 import static org.junit.Assert.*;
 
+import org.apache.hadoop.mrunit.ExpectedSuppliedException;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class TestPair {
@@ -27,6 +29,9 @@ public class TestPair {
   public static final int VAL_B = 4;
   public static final int VAL_C = 65;
   public static final int VAL_D = 98;
+
+  @Rule
+  public final ExpectedSuppliedException thrown = ExpectedSuppliedException.none();
 
   /**
    * Test method for
@@ -130,79 +135,50 @@ public class TestPair {
 
   @Test
   public void testCompareToNullNull() {
-    try {
-      new Pair<Integer, Integer>(null, null)
-              .compareTo(new Pair<Integer, Integer>(null, null));
-      fail();
-    } catch (NullPointerException npe) {
-      // expected this; ok.
-    }
+    thrown.expect(NullPointerException.class);
+    new Pair<Integer, Integer>(null, null).compareTo(new Pair<Integer, Integer>(null, null));
   }
 
   @Test
   public void testCompareToNullIntFirst0() {
-    try {
-      new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null)
-          .compareTo(new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null));
-      fail();
-    } catch (NullPointerException npe) {
-      // expected this; ok.
-    }
+    thrown.expect(NullPointerException.class);
+    new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null)
+        .compareTo(new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null));
   }
 
   @Test
   public void testCompareToNullIntFirst1() {
-    try {
-      new Pair<Integer, Integer>(null, null)
-          .compareTo(new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null));
-      fail();
-    } catch (NullPointerException npe) {
-      // expected this; ok.
-    }
+    thrown.expect(NullPointerException.class);
+    new Pair<Integer, Integer>(null, null)
+        .compareTo(new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null));
   }
 
   @Test
   public void testCompareToNullIntFirst2() {
-    try {
-      new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null)
-          .compareTo(new Pair<Integer, Integer>(null, null));
-      fail();
-    } catch (NullPointerException npe) {
-      // expected this; ok.
-    }
+    thrown.expect(NullPointerException.class);
+    new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null)
+        .compareTo(new Pair<Integer, Integer>(null, null));
   }
 
   @Test
   public void testCompareToNullIntSecond0() {
-    try {
-      new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A))
-          .compareTo(new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A)));
-      fail();
-    } catch (NullPointerException npe) {
-      // expected this; ok.
-    }
+    thrown.expect(NullPointerException.class);
+    new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A))
+        .compareTo(new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A)));
   }
 
   @Test
   public void testCompareToNullIntSecond1() {
-    try {
-      new Pair<Integer, Integer>(null, null)
-          .compareTo(new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A)));
-      fail();
-    } catch (NullPointerException npe) {
-      // expected this; ok.
-    }
+    thrown.expect(NullPointerException.class);
+    new Pair<Integer, Integer>(null, null)
+        .compareTo(new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A)));
   }
 
   @Test
   public void testCompareToNullIntSecond2() {
-    try {
-      new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A))
-          .compareTo(new Pair<Integer, Integer>(null, null));
-      fail();
-    } catch (NullPointerException npe) {
-      // expected this; ok.
-    }
+    thrown.expect(NullPointerException.class);
+    new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A))
+        .compareTo(new Pair<Integer, Integer>(null, null));
   }
 
 }

@@ -30,6 +30,7 @@ import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.junit.Rule;
 import org.junit.Test;
 
 @SuppressWarnings("deprecation")
@@ -40,6 +41,9 @@ public class TestPipelineMapReduceDriver {
   private static final int BAR_IN   = 12;
   private static final int FOO_OUT  = 52;
   private static final int BAR_OUT  = 12;
+
+  @Rule
+  public final ExpectedSuppliedException thrown = ExpectedSuppliedException.none();
 
   @Test
   public void testFullyEmpty() throws IOException {
@@ -129,12 +133,8 @@ public class TestPipelineMapReduceDriver {
     PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
     driver.addMapReduce(null, new IdentityReducer<Text, Text>());
     driver.addInput(new Text("a"), new Text("b"));
-    try {
-      driver.runTest();
-      fail();
-    } catch (IllegalStateException e) {
-      assertEquals("No Mapper class was provided for stage 1 of 1", e.getMessage());
-    }
+    thrown.expectMessage(IllegalStateException.class, "No Mapper class was provided for stage 1 of 1");
+    driver.runTest();
   }
 
   @Test
@@ -144,12 +144,8 @@ public class TestPipelineMapReduceDriver {
     driver.addMapReduce(new IdentityMapper<Text, Text>(), null);
     driver.addMapReduce(new IdentityMapper<Text, Text>(), new IdentityReducer<Text, Text>());
     driver.addInput(new Text("a"), new Text("b"));
-    try {
-      driver.runTest();
-      fail();
-    } catch (IllegalStateException e) {
-      assertEquals("No Reducer class was provided for stage 2 of 3", e.getMessage());
-    }
+    thrown.expectMessage(IllegalStateException.class, "No Reducer class was provided for stage 2 of 3");
+    driver.runTest();
   }
 }
 
