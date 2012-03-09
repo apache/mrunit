@@ -33,8 +33,10 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
+import org.apache.hadoop.mrunit.ExpectedSuppliedException;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class TestReduceDriver  {
@@ -45,6 +47,8 @@ public class TestReduceDriver  {
   private static final int INCORRECT_OUT = 12;
   private static final int OUT_EMPTY = 0;
 
+  @Rule
+  public final ExpectedSuppliedException thrown = ExpectedSuppliedException.none();
   private Reducer<Text, LongWritable, Text, LongWritable> reducer;
   private ReduceDriver<Text, LongWritable, Text, LongWritable> driver;
 
@@ -55,22 +59,14 @@ public class TestReduceDriver  {
   }
 
   @Test
-  public void testRun() {
-    List<Pair<Text, LongWritable>> out = null;
+  public void testRun() throws IOException {
+    List<Pair<Text, LongWritable>> out = driver.withInputKey(new Text("foo"))
+      .withInputValue(new LongWritable(IN_A))
+      .withInputValue(new LongWritable(IN_B))
+      .run();
 
-    try {
-      out = driver.withInputKey(new Text("foo"))
-                  .withInputValue(new LongWritable(IN_A))
-                  .withInputValue(new LongWritable(IN_B))
-                  .run();
-    } catch (IOException ioe) {
-      fail();
-    }
-
-    List<Pair<Text, LongWritable>> expected =
-        new ArrayList<Pair<Text, LongWritable>>();
-    expected.add(new Pair<Text, LongWritable>(new Text("foo"),
-            new LongWritable(OUT_VAL)));
+    List<Pair<Text, LongWritable>> expected = new ArrayList<Pair<Text, LongWritable>>();
+    expected.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(OUT_VAL)));
 
     assertListEquals(out, expected);
 
@@ -78,151 +74,109 @@ public class TestReduceDriver  {
 
   @Test
   public void testTestRun1() {
-    driver
-            .withInputKey(new Text("foo"))
-            .withOutput(new Text("foo"), new LongWritable(0))
-            .runTest();
+    driver.withInputKey(new Text("foo"))
+          .withOutput(new Text("foo"), new LongWritable(0))
+          .runTest();
   }
 
   @Test
   public void testTestRun2() {
-    driver
-            .withInputKey(new Text("foo"))
-            .withInputValue(new LongWritable(IN_A))
-            .withInputValue(new LongWritable(IN_B))
-            .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
-            .runTest();
+    driver.withInputKey(new Text("foo"))
+          .withInputValue(new LongWritable(IN_A))
+          .withInputValue(new LongWritable(IN_B))
+          .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+          .runTest();
   }
 
   @Test
   public void testTestRun3() {
-    try {
-      driver
-            .withInputKey(new Text("foo"))
-            .withInputValue(new LongWritable(IN_A))
-            .withInputValue(new LongWritable(IN_B))
-            .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10) at position 0.)");
+    driver.withInputKey(new Text("foo"))
+          .withInputValue(new LongWritable(IN_A))
+          .withInputValue(new LongWritable(IN_B))
+          .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
+          .runTest();
 
   }
 
   @Test
   public void testTestRun4() {
-    try {
-      driver
-            .withInputKey(new Text("foo"))
-            .withInputValue(new LongWritable(IN_A))
-            .withInputValue(new LongWritable(IN_B))
-            .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 12) at position 0.)");
+    driver.withInputKey(new Text("foo"))
+          .withInputValue(new LongWritable(IN_A))
+          .withInputValue(new LongWritable(IN_B))
+          .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT))
+          .runTest();
   }
 
   @Test
   public void testTestRun5() {
-    try {
-      driver
-            .withInputKey(new Text("foo"))
-            .withInputValue(new LongWritable(IN_A))
-            .withInputValue(new LongWritable(IN_B))
-            .withOutput(new Text("foo"), new LongWritable(IN_A))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 4) at position 0.)");
+    driver.withInputKey(new Text("foo"))
+          .withInputValue(new LongWritable(IN_A))
+          .withInputValue(new LongWritable(IN_B))
+          .withOutput(new Text("foo"), new LongWritable(IN_A))
+          .runTest();
   }
 
   @Test
   public void testTestRun6() {
-    try {
-      driver
-            .withInputKey(new Text("foo"))
-            .withInputValue(new LongWritable(IN_A))
-            .withInputValue(new LongWritable(IN_B))
-            .withOutput(new Text("foo"), new LongWritable(IN_A))
-            .withOutput(new Text("foo"), new LongWritable(IN_B))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 4) at position 0., " +
+        "Missing expected output (foo, 6) at position 1.)");
+    driver.withInputKey(new Text("foo"))
+          .withInputValue(new LongWritable(IN_A))
+          .withInputValue(new LongWritable(IN_B))
+          .withOutput(new Text("foo"), new LongWritable(IN_A))
+          .withOutput(new Text("foo"), new LongWritable(IN_B))
+          .runTest();
   }
 
   @Test
   public void testTestRun7() {
-    try {
-      driver
-              .withInputKey(new Text("foo"))
-              .withInputValue(new LongWritable(IN_A))
-              .withInputValue(new LongWritable(IN_B))
-              .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
-              .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
-              .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 10) at position 1.)");
+    driver.withInputKey(new Text("foo"))
+          .withInputValue(new LongWritable(IN_A))
+          .withInputValue(new LongWritable(IN_B))
+          .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+          .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+          .runTest();
   }
 
   @Test
   public void testTestRun8() {
-    try {
-      driver
-            .withInputKey(new Text("foo"))
-            .withInputValue(new LongWritable(IN_A))
-            .withInputValue(new LongWritable(IN_B))
-            .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
-            .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
-            .runTest();
-            fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10) at position 0.)");
+    driver.withInputKey(new Text("foo"))
+          .withInputValue(new LongWritable(IN_A))
+          .withInputValue(new LongWritable(IN_B))
+          .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
+          .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+          .runTest();
   }
 
   @Test
   public void testTestRun9() {
-    try {
-      driver
-            .withInputKey(new Text("foo"))
-            .withInputValue(new LongWritable(IN_A))
-            .withInputValue(new LongWritable(IN_B))
-            .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
-            .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10) at position 1.)");
+    driver.withInputKey(new Text("foo"))
+          .withInputValue(new LongWritable(IN_A))
+          .withInputValue(new LongWritable(IN_B))
+          .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+          .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
+          .runTest();
   }
 
   @Test
   public void testEmptyInput() {
     // (null, <empty>) will be forcibly fed as input
     // since we use LongSumReducer, expect (null, 0) out.
-    driver
-            .withOutput(null, new LongWritable(OUT_EMPTY))
-            .runTest();
+    driver.withOutput(null, new LongWritable(OUT_EMPTY)).runTest();
   }
 
   @Test
   public void testEmptyInput2() {
     // because a null key with zero inputs will be fed as input
     // to this reducer, do not accept no outputs.
-    try {
-      driver.runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Expected no outputs; got 1 outputs.)");
+    driver.runTest();
   }
 
   /**
@@ -253,14 +207,13 @@ public class TestReduceDriver  {
     reducer = new DoubleIterReducer<Text, LongWritable>();
     driver = ReduceDriver.newReduceDriver(reducer);
 
-    driver
-        .withInputKey(new Text("foo"))
-        .withInputValue(new LongWritable(1))
-        .withInputValue(new LongWritable(1))
-        .withInputValue(new LongWritable(1))
-        .withInputValue(new LongWritable(1))
-        .withOutput(new Text("foo"), new LongWritable(4))
-        .runTest();
+    driver.withInputKey(new Text("foo"))
+          .withInputValue(new LongWritable(1))
+          .withInputValue(new LongWritable(1))
+          .withInputValue(new LongWritable(1))
+          .withInputValue(new LongWritable(1))
+          .withOutput(new Text("foo"), new LongWritable(4))
+          .runTest();
   }
   
   @Test
@@ -292,12 +245,8 @@ public class TestReduceDriver  {
   @Test
   public void testNoReducer() {
     driver = ReduceDriver.newReduceDriver();
-    try {
-      driver.runTest();
-      fail();
-    } catch (IllegalStateException e) {
-      assertEquals("No Reducer class was provided", e.getMessage());
-    }
+    thrown.expectMessage(IllegalStateException.class, "No Reducer class was provided");
+    driver.runTest();
   }
 }
 

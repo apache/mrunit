@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.mrunit.mapreduce;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.*;
@@ -29,12 +28,17 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mrunit.ExpectedSuppliedException;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class TestMapDriver  {
 
+  @Rule
+  public final ExpectedSuppliedException thrown = ExpectedSuppliedException.none();
   private Mapper<Text, Text, Text, Text> mapper;
   private MapDriver<Text, Text, Text, Text> driver;
 
@@ -45,14 +49,8 @@ public class TestMapDriver  {
   }
 
   @Test
-  public void testRun() {
-    List<Pair<Text, Text>> out = null;
-
-    try {
-      out = driver.withInput(new Text("foo"), new Text("bar")).run();
-    } catch (IOException ioe) {
-      fail();
-    }
+  public void testRun() throws IOException {
+    List<Pair<Text, Text>> out = driver.withInput(new Text("foo"), new Text("bar")).run();
 
     List<Pair<Text, Text>> expected = new ArrayList<Pair<Text, Text>>();
     expected.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
@@ -63,91 +61,61 @@ public class TestMapDriver  {
   @Test
   public void testTestRun1() {
     driver.withInput(new Text("foo"), new Text("bar"))
-            .withOutput(new Text("foo"), new Text("bar"))
-            .runTest();
+          .withOutput(new Text("foo"), new Text("bar")).runTest();
   }
 
   @Test
   public void testTestRun2() {
-    try {
-      driver.withInput(new Text("foo"), new Text("bar"))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Expected no outputs; got 1 outputs.)");
+    driver.withInput(new Text("foo"), new Text("bar")).runTest();
   }
 
   @Test
   public void testTestRun3() {
-    try {
-      driver.withInput(new Text("foo"), new Text("bar"))
-            .withOutput(new Text("foo"), new Text("bar"))
-            .withOutput(new Text("foo"), new Text("bar"))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, bar) at position 1.)");
+    driver.withInput(new Text("foo"), new Text("bar"))
+          .withOutput(new Text("foo"), new Text("bar"))
+          .withOutput(new Text("foo"), new Text("bar"))
+          .runTest();
   }
 
   @Test
   public void testTestRun4() {
-    try {
-      driver.withInput(new Text("foo"), new Text("bar"))
-            .withOutput(new Text("foo"), new Text("bar"))
-            .withOutput(new Text("bonusfoo"), new Text("bar"))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (bonusfoo, bar) at position 1.)");
+    driver.withInput(new Text("foo"), new Text("bar"))
+          .withOutput(new Text("foo"), new Text("bar"))
+          .withOutput(new Text("bonusfoo"), new Text("bar"))
+          .runTest();
 
   }
   @Test
   public void testTestRun5() {
-    try {
-      driver.withInput(new Text("foo"), new Text("bar"))
-            .withOutput(new Text("foo"), new Text("somethingelse"))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, somethingelse) at position 0.)");
+    driver.withInput(new Text("foo"), new Text("bar"))
+          .withOutput(new Text("foo"), new Text("somethingelse"))
+          .runTest();
   }
 
   @Test
   public void testTestRun6() {
-    try {
-      driver.withInput(new Text("foo"), new Text("bar"))
-              .withOutput(new Text("someotherkey"), new Text("bar"))
-              .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (someotherkey, bar) at position 0.)");
+    driver.withInput(new Text("foo"), new Text("bar"))
+          .withOutput(new Text("someotherkey"), new Text("bar"))
+          .runTest();
   }
 
   @Test
   public void testTestRun7() {
-    try {
-      driver.withInput(new Text("foo"), new Text("bar"))
-            .withOutput(new Text("someotherkey"), new Text("bar"))
-            .withOutput(new Text("foo"), new Text("bar"))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (someotherkey, bar) at position 0.)");
+    driver.withInput(new Text("foo"), new Text("bar"))
+          .withOutput(new Text("someotherkey"), new Text("bar"))
+          .withOutput(new Text("foo"), new Text("bar"))
+          .runTest();
   }
 
   @Test
   public void testSetInput() {
-    try {
-      driver.setInput(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
-    } catch (Exception e) {
-      fail();
-    }
+    driver.setInput(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
 
     assertEquals(driver.getInputKey(), new Text("foo"));
     assertEquals(driver.getInputValue(), new Text("bar"));
@@ -155,12 +123,8 @@ public class TestMapDriver  {
 
   @Test
   public void testSetInputNull() {
-    try {
-      driver.setInput((Pair<Text, Text>) null);
-      fail();
-    } catch (Exception e) {
-      // expect this.
-    }
+    thrown.expectMessage(IllegalArgumentException.class, "null inputRecord in setInput()");
+    driver.setInput((Pair<Text, Text>) null);
   }
 
   @Test
@@ -175,12 +139,8 @@ public class TestMapDriver  {
     // it is an error to expect no output because we expect
     // the mapper to be fed (null, null) as an input if the
     // user doesn't set any input.
-    try {
-      driver.runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Expected no outputs; got 1 outputs.)");
+    driver.runTest();
   }
   
   @Test
@@ -211,12 +171,8 @@ public class TestMapDriver  {
   @Test
   public void testNoMapper() {
     driver = MapDriver.newMapDriver();
-    try {
-      driver.runTest();
-      fail();
-    } catch (IllegalStateException e) {
-      assertEquals("No Mapper class was provided", e.getMessage());
-    }
+    thrown.expectMessage(IllegalStateException.class, "No Mapper class was provided");
+    driver.runTest();
   }
 }
 

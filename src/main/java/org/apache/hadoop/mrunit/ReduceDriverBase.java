@@ -186,7 +186,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   @Override
-  public void runTest() throws RuntimeException {
+  public void runTest() {
 
     String inputKeyStr = "(null)";
 

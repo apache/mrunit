@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.mrunit;
 
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,11 +65,8 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * Runs the test and validates the results
-   * @return void if the tests passed
-   * @throws RuntimeException if they don't
-   * *
    */
-  public abstract void runTest() throws RuntimeException;
+  public abstract void runTest();
 
   /**
    * Split "key \t val" into Pair(Text(key), Text(val))
@@ -126,11 +124,9 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * check the outputs against the expected inputs in record
-   * @param outputs The actual output (k, v) pairs from the Mapper
-   * @return void if they all pass
-   * @throws RuntimeException if they don't
+   * @param outputs The actual output (k, v) pairs
    */
-  protected void validate(List<Pair<K2, V2>> outputs) throws RuntimeException {
+  protected void validate(List<Pair<K2, V2>> outputs) {
 
     boolean success = true;
     List<String> errors = new ArrayList<String>();
@@ -205,7 +201,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       StringBuilder buffer = new StringBuilder();
       buffer.append(errors.size()).append(" Error(s): ");
       formatValueList(errors, buffer);
-      throw new RuntimeException(buffer.toString());
+      fail(buffer.toString());
     }
   }
 

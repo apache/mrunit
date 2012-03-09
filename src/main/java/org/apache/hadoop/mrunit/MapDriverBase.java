@@ -169,7 +169,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   @Override
-  public void runTest() throws RuntimeException {
+  public void runTest() {
     String inputKeyStr = "(null)";
     String inputValStr = "(null)";
 

@@ -39,6 +39,7 @@ import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 @SuppressWarnings("deprecation")
@@ -49,6 +50,8 @@ public class TestMapReduceDriver {
   private static final int BAR_IN = 12;
   private static final int FOO_OUT = 52;
 
+  @Rule
+  public final ExpectedSuppliedException thrown = ExpectedSuppliedException.none();
   private Mapper<Text, LongWritable, Text, LongWritable> mapper;
   private Reducer<Text, LongWritable, Text, LongWritable> reducer;
   private MapReduceDriver<Text, LongWritable,
@@ -67,17 +70,12 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testRun() {
-    List<Pair<Text, LongWritable>> out = null;
-    try {
-      out = driver
-              .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-              .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-              .withInput(new Text("bar"), new LongWritable(BAR_IN))
-              .run();
-    } catch (IOException ioe) {
-      fail();
-    }
+  public void testRun() throws IOException {
+    List<Pair<Text, LongWritable>> out = driver
+      .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+      .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+      .withInput(new Text("bar"), new LongWritable(BAR_IN))
+      .run();
 
     List<Pair<Text, LongWritable>> expected =
       new ArrayList<Pair<Text, LongWritable>>();
@@ -91,40 +89,33 @@ public class TestMapReduceDriver {
 
   @Test
   public void testTestRun1() {
-    driver
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-            .runTest();
+    driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+          .withInput(new Text("bar"), new LongWritable(BAR_IN))
+          .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+          .runTest();
   }
 
   @Test
   public void testTestRun2() {
-    driver
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-            .runTest();
+    driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+          .withInput(new Text("bar"), new LongWritable(BAR_IN))
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+          .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+          .runTest();
   }
 
   @Test
   public void testTestRun3() {
-    try {
-      driver
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected
-    }
+    thrown.expectAssertionErrorMessage("0 Error(s): ()");
+    driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+          .withInput(new Text("bar"), new LongWritable(BAR_IN))
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+          .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+          .runTest();
   }
 
   @Test
@@ -134,14 +125,8 @@ public class TestMapReduceDriver {
 
   @Test
   public void testEmptyInputWithOutputFails() {
-    try {
-      driver
-              .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-              .runTest();
-      fail();
-    } catch (RuntimeException re) {
-      // expected.
-    }
+    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 52) at position 0.)");
+    driver.withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
   }
 
   @Test
@@ -239,42 +224,39 @@ public class TestMapReduceDriver {
   // Test "combining" with an IdentityReducer. Result should be the same.
   @Test
   public void testIdentityCombiner() {
-    driver
-            .withCombiner(new IdentityReducer<Text, LongWritable>())
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-            .runTest();
+    driver.withCombiner(new IdentityReducer<Text, LongWritable>())
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+          .withInput(new Text("bar"), new LongWritable(BAR_IN))
+          .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+          .runTest();
   }
 
   // Test "combining" with another LongSumReducer. Result should be the same.
   @Test
   public void testLongSumCombiner() {
-    driver
-            .withCombiner(new LongSumReducer<Text>())
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-            .runTest();
+    driver.withCombiner(new LongSumReducer<Text>())
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+          .withInput(new Text("bar"), new LongWritable(BAR_IN))
+          .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+          .runTest();
   }
 
   // Test "combining" with another LongSumReducer, and with the Reducer
   // set to IdentityReducer. Result should be the same.
   @Test
   public void testLongSumCombinerAndIdentityReduce() {
-    driver
-            .withCombiner(new LongSumReducer<Text>())
-            .withReducer(new IdentityReducer<Text, LongWritable>())
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-            .runTest();
+    driver.withCombiner(new LongSumReducer<Text>())
+          .withReducer(new IdentityReducer<Text, LongWritable>())
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+          .withInput(new Text("bar"), new LongWritable(BAR_IN))
+          .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+          .runTest();
   }
   
   // Test the key grouping and value ordering comparators
@@ -350,24 +332,16 @@ public class TestMapReduceDriver {
   public void testNoMapper() {
     driver = MapReduceDriver.newMapReduceDriver();
     driver.withReducer(reducer).withInput(new Text("a"), new LongWritable(0));
-    try {
-      driver.runTest();
-      fail();
-    } catch (IllegalStateException e) {
-      assertEquals("No Mapper class was provided", e.getMessage());
-    }
+    thrown.expectMessage(IllegalStateException.class, "No Mapper class was provided");
+    driver.runTest();
   }
 
   @Test
   public void testNoReducer() {
     driver = MapReduceDriver.newMapReduceDriver();
     driver.withMapper(mapper).withInput(new Text("a"), new LongWritable(0));
-    try {
-      driver.runTest();
-      fail();
-    } catch (IllegalStateException e) {
-      assertEquals("No Reducer class was provided", e.getMessage());
-    }
+    thrown.expectMessage(IllegalStateException.class, "No Reducer class was provided");
+    driver.runTest();
   }
 }
 
