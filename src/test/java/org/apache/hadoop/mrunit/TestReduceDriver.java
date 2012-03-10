@@ -26,12 +26,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
@@ -224,5 +226,22 @@ public class TestReduceDriver {
     thrown.expectMessage(IllegalStateException.class, "No Reducer class was provided");
     driver.runTest();
   }
+
+  @Test
+  public void testJavaSerialization() {
+    ReduceDriver<Integer, Integer, Integer, Integer> driver = ReduceDriver.newReduceDriver(new IdentityReducer<Integer, Integer>());
+    Configuration conf = new Configuration();
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization");
+    driver.setConfiguration(conf);
+    driver.withInputKey(1)
+          .withInputValue(2)
+          .withInputValue(3)
+          .withInputValue(4)
+          .withOutput(1, 2)
+          .withOutput(1, 3)
+          .withOutput(1, 4)
+          .runTest();
+  }
+
 }
 

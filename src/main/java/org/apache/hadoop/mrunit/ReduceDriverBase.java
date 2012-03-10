@@ -217,11 +217,6 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
     public ValueClassInstanceReuseList(List<T> list, Configuration conf) {
       super(list);
       this.conf = conf;
-      if (!list.isEmpty()) {
-        T first = list.get(0);
-        Class<T> klass = (Class<T>) first.getClass();
-        this.value = ReflectionUtils.newInstance(klass, conf);
-      }
     }
 
     @Override
@@ -239,7 +234,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
         @Override
         public T next() {
           T next = iterator.next();
-          copy(next, value, conf);
+          value = (T) copy(next, value, conf);
           return value;
         }
 
