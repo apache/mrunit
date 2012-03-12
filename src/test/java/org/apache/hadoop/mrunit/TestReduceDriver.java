@@ -94,7 +94,8 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun3() {
-    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10) at position 0.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, 10), " +
+        "Missing expected output (bar, 10) at position 0.)");
     driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
           .withInputValue(new LongWritable(IN_B))
@@ -104,7 +105,8 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun4() {
-    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 12) at position 0.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, 10), " +
+        "Missing expected output (foo, 12) at position 0.)");
     driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
           .withInputValue(new LongWritable(IN_B))
@@ -114,7 +116,8 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun5() {
-    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 4) at position 0.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, 10), " +
+        "Missing expected output (foo, 4) at position 0.)");
     driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
           .withInputValue(new LongWritable(IN_B))
@@ -124,7 +127,8 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun6() {
-    thrown.expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 4) at position 0., " +
+    thrown.expectAssertionErrorMessage("3 Error(s): (Received unexpected output (foo, 10), " +
+        "Missing expected output (foo, 4) at position 0., " +
         "Missing expected output (foo, 6) at position 1.)");
     driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
@@ -147,7 +151,9 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun8() {
-    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10) at position 0.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Matched expected output (foo, 10) but at " +
+        "incorrect position 0 (expected position 1), " +
+        "Missing expected output (bar, 10) at position 0.)");
     driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
           .withInputValue(new LongWritable(IN_B))
@@ -178,7 +184,7 @@ public class TestReduceDriver {
   public void testEmptyInput2() {
     // because a null key with zero inputs will be fed as input
     // to this reducer, do not accept no outputs.
-    thrown.expectAssertionErrorMessage("1 Error(s): (Expected no outputs; got 1 outputs.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., Received unexpected output (null, 0))");
     driver.runTest();
   }
 

@@ -66,7 +66,8 @@ public class TestMapDriver  {
 
   @Test
   public void testTestRun2() {
-    thrown.expectAssertionErrorMessage("1 Error(s): (Expected no outputs; got 1 outputs.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., " +
+        "Received unexpected output (foo, bar))");
     driver.withInput(new Text("foo"), new Text("bar")).runTest();
   }
 
@@ -90,7 +91,8 @@ public class TestMapDriver  {
   }
   @Test
   public void testTestRun5() {
-    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, somethingelse) at position 0.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, bar), " +
+        "Missing expected output (foo, somethingelse) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
           .withOutput(new Text("foo"), new Text("somethingelse"))
           .runTest();
@@ -98,7 +100,8 @@ public class TestMapDriver  {
 
   @Test
   public void testTestRun6() {
-    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (someotherkey, bar) at position 0.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, bar), " +
+        "Missing expected output (someotherkey, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
           .withOutput(new Text("someotherkey"), new Text("bar"))
           .runTest();
@@ -106,7 +109,8 @@ public class TestMapDriver  {
 
   @Test
   public void testTestRun7() {
-    thrown.expectAssertionErrorMessage("1 Error(s): (Missing expected output (someotherkey, bar) at position 0.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Matched expected output (foo, bar) but at " +
+        "incorrect position 0 (expected position 1), Missing expected output (someotherkey, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
           .withOutput(new Text("someotherkey"), new Text("bar"))
           .withOutput(new Text("foo"), new Text("bar"))
@@ -139,7 +143,8 @@ public class TestMapDriver  {
     // it is an error to expect no output because we expect
     // the mapper to be fed (null, null) as an input if the
     // user doesn't set any input.
-    thrown.expectAssertionErrorMessage("1 Error(s): (Expected no outputs; got 1 outputs.)");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., " +
+        "Received unexpected output (null, null))");
     driver.runTest();
   }
   

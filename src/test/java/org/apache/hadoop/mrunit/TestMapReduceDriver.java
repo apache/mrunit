@@ -109,7 +109,9 @@ public class TestMapReduceDriver {
 
   @Test
   public void testTestRun3() {
-    thrown.expectAssertionErrorMessage("0 Error(s): ()");
+    thrown.expectAssertionErrorMessage("2 Error(s): (Matched expected output (bar, 12) but at " +
+        "incorrect position 0 (expected position 1), Matched expected output (foo, 52) but at " +
+        "incorrect position 1 (expected position 0))");
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
           .withInput(new Text("bar"), new LongWritable(BAR_IN))
           .withInput(new Text("foo"), new LongWritable(FOO_IN_B))

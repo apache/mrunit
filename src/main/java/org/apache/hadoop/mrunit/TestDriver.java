@@ -143,7 +143,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     // and at the proper position.
     for (int i = 0; i < outputs.size(); i++) {
       Pair<K2, V2> actual = outputs.get(i);
-      success = lookupExpectedValue(actual, i) && success;
+      success = lookupExpectedValue(actual, i, errors) && success;
     }
 
     // make sure all expected outputs were accounted for.
@@ -212,13 +212,12 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    * @return true if the expected val at 'actualPos' in the expected
    *              list equals actualVal
    */
-  private boolean lookupExpectedValue(Pair<K2, V2> actualVal, int actualPos) {
+  private boolean lookupExpectedValue(Pair<K2, V2> actualVal, int actualPos, List<String> errors) {
 
     // first: Do we have the success condition?
     if (expectedOutputs.size() > actualPos
             && expectedOutputs.get(actualPos).equals(actualVal)) {
-      LOG.debug("Matched expected output " + actualVal.toString()
-          + " at position " + actualPos);
+      LOG.debug("Matched expected output " + actualVal.toString() + " at position " + actualPos);
       return true;
     }
 
@@ -230,15 +229,33 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       Pair<K2, V2> expected = expectedOutputs.get(i);
 
       if (expected.equals(actualVal)) {
-        LOG.error("Matched expected output "
-                + actualVal.toString() + " but at incorrect position "
-                + actualPos + " (expected position " + i + ")");
+        String msg = "Matched expected output " + actualVal.toString() + " but at incorrect position "
+            + actualPos + " (expected position " + i + ")";
+        LOG.error(msg);
+        errors.add(msg);
+
+        foundSomewhere = true;
+      } else if (actualVal.getFirst().getClass() != expected.getFirst().getClass()) {
+        String msg = "Received unexpected output " + actualVal.toString() + ": Mismatch in key class: expected: " +
+            expected.getFirst().getClass() + " " + "actual: " + actualVal.getFirst().getClass();
+        LOG.error(msg);
+        errors.add(msg);
+
+        foundSomewhere = true;
+      } else if (actualVal.getSecond().getClass() != expected.getSecond().getClass()) {
+        String msg =  "Received unexpected output " + actualVal.toString() + ": Mismatch in value class: expected: " +
+            expected.getSecond().getClass() + " " + "actual: " + actualVal.getSecond().getClass();
+        LOG.error(msg);
+        errors.add(msg);
+
         foundSomewhere = true;
       }
     }
 
     if (!foundSomewhere) {
-      LOG.error("Received unexpected output " + actualVal.toString());
+      String msg = "Received unexpected output " + actualVal.toString();
+      LOG.error(msg);
+      errors.add(msg);
     }
 
     return false;
