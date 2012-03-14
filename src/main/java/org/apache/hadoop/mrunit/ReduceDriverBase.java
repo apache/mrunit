@@ -18,6 +18,7 @@
 package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.Serialization.copy;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,7 +27,6 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.types.Pair;
-import org.apache.hadoop.util.ReflectionUtils;
 
 /**
  * Harness that allows you to test a Reducer instance. You provide a key and a
@@ -42,28 +42,28 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
     TestDriver<K1, V1, K2, V2> {
 
   protected K1 inputKey;
-  private List<V1> inputValues;
+  private final List<V1> inputValues;
 
   public ReduceDriverBase() {
     inputValues = new ArrayList<V1>();
   }
 
   /**
-   * Returns a list which when iterated over, returns
-   * the same instance of the value each time with different
-   * contents similar to how Hadoop currently works with 
-   * Writables.
+   * Returns a list which when iterated over, returns the same instance of the
+   * value each time with different contents similar to how Hadoop currently
+   * works with Writables.
    * 
    * @return List of values
    */
   public List<V1> getInputValues() {
     return new ValueClassInstanceReuseList<V1>(inputValues, getConfiguration());
   }
+
   /**
    * Sets the input key to send to the Reducer
    * 
    */
-  public void setInputKey(K1 key) {
+  public void setInputKey(final K1 key) {
     inputKey = key;
   }
 
@@ -72,7 +72,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param val
    */
-  public void addInputValue(V1 val) {
+  public void addInputValue(final V1 val) {
     inputValues.add(val);
   }
 
@@ -81,7 +81,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param values
    */
-  public void setInputValues(List<V1> values) {
+  public void setInputValues(final List<V1> values) {
     inputValues.clear();
     inputValues.addAll(values);
   }
@@ -91,7 +91,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param values
    */
-  public void addInputValues(List<V1> values) {
+  public void addInputValues(final List<V1> values) {
     inputValues.addAll(values);
   }
 
@@ -100,7 +100,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param values
    */
-  public void setInput(K1 key, List<V1> values) {
+  public void setInput(final K1 key, final List<V1> values) {
     setInputKey(key);
     setInputValues(values);
   }
@@ -111,7 +111,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * @param outputRecord
    *          The (k, v) pair to add
    */
-  public void addOutput(Pair<K2, V2> outputRecord) {
+  public void addOutput(final Pair<K2, V2> outputRecord) {
     if (null != outputRecord) {
       expectedOutputs.add(outputRecord);
     } else {
@@ -127,7 +127,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * @param val
    *          The val part of a (k, v) pair to add
    */
-  public void addOutput(K2 key, V2 val) {
+  public void addOutput(final K2 key, final V2 val) {
     addOutput(new Pair<K2, V2>(key, val));
   }
 
@@ -137,15 +137,16 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param input
    *          A string of the form "key \t val,val,val". Trims any whitespace.
-   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
    */
   @Deprecated
   @SuppressWarnings("unchecked")
-  public void setInputFromString(String input) {
+  public void setInputFromString(final String input) {
     if (null == input) {
       throw new IllegalArgumentException("null input");
     } else {
-      Pair<Text, Text> inputPair = parseTabbedPair(input);
+      final Pair<Text, Text> inputPair = parseTabbedPair(input);
       if (null != inputPair) {
         // I know this is not type-safe, but I don't know a better way to do
         // this.
@@ -164,15 +165,16 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
-   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
    */
   @Deprecated
   @SuppressWarnings("unchecked")
-  public void addOutputFromString(String output) {
+  public void addOutputFromString(final String output) {
     if (null == output) {
       throw new IllegalArgumentException("null input");
     } else {
-      Pair<Text, Text> outputPair = parseTabbedPair(output);
+      final Pair<Text, Text> outputPair = parseTabbedPair(output);
       if (null != outputPair) {
         // I know this is not type-safe, but I don't know a better way to do
         // this.
@@ -183,6 +185,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
     }
   }
 
+  @Override
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   @Override
@@ -194,7 +197,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
       inputKeyStr = inputKey.toString();
     }
 
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     formatValueList(inputValues, sb);
 
     LOG.debug("Reducing input (" + inputKeyStr + ", " + sb.toString() + ")");
@@ -203,7 +206,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
     try {
       outputs = run();
       validate(outputs);
-    } catch (IOException ioe) {
+    } catch (final IOException ioe) {
       LOG.error("IOException in reducer", ioe);
       throw new RuntimeException("IOException in reducer: ", ioe);
     }
@@ -213,8 +216,10 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
     private static final long serialVersionUID = 1L;
     private T value;
     private final Configuration conf;
+
     @SuppressWarnings("unchecked")
-    public ValueClassInstanceReuseList(List<T> list, Configuration conf) {
+    public ValueClassInstanceReuseList(final List<T> list,
+        final Configuration conf) {
       super(list);
       this.conf = conf;
     }
@@ -225,7 +230,8 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
       final T currentValue = value;
       return new Iterator<T>() {
         private T value = currentValue;
-        private Iterator<T> iterator = listIterator;
+        private final Iterator<T> iterator = listIterator;
+
         @Override
         public boolean hasNext() {
           return iterator.hasNext();
@@ -233,7 +239,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
 
         @Override
         public T next() {
-          T next = iterator.next();
+          final T next = iterator.next();
           value = (T) copy(next, value, conf);
           return value;
         }

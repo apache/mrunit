@@ -19,8 +19,6 @@ package org.apache.hadoop.mrunit;
 
 import static org.junit.Assert.assertEquals;
 
-import java.nio.ByteBuffer;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.junit.Test;
@@ -29,27 +27,30 @@ public class TestSerialization {
 
   @Test
   public void testClassWithoutNoArgConstructor() {
-    Configuration conf = new Configuration();
-    conf.setStrings("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization");
+    final Configuration conf = new Configuration();
+    conf.setStrings("io.serializations",
+        "org.apache.hadoop.io.serializer.JavaSerialization");
     assertEquals(new Integer(1), Serialization.copy(new Integer(1), conf));
   }
 
   @Test
   public void testChangeStateOfCopyArgument() {
-    IntWritable int1 = new IntWritable(1);
-    IntWritable int2 = new IntWritable(2);
-    IntWritable copy = (IntWritable) Serialization.copy(int1, int2, new Configuration());
+    final IntWritable int1 = new IntWritable(1);
+    final IntWritable int2 = new IntWritable(2);
+    final IntWritable copy = (IntWritable) Serialization.copy(int1, int2,
+        new Configuration());
     assertEquals(int1, copy);
     assertEquals(int1, int2);
   }
 
   @Test
   public void testDontChangeStateOfCopyArgument() {
-    Configuration conf = new Configuration();
-    conf.setStrings("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization");
-    Integer int1 = new Integer(1);
-    Integer int2 = new Integer(2);
-    Integer copy = (Integer) Serialization.copy(int1, int2, conf);
+    final Configuration conf = new Configuration();
+    conf.setStrings("io.serializations",
+        "org.apache.hadoop.io.serializer.JavaSerialization");
+    final Integer int1 = new Integer(1);
+    final Integer int2 = new Integer(2);
+    final Integer copy = (Integer) Serialization.copy(int1, int2, conf);
     assertEquals(int1, copy);
     assertEquals(new Integer(2), int2);
   }

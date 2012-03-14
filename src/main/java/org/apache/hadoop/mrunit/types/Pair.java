@@ -19,7 +19,6 @@ package org.apache.hadoop.mrunit.types;
 
 import java.util.Comparator;
 
-
 /**
  * A very basic pair type.
  */
@@ -34,15 +33,20 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
     second = cdr;
   }
 
-  public S getFirst() { return first; }
-  public T getSecond() { return second; }
+  public S getFirst() {
+    return first;
+  }
+
+  public T getSecond() {
+    return second;
+  }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (null == o) {
       return false;
     } else if (o instanceof Pair) {
-      Pair<S, T> p = (Pair<S, T>) o;
+      final Pair<S, T> p = (Pair<S, T>) o;
       if (first == null && second == null) {
         return p.first == null && p.second == null;
       } else if (first == null) {
@@ -73,16 +77,16 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
   }
 
   @Override
-  public int compareTo(Pair<S, T> p) {
+  public int compareTo(final Pair<S, T> p) {
     if (null == p) {
       return 1;
     }
 
-    Comparable<S> firstCompare = (Comparable<S>) first;
+    final Comparable<S> firstCompare = (Comparable<S>) first;
 
-    int firstResult = firstCompare.compareTo(p.first);
+    final int firstResult = firstCompare.compareTo(p.first);
     if (firstResult == 0) {
-      Comparable<T> secondCompare = (Comparable<T>) second;
+      final Comparable<T> secondCompare = (Comparable<T>) second;
       return secondCompare.compareTo(p.second);
     } else {
       return firstResult;
@@ -94,8 +98,9 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
     public FirstElemComparator() {
     }
 
-    public int compare(Pair<S, T> p1, Pair<S, T> p2) {
-      Comparable<S> cS = (Comparable<S>) p1.first;
+    @Override
+    public int compare(final Pair<S, T> p1, final Pair<S, T> p2) {
+      final Comparable<S> cS = (Comparable<S>) p1.first;
       return cS.compareTo(p2.first);
     }
   }
@@ -104,8 +109,9 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
     public SecondElemComparator() {
     }
 
-    public int compare(Pair<S, T> p1, Pair<S, T> p2) {
-      Comparable<T> cT = (Comparable<T>) p1.second;
+    @Override
+    public int compare(final Pair<S, T> p1, final Pair<S, T> p2) {
+      final Comparable<T> cT = (Comparable<T>) p1.second;
       return cT.compareTo(p2.second);
     }
   }

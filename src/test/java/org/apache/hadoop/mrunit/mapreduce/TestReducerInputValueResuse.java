@@ -18,12 +18,12 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -32,22 +32,25 @@ import org.junit.Test;
 
 public class TestReducerInputValueResuse {
 
-  private class TestReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
+  private class TestReducer extends
+      Reducer<Text, LongWritable, Text, LongWritable> {
     public LongWritable outputValue = new LongWritable();
     protected boolean instanceCheckOccured = false;
     protected boolean instanceCheckFailed = false;
-    public void reduce(Text key, Iterable<LongWritable> vals, Context context)
-        throws IOException, InterruptedException {
+
+    @Override
+    public void reduce(final Text key, final Iterable<LongWritable> vals,
+        final Context context) throws IOException, InterruptedException {
       long sum = 0;
       LongWritable inputValue = null;
-      for(LongWritable val : vals) {
-        if(inputValue != null) {
+      for (final LongWritable val : vals) {
+        if (inputValue != null) {
           instanceCheckOccured = true;
-          if(inputValue != val) {
+          if (inputValue != val) {
             instanceCheckFailed = true;
           }
         }
-        if(inputValue == null) {
+        if (inputValue == null) {
           inputValue = val;
         }
         sum += val.get();
@@ -59,10 +62,11 @@ public class TestReducerInputValueResuse {
 
   @Test
   public void testReduce() throws IOException {
-    TestReducer reducer = new TestReducer();
-    ReduceDriver<Text, LongWritable, Text, LongWritable> driver = ReduceDriver.newReduceDriver();
+    final TestReducer reducer = new TestReducer();
+    final ReduceDriver<Text, LongWritable, Text, LongWritable> driver = ReduceDriver
+        .newReduceDriver();
     driver.setReducer(reducer);
-    List<LongWritable> values = new ArrayList<LongWritable>();
+    final List<LongWritable> values = new ArrayList<LongWritable>();
     values.add(new LongWritable(1));
     values.add(new LongWritable(1));
     values.add(new LongWritable(1));
@@ -75,4 +79,3 @@ public class TestReducerInputValueResuse {
   }
 
 }
-

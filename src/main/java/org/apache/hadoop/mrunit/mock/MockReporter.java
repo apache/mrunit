@@ -18,54 +18,54 @@
 package org.apache.hadoop.mrunit.mock;
 
 import org.apache.hadoop.mapred.Counters;
+import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.Counters.Counter;
 
 @SuppressWarnings("deprecation")
 public class MockReporter implements Reporter {
 
-  private MockInputSplit inputSplit = new MockInputSplit();
-  private Counters counters;
+  private final MockInputSplit inputSplit = new MockInputSplit();
+  private final Counters counters;
 
   public enum ReporterType {
-    Mapper,
-    Reducer
+    Mapper, Reducer
   }
 
-  private ReporterType typ;
+  private final ReporterType typ;
 
   public MockReporter(final ReporterType kind, final Counters ctrs) {
-    this.typ = kind;
-    this.counters = ctrs;
+    typ = kind;
+    counters = ctrs;
   }
 
   @Override
   public InputSplit getInputSplit() {
     if (typ == ReporterType.Reducer) {
       throw new UnsupportedOperationException(
-              "Reducer cannot call getInputSplit()");
+          "Reducer cannot call getInputSplit()");
     } else {
       return inputSplit;
     }
   }
 
   @Override
-  public void incrCounter(Enum<?> key, long amount) {
+  public void incrCounter(final Enum<?> key, final long amount) {
     if (null != counters) {
       counters.incrCounter(key, amount);
     }
   }
 
   @Override
-  public void incrCounter(String group, String counter, long amount) {
+  public void incrCounter(final String group, final String counter,
+      final long amount) {
     if (null != counters) {
       counters.incrCounter(group, counter, amount);
     }
   }
 
   @Override
-  public void setStatus(String status) {
+  public void setStatus(final String status) {
     // do nothing.
   }
 
@@ -75,7 +75,7 @@ public class MockReporter implements Reporter {
   }
 
   @Override
-  public Counter getCounter(String group, String name) {
+  public Counter getCounter(final String group, final String name) {
     Counters.Counter counter = null;
     if (counters != null) {
       counter = counters.findCounter(group, name);
@@ -85,7 +85,7 @@ public class MockReporter implements Reporter {
   }
 
   @Override
-  public Counter getCounter(Enum<?> key) {
+  public Counter getCounter(final Enum<?> key) {
     Counters.Counter counter = null;
     if (counters != null) {
       counter = counters.findCounter(key);
@@ -93,8 +93,8 @@ public class MockReporter implements Reporter {
 
     return counter;
   }
+
   public float getProgress() {
     return 0;
   }
 }
-

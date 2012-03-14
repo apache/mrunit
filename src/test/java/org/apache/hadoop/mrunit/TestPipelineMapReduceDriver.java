@@ -18,7 +18,7 @@
 package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,20 +38,21 @@ public class TestPipelineMapReduceDriver {
 
   private static final int FOO_IN_A = 42;
   private static final int FOO_IN_B = 10;
-  private static final int BAR_IN   = 12;
-  private static final int FOO_OUT  = 52;
-  private static final int BAR_OUT  = 12;
+  private static final int BAR_IN = 12;
+  private static final int FOO_OUT = 52;
+  private static final int BAR_OUT = 12;
 
   @Rule
-  public final ExpectedSuppliedException thrown = ExpectedSuppliedException.none();
+  public final ExpectedSuppliedException thrown = ExpectedSuppliedException
+      .none();
 
   @Test
   public void testFullyEmpty() throws IOException {
     // If no mappers or reducers are configured, then it should
     // just return its inputs. If there are no inputs, this
     // should be an empty list of outputs.
-    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
-    List<Pair<Text, Text>> out = driver.run();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final List<Pair<Text, Text>> out = driver.run();
     assertEquals("Expected empty output list", out.size(), 0);
   }
 
@@ -59,11 +60,11 @@ public class TestPipelineMapReduceDriver {
   public void testEmptyPipeline() throws IOException {
     // If no mappers or reducers are configured, then it should
     // just return its inputs.
-    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
     driver.addInput(new Text("foo"), new Text("bar"));
-    List<Pair<Text, Text>> out = driver.run();
+    final List<Pair<Text, Text>> out = driver.run();
 
-    List<Pair<Text, Text>> expected = new ArrayList<Pair<Text, Text>>();
+    final List<Pair<Text, Text>> expected = new ArrayList<Pair<Text, Text>>();
     expected.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
     assertListEquals(expected, out);
   }
@@ -71,81 +72,92 @@ public class TestPipelineMapReduceDriver {
   @Test
   public void testEmptyPipelineWithRunTest() {
     // Like testEmptyPipeline, but call runTest.
-    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
     driver.withInput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("foo"), new Text("bar"))
-          .runTest();
+        .withOutput(new Text("foo"), new Text("bar")).runTest();
   }
-
 
   @Test
   public void testSingleIdentity() {
     // Test that an identity mapper and identity reducer work
-    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
-    driver.withMapReduce(new IdentityMapper<Text, Text>(), new IdentityReducer<Text, Text>())
-          .withInput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("foo"), new Text("bar"))
-          .runTest();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    driver
+        .withMapReduce(new IdentityMapper<Text, Text>(),
+            new IdentityReducer<Text, Text>())
+        .withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar")).runTest();
   }
 
   @Test
   public void testMultipleIdentities() {
     // Test that a pipeline of identity mapper and reducers work
-    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
-    driver.withMapReduce(new IdentityMapper<Text, Text>(), new IdentityReducer<Text, Text>())
-          .withMapReduce(new IdentityMapper<Text, Text>(), new IdentityReducer<Text, Text>())
-          .withMapReduce(new IdentityMapper<Text, Text>(), new IdentityReducer<Text, Text>())
-          .withInput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("foo"), new Text("bar"))
-          .runTest();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    driver
+        .withMapReduce(new IdentityMapper<Text, Text>(),
+            new IdentityReducer<Text, Text>())
+        .withMapReduce(new IdentityMapper<Text, Text>(),
+            new IdentityReducer<Text, Text>())
+        .withMapReduce(new IdentityMapper<Text, Text>(),
+            new IdentityReducer<Text, Text>())
+        .withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar")).runTest();
   }
 
   @Test
   public void testSumAtEnd() {
-    PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = new PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable>();
-    driver.withMapReduce(new IdentityMapper<Text, LongWritable>(), new IdentityReducer<Text, LongWritable>())
-          .withMapReduce(new IdentityMapper<Text, LongWritable>(), new IdentityReducer<Text, LongWritable>())
-          .withMapReduce(new IdentityMapper<Text, LongWritable>(), new LongSumReducer<Text>())
-          .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-          .withInput(new Text("bar"), new LongWritable(BAR_IN))
-          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-          .withOutput(new Text("bar"), new LongWritable(BAR_OUT))
-          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-          .runTest();
+    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = new PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable>();
+    driver
+        .withMapReduce(new IdentityMapper<Text, LongWritable>(),
+            new IdentityReducer<Text, LongWritable>())
+        .withMapReduce(new IdentityMapper<Text, LongWritable>(),
+            new IdentityReducer<Text, LongWritable>())
+        .withMapReduce(new IdentityMapper<Text, LongWritable>(),
+            new LongSumReducer<Text>())
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+        .withInput(new Text("bar"), new LongWritable(BAR_IN))
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+        .withOutput(new Text("bar"), new LongWritable(BAR_OUT))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
   }
 
   @Test
   public void testSumInMiddle() {
-    PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = new PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable>();
-    driver.withMapReduce(new IdentityMapper<Text, LongWritable>(), new IdentityReducer<Text, LongWritable>())
-          .withMapReduce(new IdentityMapper<Text, LongWritable>(), new LongSumReducer<Text>())
-          .withMapReduce(new IdentityMapper<Text, LongWritable>(), new IdentityReducer<Text, LongWritable>())
-          .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-          .withInput(new Text("bar"), new LongWritable(BAR_IN))
-          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-          .withOutput(new Text("bar"), new LongWritable(BAR_OUT))
-          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-          .runTest();
+    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = new PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable>();
+    driver
+        .withMapReduce(new IdentityMapper<Text, LongWritable>(),
+            new IdentityReducer<Text, LongWritable>())
+        .withMapReduce(new IdentityMapper<Text, LongWritable>(),
+            new LongSumReducer<Text>())
+        .withMapReduce(new IdentityMapper<Text, LongWritable>(),
+            new IdentityReducer<Text, LongWritable>())
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+        .withInput(new Text("bar"), new LongWritable(BAR_IN))
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+        .withOutput(new Text("bar"), new LongWritable(BAR_OUT))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
   }
 
   @Test
   public void testNoMapper() {
-    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
     driver.addMapReduce(null, new IdentityReducer<Text, Text>());
     driver.addInput(new Text("a"), new Text("b"));
-    thrown.expectMessage(IllegalStateException.class, "No Mapper class was provided for stage 1 of 1");
+    thrown.expectMessage(IllegalStateException.class,
+        "No Mapper class was provided for stage 1 of 1");
     driver.runTest();
   }
 
   @Test
   public void testNoReducer() {
-    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
-    driver.addMapReduce(new IdentityMapper<Text, Text>(), new IdentityReducer<Text, Text>());
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    driver.addMapReduce(new IdentityMapper<Text, Text>(),
+        new IdentityReducer<Text, Text>());
     driver.addMapReduce(new IdentityMapper<Text, Text>(), null);
-    driver.addMapReduce(new IdentityMapper<Text, Text>(), new IdentityReducer<Text, Text>());
+    driver.addMapReduce(new IdentityMapper<Text, Text>(),
+        new IdentityReducer<Text, Text>());
     driver.addInput(new Text("a"), new Text("b"));
-    thrown.expectMessage(IllegalStateException.class, "No Reducer class was provided for stage 2 of 3");
+    thrown.expectMessage(IllegalStateException.class,
+        "No Reducer class was provided for stage 2 of 3");
     driver.runTest();
   }
 }
-

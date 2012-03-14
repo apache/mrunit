@@ -17,7 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-
 import java.io.IOException;
 import java.util.List;
 
@@ -27,27 +26,27 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * Harness that allows you to test a Mapper instance. You provide the input
- * key and value that should be sent to the Mapper, and outputs you expect to
- * be sent by the Mapper to the collector for those inputs. By calling
- * runTest(), the harness will deliver the input to the Mapper and will check
- * its outputs against the expected results. This is designed to handle a
- * single (k, v) -> (k, v)* case from the Mapper, representing a single unit
- * test. Multiple input (k, v) pairs should go in separate unit tests.
+ * Harness that allows you to test a Mapper instance. You provide the input key
+ * and value that should be sent to the Mapper, and outputs you expect to be
+ * sent by the Mapper to the collector for those inputs. By calling runTest(),
+ * the harness will deliver the input to the Mapper and will check its outputs
+ * against the expected results. This is designed to handle a single (k, v) ->
+ * (k, v)* case from the Mapper, representing a single unit test. Multiple input
+ * (k, v) pairs should go in separate unit tests.
  */
-public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
+public abstract class MapDriverBase<K1, V1, K2, V2> extends
+    TestDriver<K1, V1, K2, V2> {
 
   public static final Log LOG = LogFactory.getLog(MapDriverBase.class);
 
   protected K1 inputKey;
   protected V1 inputVal;
 
-
   /**
    * Sets the input key to send to the mapper
-   *
+   * 
    */
-  public void setInputKey(K1 key) {
+  public void setInputKey(final K1 key) {
     inputKey = key;
   }
 
@@ -57,10 +56,10 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
 
   /**
    * Sets the input value to send to the mapper
-   *
+   * 
    * @param val
    */
-  public void setInputValue(V1 val) {
+  public void setInputValue(final V1 val) {
     inputVal = val;
   }
 
@@ -70,20 +69,20 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
 
   /**
    * Sets the input to send to the mapper
-   *
+   * 
    */
-  public void setInput(K1 key, V1 val) {
+  public void setInput(final K1 key, final V1 val) {
     setInputKey(key);
     setInputValue(val);
   }
 
   /**
    * Sets the input to send to the mapper
-   *
+   * 
    * @param inputRecord
    *          a (key, val) pair
    */
-  public void setInput(Pair<K1, V1> inputRecord) {
+  public void setInput(final Pair<K1, V1> inputRecord) {
     if (null != inputRecord) {
       setInputKey(inputRecord.getFirst());
       setInputValue(inputRecord.getSecond());
@@ -94,11 +93,11 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
 
   /**
    * Adds an output (k, v) pair we expect from the Mapper
-   *
+   * 
    * @param outputRecord
    *          The (k, v) pair to add
    */
-  public void addOutput(Pair<K2, V2> outputRecord) {
+  public void addOutput(final Pair<K2, V2> outputRecord) {
     if (null != outputRecord) {
       expectedOutputs.add(outputRecord);
     } else {
@@ -108,54 +107,55 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
 
   /**
    * Adds a (k, v) pair we expect as output from the mapper
-   *
+   * 
    */
-  public void addOutput(K2 key, V2 val) {
+  public void addOutput(final K2 key, final V2 val) {
     addOutput(new Pair<K2, V2>(key, val));
   }
 
   /**
-   * Expects an input of the form "key \t val" Forces the Mapper input types
-   * to Text.
-   *
+   * Expects an input of the form "key \t val" Forces the Mapper input types to
+   * Text.
+   * 
    * @param input
    *          A string of the form "key \t val".
-   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
    */
   @Deprecated
   @SuppressWarnings("unchecked")
-  public void setInputFromString(String input) {
+  public void setInputFromString(final String input) {
     if (null == input) {
       throw new IllegalArgumentException("null input");
     } else {
-      Pair<Text, Text> inputPair = parseTabbedPair(input);
+      final Pair<Text, Text> inputPair = parseTabbedPair(input);
       if (null != inputPair) {
         // I know this is not type-safe, but I don't know a better way to do
         // this.
         setInputKey((K1) inputPair.getFirst());
         setInputValue((V1) inputPair.getSecond());
       } else {
-        throw new IllegalArgumentException(
-            "Could not parse input pair");
+        throw new IllegalArgumentException("Could not parse input pair");
       }
     }
   }
 
   /**
-   * Expects an input of the form "key \t val" Forces the Mapper output types
-   * to Text.
-   *
+   * Expects an input of the form "key \t val" Forces the Mapper output types to
+   * Text.
+   * 
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
-   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
    */
   @Deprecated
   @SuppressWarnings("unchecked")
-  public void addOutputFromString(String output) {
+  public void addOutputFromString(final String output) {
     if (null == output) {
       throw new IllegalArgumentException("null input");
     } else {
-      Pair<Text, Text> outputPair = parseTabbedPair(output);
+      final Pair<Text, Text> outputPair = parseTabbedPair(output);
       if (null != outputPair) {
         // I know this is not type-safe, but I don't know a better way to do
         // this.
@@ -166,6 +166,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
     }
   }
 
+  @Override
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   @Override
@@ -188,10 +189,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K
     try {
       outputs = run();
       validate(outputs);
-    } catch (IOException ioe) {
+    } catch (final IOException ioe) {
       LOG.error("IOException in mapper", ioe);
       throw new RuntimeException("IOException in mapper: ", ioe);
     }
   }
 }
-

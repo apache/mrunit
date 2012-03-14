@@ -20,25 +20,27 @@ package org.apache.hadoop.mrunit.mock;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mrunit.MapDriver;
-
 import org.junit.Test;
 
 @SuppressWarnings("deprecation")
-public class TestMockOutputCollector  {
+public class TestMockOutputCollector {
 
   /**
    * A mapper that reuses the same key and val objects to emit multiple values
    */
-  class RepeatMapper extends MapReduceBase implements Mapper<Text, Text, Text, Text> {
-    public void map(Text k, Text v, OutputCollector<Text, Text> out, Reporter r)
+  class RepeatMapper extends MapReduceBase implements
+      Mapper<Text, Text, Text, Text> {
+    @Override
+    public void map(final Text k, final Text v,
+        final OutputCollector<Text, Text> out, final Reporter r)
         throws IOException {
-      Text outKey = new Text();
-      Text outVal = new Text();
+      final Text outKey = new Text();
+      final Text outVal = new Text();
 
       outKey.set("1");
       outVal.set("a");
@@ -56,14 +58,13 @@ public class TestMockOutputCollector  {
 
   @Test
   public void testRepeatedObjectUse() {
-    Mapper<Text, Text, Text, Text> mapper = new RepeatMapper();
-    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver(mapper);
+    final Mapper<Text, Text, Text, Text> mapper = new RepeatMapper();
+    final MapDriver<Text, Text, Text, Text> driver = MapDriver
+        .newMapDriver(mapper);
 
     driver.withInput(new Text("inK"), new Text("inV"))
-          .withOutput(new Text("1"), new Text("a"))
-          .withOutput(new Text("2"), new Text("b"))
-          .withOutput(new Text("3"), new Text("c"))
-          .runTest();
+        .withOutput(new Text("1"), new Text("a"))
+        .withOutput(new Text("2"), new Text("b"))
+        .withOutput(new Text("3"), new Text("c")).runTest();
   }
 }
-

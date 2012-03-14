@@ -34,7 +34,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   public static final Log LOG = LogFactory.getLog(TestDriver.class);
 
   protected List<Pair<K2, V2>> expectedOutputs;
-  
+
   protected Configuration configuration;
 
   public TestDriver() {
@@ -57,8 +57,9 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   }
 
   /**
-   * Runs the test but returns the result set instead of validating it
-   * (ignores any addOutput(), etc calls made before this)
+   * Runs the test but returns the result set instead of validating it (ignores
+   * any addOutput(), etc calls made before this)
+   * 
    * @return the list of (k, v) pairs returned as output from the test
    */
   public abstract List<Pair<K2, V2>> run() throws IOException;
@@ -70,9 +71,10 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * Split "key \t val" into Pair(Text(key), Text(val))
+   * 
    * @param tabSeparatedPair
    */
-  public static Pair<Text, Text> parseTabbedPair(String tabSeparatedPair) {
+  public static Pair<Text, Text> parseTabbedPair(final String tabSeparatedPair) {
 
     String key, val;
 
@@ -80,7 +82,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       return null;
     }
 
-    int split = tabSeparatedPair.indexOf('\t');
+    final int split = tabSeparatedPair.indexOf('\t');
     if (-1 == split) {
       return null;
     }
@@ -93,16 +95,19 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * Split "val,val,val,val..." into a List of Text(val) objects.
-   * @param commaDelimList A list of values separated by commas
+   * 
+   * @param commaDelimList
+   *          A list of values separated by commas
    */
-  protected static List<Text> parseCommaDelimitedList(String commaDelimList) {
-    ArrayList<Text> outList = new ArrayList<Text>();
+  protected static List<Text> parseCommaDelimitedList(
+      final String commaDelimList) {
+    final ArrayList<Text> outList = new ArrayList<Text>();
 
     if (null == commaDelimList) {
       return null;
     }
 
-    int len = commaDelimList.length();
+    final int len = commaDelimList.length();
     int curPos = 0;
     int curComma = commaDelimList.indexOf(',');
     if (curComma == -1) {
@@ -110,8 +115,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     }
 
     while (curPos < len) {
-      outList.add(new Text(
-              commaDelimList.substring(curPos, curComma).trim()));
+      outList.add(new Text(commaDelimList.substring(curPos, curComma).trim()));
       curPos = curComma + 1;
       curComma = commaDelimList.indexOf(',', curPos);
       if (curComma == -1) {
@@ -124,16 +128,19 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * check the outputs against the expected inputs in record
-   * @param outputs The actual output (k, v) pairs
+   * 
+   * @param outputs
+   *          The actual output (k, v) pairs
    */
-  protected void validate(List<Pair<K2, V2>> outputs) {
+  protected void validate(final List<Pair<K2, V2>> outputs) {
 
     boolean success = true;
-    List<String> errors = new ArrayList<String>();
+    final List<String> errors = new ArrayList<String>();
     // were we supposed to get output in the first place?
     // return false if we don't.
     if (expectedOutputs.size() == 0 && outputs.size() > 0) {
-      String msg = "Expected no outputs; got " + outputs.size() + " outputs.";
+      final String msg = "Expected no outputs; got " + outputs.size()
+          + " outputs.";
       LOG.error(msg);
       errors.add(msg);
       success = false;
@@ -142,7 +149,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     // make sure all actual outputs are in the expected set,
     // and at the proper position.
     for (int i = 0; i < outputs.size(); i++) {
-      Pair<K2, V2> actual = outputs.get(i);
+      final Pair<K2, V2> actual = outputs.get(i);
       success = lookupExpectedValue(actual, i, errors) && success;
     }
 
@@ -150,11 +157,11 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     if (expectedOutputs.size() != outputs.size() || !success) {
       // something is unaccounted for. Figure out what.
 
-      ArrayList<Pair<K2, V2>> actuals = new ArrayList<Pair<K2, V2>>();
+      final ArrayList<Pair<K2, V2>> actuals = new ArrayList<Pair<K2, V2>>();
       actuals.addAll(outputs);
 
       for (int i = 0; i < expectedOutputs.size(); i++) {
-        Pair<K2, V2> expected = expectedOutputs.get(i);
+        final Pair<K2, V2> expected = expectedOutputs.get(i);
 
         String expectedStr = "(null)";
         if (null != expected) {
@@ -163,23 +170,29 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
         boolean found = false;
         for (int j = 0; j < actuals.size() && !found; j++) {
-          Pair<K2, V2> actual = actuals.get(j);
+          final Pair<K2, V2> actual = actuals.get(j);
 
           if (actual.equals(expected)) {
             // don't match against this actual output again
             actuals.remove(j);
 
             found = true;
-          } else if (actual.getFirst().getClass() != expected.getFirst().getClass()) {
-            String msg = "Missing expected output " + expectedStr + ": Mismatch in key class: expected: " +
-                expected.getFirst().getClass() + " " + "actual: " + actual.getFirst().getClass();
+          } else if (actual.getFirst().getClass() != expected.getFirst()
+              .getClass()) {
+            final String msg = "Missing expected output " + expectedStr
+                + ": Mismatch in key class: expected: "
+                + expected.getFirst().getClass() + " " + "actual: "
+                + actual.getFirst().getClass();
             LOG.error(msg);
             errors.add(msg);
 
             found = true;
-          } else if (actual.getSecond().getClass() != expected.getSecond().getClass()) {
-            String msg =  "Missing expected output " + expectedStr + ": Mismatch in value class: expected: " +
-                expected.getSecond().getClass() + " " + "actual: " + actual.getSecond().getClass();
+          } else if (actual.getSecond().getClass() != expected.getSecond()
+              .getClass()) {
+            final String msg = "Missing expected output " + expectedStr
+                + ": Mismatch in value class: expected: "
+                + expected.getSecond().getClass() + " " + "actual: "
+                + actual.getSecond().getClass();
             LOG.error(msg);
             errors.add(msg);
 
@@ -188,7 +201,8 @@ public abstract class TestDriver<K1, V1, K2, V2> {
         }
 
         if (!found) {
-          String msg = "Missing expected output " + expectedStr + " at position " + i + ".";
+          final String msg = "Missing expected output " + expectedStr
+              + " at position " + i + ".";
           LOG.error(msg);
           errors.add(msg);
         }
@@ -198,7 +212,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     }
 
     if (!success) {
-      StringBuilder buffer = new StringBuilder();
+      final StringBuilder buffer = new StringBuilder();
       buffer.append(errors.size()).append(" Error(s): ");
       formatValueList(errors, buffer);
       fail(buffer.toString());
@@ -207,17 +221,22 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * Part of the validation system.
-   * @param actualVal A (k, v) pair we got from the Mapper
-   * @param actualPos The position of this pair in the actual output
-   * @return true if the expected val at 'actualPos' in the expected
-   *              list equals actualVal
+   * 
+   * @param actualVal
+   *          A (k, v) pair we got from the Mapper
+   * @param actualPos
+   *          The position of this pair in the actual output
+   * @return true if the expected val at 'actualPos' in the expected list equals
+   *         actualVal
    */
-  private boolean lookupExpectedValue(Pair<K2, V2> actualVal, int actualPos, List<String> errors) {
+  private boolean lookupExpectedValue(final Pair<K2, V2> actualVal,
+      final int actualPos, final List<String> errors) {
 
     // first: Do we have the success condition?
     if (expectedOutputs.size() > actualPos
-            && expectedOutputs.get(actualPos).equals(actualVal)) {
-      LOG.debug("Matched expected output " + actualVal.toString() + " at position " + actualPos);
+        && expectedOutputs.get(actualPos).equals(actualVal)) {
+      LOG.debug("Matched expected output " + actualVal.toString()
+          + " at position " + actualPos);
       return true;
     }
 
@@ -226,25 +245,32 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     boolean foundSomewhere = false;
 
     for (int i = 0; i < expectedOutputs.size() && !foundSomewhere; i++) {
-      Pair<K2, V2> expected = expectedOutputs.get(i);
+      final Pair<K2, V2> expected = expectedOutputs.get(i);
 
       if (expected.equals(actualVal)) {
-        String msg = "Matched expected output " + actualVal.toString() + " but at incorrect position "
-            + actualPos + " (expected position " + i + ")";
+        final String msg = "Matched expected output " + actualVal.toString()
+            + " but at incorrect position " + actualPos
+            + " (expected position " + i + ")";
         LOG.error(msg);
         errors.add(msg);
 
         foundSomewhere = true;
-      } else if (actualVal.getFirst().getClass() != expected.getFirst().getClass()) {
-        String msg = "Received unexpected output " + actualVal.toString() + ": Mismatch in key class: expected: " +
-            expected.getFirst().getClass() + " " + "actual: " + actualVal.getFirst().getClass();
+      } else if (actualVal.getFirst().getClass() != expected.getFirst()
+          .getClass()) {
+        final String msg = "Received unexpected output " + actualVal.toString()
+            + ": Mismatch in key class: expected: "
+            + expected.getFirst().getClass() + " " + "actual: "
+            + actualVal.getFirst().getClass();
         LOG.error(msg);
         errors.add(msg);
 
         foundSomewhere = true;
-      } else if (actualVal.getSecond().getClass() != expected.getSecond().getClass()) {
-        String msg =  "Received unexpected output " + actualVal.toString() + ": Mismatch in value class: expected: " +
-            expected.getSecond().getClass() + " " + "actual: " + actualVal.getSecond().getClass();
+      } else if (actualVal.getSecond().getClass() != expected.getSecond()
+          .getClass()) {
+        final String msg = "Received unexpected output " + actualVal.toString()
+            + ": Mismatch in value class: expected: "
+            + expected.getSecond().getClass() + " " + "actual: "
+            + actualVal.getSecond().getClass();
         LOG.error(msg);
         errors.add(msg);
 
@@ -253,7 +279,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     }
 
     if (!foundSomewhere) {
-      String msg = "Received unexpected output " + actualVal.toString();
+      final String msg = "Received unexpected output " + actualVal.toString();
       LOG.error(msg);
       errors.add(msg);
     }
@@ -261,13 +287,14 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     return false;
   }
 
-  protected static void formatValueList(List<?> values, StringBuilder sb) {
+  protected static void formatValueList(final List<?> values,
+      final StringBuilder sb) {
     sb.append("(");
 
     if (null != values) {
       boolean first = true;
 
-      for (Object val : values) {
+      for (final Object val : values) {
         if (!first) {
           sb.append(", ");
         }
@@ -280,19 +307,20 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     sb.append(")");
   }
 
-  /** 
-   * @return The configuration object that will given to the mapper and/or 
+  /**
+   * @return The configuration object that will given to the mapper and/or
    *         reducer associated with the driver (new API only)
    */
   public Configuration getConfiguration() {
     return configuration;
   }
-  
+
   /**
-   * @param configuration The configuration object that will given to the 
-   *        mapper and/or reducer associated with the driver (new API only)
+   * @param configuration
+   *          The configuration object that will given to the mapper and/or
+   *          reducer associated with the driver (new API only)
    */
-  public void setConfiguration(Configuration configuration) {
+  public void setConfiguration(final Configuration configuration) {
     this.configuration = configuration;
   }
 }

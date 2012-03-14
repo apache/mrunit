@@ -35,7 +35,7 @@ public class MockInputSplit extends FileSplit implements InputSplit {
   private static final Path MOCK_PATH = new Path("somefile");
 
   public MockInputSplit() {
-    super(MOCK_PATH, 0, 0, (String []) null);
+    super(MOCK_PATH, 0, 0, (String[]) null);
   }
 
   @Override
@@ -49,17 +49,17 @@ public class MockInputSplit extends FileSplit implements InputSplit {
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException {
+  public void readFields(final DataInput in) throws IOException {
   }
 
   @Override
-  public void write(DataOutput out) throws IOException {
+  public void write(final DataOutput out) throws IOException {
   }
 
+  @Override
   public String toString() {
     return "MockInputSplit";
   }
-
 
   /**
    * Return the path object represented by this as a FileSplit.
@@ -68,4 +68,3 @@ public class MockInputSplit extends FileSplit implements InputSplit {
     return MOCK_PATH;
   }
 }
-

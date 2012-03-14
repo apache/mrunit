@@ -17,7 +17,7 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -38,9 +38,9 @@ public class TestConfigureClose {
   public void testMapperConfigureClose() {
     final AtomicBoolean configureWasCalled = new AtomicBoolean(false);
     final AtomicBoolean closeWasCalled = new AtomicBoolean(false);
-    Mapper<Text, Text, Text, Text> mapper = new Mapper<Text, Text, Text, Text>() {
+    final Mapper<Text, Text, Text, Text> mapper = new Mapper<Text, Text, Text, Text>() {
       @Override
-      public void configure(JobConf arg0) {
+      public void configure(final JobConf arg0) {
         configureWasCalled.set(true);
       }
 
@@ -48,23 +48,27 @@ public class TestConfigureClose {
       public void close() throws IOException {
         closeWasCalled.set(true);
       }
+
       @Override
-      public void map(Text key, Text value, OutputCollector<Text, Text> output,
-          Reporter reporter) throws IOException { 
+      public void map(final Text key, final Text value,
+          final OutputCollector<Text, Text> output, final Reporter reporter)
+          throws IOException {
       }
-    };    
-    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver(mapper);
+    };
+    final MapDriver<Text, Text, Text, Text> driver = MapDriver
+        .newMapDriver(mapper);
     driver.runTest();
     assertTrue(configureWasCalled.get());
     assertTrue(closeWasCalled.get());
   }
+
   @Test
   public void testReducerConfigureClose() {
     final AtomicBoolean configureWasCalled = new AtomicBoolean(false);
     final AtomicBoolean closeWasCalled = new AtomicBoolean(false);
-    Reducer<Text, Text, Text, Text> reducer = new Reducer<Text, Text, Text, Text>() {
+    final Reducer<Text, Text, Text, Text> reducer = new Reducer<Text, Text, Text, Text>() {
       @Override
-      public void configure(JobConf arg0) {
+      public void configure(final JobConf arg0) {
         configureWasCalled.set(true);
       }
 
@@ -74,11 +78,13 @@ public class TestConfigureClose {
       }
 
       @Override
-      public void reduce(Text arg0, Iterator<Text> arg1,
-          OutputCollector<Text, Text> arg2, Reporter arg3) throws IOException {
+      public void reduce(final Text arg0, final Iterator<Text> arg1,
+          final OutputCollector<Text, Text> arg2, final Reporter arg3)
+          throws IOException {
       }
-    };    
-    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver(reducer);
+    };
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver(reducer);
     driver.runTest();
     assertTrue(configureWasCalled.get());
     assertTrue(closeWasCalled.get());

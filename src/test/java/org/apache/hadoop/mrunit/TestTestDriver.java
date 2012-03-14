@@ -18,7 +18,7 @@
 package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,81 +31,82 @@ public class TestTestDriver {
 
   /**
    * Test method for
-   * {@link org.apache.hadoop.mrunit.TestDriver#parseTabbedPair(java.lang.String)}.
+   * {@link org.apache.hadoop.mrunit.TestDriver#parseTabbedPair(java.lang.String)}
+   * .
    */
   @Test
   public void testParseTabbedPair1() {
-    Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\tbar");
+    final Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\tbar");
     assertEquals(pr.getFirst().toString(), "foo");
     assertEquals(pr.getSecond().toString(), "bar");
   }
 
   @Test
   public void testParseTabbedPair2() {
-    Pair<Text, Text> pr = TestDriver.parseTabbedPair("   foo\tbar");
+    final Pair<Text, Text> pr = TestDriver.parseTabbedPair("   foo\tbar");
     assertEquals(pr.getFirst().toString(), "   foo");
     assertEquals(pr.getSecond().toString(), "bar");
   }
 
   @Test
   public void testParseTabbedPair3() {
-    Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\tbar   ");
+    final Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\tbar   ");
     assertEquals(pr.getFirst().toString(), "foo");
     assertEquals(pr.getSecond().toString(), "bar   ");
   }
 
   @Test
   public void testParseTabbedPair4() {
-    Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo    \tbar");
+    final Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo    \tbar");
     assertEquals(pr.getFirst().toString(), "foo    ");
     assertEquals(pr.getSecond().toString(), "bar");
   }
 
   @Test
   public void testParseTabbedPair5() {
-    Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\t  bar");
+    final Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\t  bar");
     assertEquals(pr.getFirst().toString(), "foo");
     assertEquals(pr.getSecond().toString(), "  bar");
   }
 
   @Test
   public void testParseTabbedPair6() {
-    Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\t\tbar");
+    final Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\t\tbar");
     assertEquals(pr.getFirst().toString(), "foo");
     assertEquals(pr.getSecond().toString(), "\tbar");
   }
 
   @Test
   public void testParseTabbedPair7() {
-    Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\tbar\n");
+    final Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\tbar\n");
     assertEquals(pr.getFirst().toString(), "foo");
     assertEquals(pr.getSecond().toString(), "bar\n");
   }
 
   @Test
   public void testParseTabbedPair8() {
-    Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\t  bar\tbaz");
+    final Pair<Text, Text> pr = TestDriver.parseTabbedPair("foo\t  bar\tbaz");
     assertEquals(pr.getFirst().toString(), "foo");
     assertEquals(pr.getSecond().toString(), "  bar\tbaz");
   }
 
   /**
    * Test method for
-   * {@link
-   * org.apache.hadoop.mrunit.TestDriver#parseCommaDelimitedList(java.lang.String)}.
+   * {@link org.apache.hadoop.mrunit.TestDriver#parseCommaDelimitedList(java.lang.String)}
+   * .
    */
   @Test
   public void testParseCommaDelimList1() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("foo");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("foo");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     assertListEquals(out, verify);
   }
 
   @Test
   public void testParseCommaDelimList2() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     verify.add(new Text("bar"));
     assertListEquals(out, verify);
@@ -113,8 +114,8 @@ public class TestTestDriver {
 
   @Test
   public void testParseCommaDelimList3() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("foo   ,bar");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("foo   ,bar");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     verify.add(new Text("bar"));
     assertListEquals(out, verify);
@@ -122,8 +123,8 @@ public class TestTestDriver {
 
   @Test
   public void testParseCommaDelimList4() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("foo,   bar");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("foo,   bar");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     verify.add(new Text("bar"));
     assertListEquals(out, verify);
@@ -131,8 +132,8 @@ public class TestTestDriver {
 
   @Test
   public void testParseCommaDelimList5() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("   foo,bar");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("   foo,bar");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     verify.add(new Text("bar"));
     assertListEquals(out, verify);
@@ -140,8 +141,8 @@ public class TestTestDriver {
 
   @Test
   public void testParseCommaDelimList6() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar   ");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar   ");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     verify.add(new Text("bar"));
     assertListEquals(out, verify);
@@ -149,8 +150,8 @@ public class TestTestDriver {
 
   @Test
   public void testParseCommaDelimList7() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar, baz");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar, baz");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     verify.add(new Text("bar"));
     verify.add(new Text("baz"));
@@ -161,8 +162,8 @@ public class TestTestDriver {
   // add a tailing empty element by itself.
   @Test
   public void testParseCommaDelimList8() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar,");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar,");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     verify.add(new Text("bar"));
     assertListEquals(out, verify);
@@ -171,8 +172,8 @@ public class TestTestDriver {
   // but this one does.
   @Test
   public void testParseCommaDelimList8a() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar,,");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("foo,bar,,");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     verify.add(new Text("bar"));
     verify.add(new Text(""));
@@ -181,8 +182,8 @@ public class TestTestDriver {
 
   @Test
   public void testParseCommaDelimList9() {
-    List<Text> out = TestDriver.parseCommaDelimitedList("foo,,bar");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList("foo,,bar");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text("foo"));
     verify.add(new Text(""));
     verify.add(new Text("bar"));
@@ -191,8 +192,8 @@ public class TestTestDriver {
 
   @Test
   public void testParseCommaDelimList10() {
-    List<Text> out = TestDriver.parseCommaDelimitedList(",foo,bar");
-    ArrayList<Text> verify = new ArrayList<Text>();
+    final List<Text> out = TestDriver.parseCommaDelimitedList(",foo,bar");
+    final ArrayList<Text> verify = new ArrayList<Text>();
     verify.add(new Text(""));
     verify.add(new Text("foo"));
     verify.add(new Text("bar"));
@@ -200,4 +201,3 @@ public class TestTestDriver {
   }
 
 }
-

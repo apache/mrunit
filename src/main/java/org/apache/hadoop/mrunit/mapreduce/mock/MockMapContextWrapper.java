@@ -34,44 +34,46 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 /**
- * o.a.h.mapreduce.Mapper.map() expects to use a Mapper.Context
- * object as a parameter. We want to override the functionality
- * of a lot of Context to have it send the results back to us, etc.
- * But since Mapper.Context is an inner class of Mapper, we need to
- * put any subclasses of Mapper.Context in a subclass of Mapper.
- *
+ * o.a.h.mapreduce.Mapper.map() expects to use a Mapper.Context object as a
+ * parameter. We want to override the functionality of a lot of Context to have
+ * it send the results back to us, etc. But since Mapper.Context is an inner
+ * class of Mapper, we need to put any subclasses of Mapper.Context in a
+ * subclass of Mapper.
+ * 
  * This wrapper class exists for that purpose.
  */
-public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
-    extends MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
+    MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
-  protected static final Log LOG = LogFactory.getLog(MockMapContextWrapper.class);
+  protected static final Log LOG = LogFactory
+      .getLog(MockMapContextWrapper.class);
   protected final List<Pair<KEYIN, VALUEIN>> inputs;
   protected Pair<KEYIN, VALUEIN> currentKeyValue;
-  protected final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;  
+  protected final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;
 
-  public MockMapContextWrapper(List<Pair<KEYIN, VALUEIN>> inputs,
-      Counters counters, Configuration conf) throws IOException, InterruptedException {
+  public MockMapContextWrapper(final List<Pair<KEYIN, VALUEIN>> inputs,
+      final Counters counters, final Configuration conf) throws IOException,
+      InterruptedException {
     super(counters, conf);
     this.inputs = inputs;
     this.context = create();
   }
-  
-  @SuppressWarnings({ "unchecked"})
-  private Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create() 
-  throws IOException, InterruptedException {
-    Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context =  mock(org.apache.hadoop.mapreduce.Mapper.Context.class);
-    
+
+  @SuppressWarnings({ "unchecked" })
+  private Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create()
+      throws IOException, InterruptedException {
+    final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Mapper.Context.class);
+
     createCommon(context);
-    
+
     /*
-     * In actual context code nextKeyValue() modifies 
-     * the current state so we can here as well.
+     * In actual context code nextKeyValue() modifies the current state so we
+     * can here as well.
      */
     when(context.nextKeyValue()).thenAnswer(new Answer<Boolean>() {
       @Override
-      public Boolean answer(InvocationOnMock invocation) {
-        if(inputs.size() > 0) {
+      public Boolean answer(final InvocationOnMock invocation) {
+        if (inputs.size() > 0) {
           currentKeyValue = inputs.remove(0);
           return true;
         } else {
@@ -82,22 +84,21 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
     });
     when(context.getCurrentKey()).thenAnswer(new Answer<KEYIN>() {
       @Override
-      public KEYIN answer(InvocationOnMock invocation) {
+      public KEYIN answer(final InvocationOnMock invocation) {
         return currentKeyValue.getFirst();
       }
     });
     when(context.getCurrentValue()).thenAnswer(new Answer<VALUEIN>() {
       @Override
-      public VALUEIN answer(InvocationOnMock invocation) {
+      public VALUEIN answer(final InvocationOnMock invocation) {
         return currentKeyValue.getSecond();
       }
-    });    
+    });
     return context;
   }
 
   /**
-   * @return the outputs from the MockOutputCollector back to
-   * the test harness.
+   * @return the outputs from the MockOutputCollector back to the test harness.
    */
   public List<Pair<KEYOUT, VALUEOUT>> getOutputs() {
     return outputs;

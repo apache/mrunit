@@ -17,47 +17,42 @@
  */
 package org.apache.hadoop.mrunit.mock;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.DataInputBuffer;
-import org.apache.hadoop.io.DataOutputBuffer;
-import org.apache.hadoop.io.serializer.SerializationFactory;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mrunit.Serialization;
 import org.apache.hadoop.mrunit.types.Pair;
 
-
 /**
- * OutputCollector to use in the test framework for Mapper and Reducer
- * classes. Accepts a set of output (k, v) pairs and returns them to the
- * framework for validation.
+ * OutputCollector to use in the test framework for Mapper and Reducer classes.
+ * Accepts a set of output (k, v) pairs and returns them to the framework for
+ * validation.
  */
 public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
 
-  private ArrayList<Pair<K, V>> collectedOutputs;
-  private Configuration conf;
+  private final ArrayList<Pair<K, V>> collectedOutputs;
+  private final Configuration conf;
 
-
-  public MockOutputCollector(Configuration config) {
+  public MockOutputCollector(final Configuration config) {
     collectedOutputs = new ArrayList<Pair<K, V>>();
     conf = config;
   }
 
-
-  private Object deepCopy(Object obj) {
-      return Serialization.copy(obj, conf);
+  private Object deepCopy(final Object obj) {
+    return Serialization.copy(obj, conf);
   }
 
   /**
    * Accepts another (key, value) pair as an output of this mapper/reducer.
    */
+  @Override
   @SuppressWarnings("unchecked")
-  public void collect(K key, V value) throws IOException {
-    collectedOutputs.add(new Pair<K, V>((K) deepCopy(key), (V) deepCopy(value)));
+  public void collect(final K key, final V value) throws IOException {
+    collectedOutputs
+        .add(new Pair<K, V>((K) deepCopy(key), (V) deepCopy(value)));
   }
 
   /**
@@ -67,4 +62,3 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
     return collectedOutputs;
   }
 }
-

@@ -41,40 +41,44 @@ public abstract class MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
   protected final Configuration conf;
   protected final List<Pair<KEYOUT, VALUEOUT>> outputs = new ArrayList<Pair<KEYOUT, VALUEOUT>>();
 
-  public MockContextWrapper(Counters counters, Configuration conf) {
+  public MockContextWrapper(final Counters counters, final Configuration conf) {
     this.conf = conf;
     this.counters = counters;
   }
-  
+
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  protected void createCommon(TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) throws IOException, InterruptedException {
-    when(context.getCounter((Enum)any())).thenAnswer(new Answer<Counter>() {
+  protected void createCommon(
+      final TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context)
+      throws IOException, InterruptedException {
+    when(context.getCounter((Enum) any())).thenAnswer(new Answer<Counter>() {
       @Override
-      public Counter answer(InvocationOnMock invocation) {
-        Object[] args = invocation.getArguments();
-        return counters.findCounter((Enum)args[0]);
+      public Counter answer(final InvocationOnMock invocation) {
+        final Object[] args = invocation.getArguments();
+        return counters.findCounter((Enum) args[0]);
       }
     });
-    when(context.getCounter(anyString(), anyString())).thenAnswer(new Answer<Counter>() {
-      @Override
-      public Counter answer(InvocationOnMock invocation) {
-        Object[] args = invocation.getArguments();
-        return counters.findCounter((String)args[0], (String)args[1]);
-      }
-    });
+    when(context.getCounter(anyString(), anyString())).thenAnswer(
+        new Answer<Counter>() {
+          @Override
+          public Counter answer(final InvocationOnMock invocation) {
+            final Object[] args = invocation.getArguments();
+            return counters.findCounter((String) args[0], (String) args[1]);
+          }
+        });
     when(context.getConfiguration()).thenAnswer(new Answer<Configuration>() {
       @Override
-      public Configuration answer(InvocationOnMock invocation) {
+      public Configuration answer(final InvocationOnMock invocation) {
         return conf;
       }
     });
     doAnswer(new Answer<Object>() {
-      public Object answer(InvocationOnMock invocation) {
-          Object[] args = invocation.getArguments();
-          outputs.add(new Pair(copy(args[0], conf), copy(args[1], conf)));
-          return null;
-      }}).when(context).write((KEYOUT)any(), (VALUEOUT)any());
+      @Override
+      public Object answer(final InvocationOnMock invocation) {
+        final Object[] args = invocation.getArguments();
+        outputs.add(new Pair(copy(args[0], conf), copy(args[1], conf)));
+        return null;
+      }
+    }).when(context).write((KEYOUT) any(), (VALUEOUT) any());
 
   }
 }
-

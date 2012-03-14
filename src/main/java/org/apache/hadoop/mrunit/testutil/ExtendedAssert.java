@@ -17,34 +17,42 @@
  */
 package org.apache.hadoop.mrunit.testutil;
 
-import java.util.List;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import static org.junit.Assert.*;
+import java.util.List;
 
 public final class ExtendedAssert {
 
-  private ExtendedAssert() { }
+  private ExtendedAssert() {
+  }
 
   /**
    * Asserts that all the elements of the list are equivalent under equals()
-   * @param expected a list full of expected values
-   * @param actual a list full of actual test values
+   * 
+   * @param expected
+   *          a list full of expected values
+   * @param actual
+   *          a list full of actual test values
    */
-  public static void assertListEquals(List<?> expected, List<?> actual) {
+  public static void assertListEquals(final List<?> expected,
+      final List<?> actual) {
     if (expected.size() != actual.size()) {
       fail("Expected list of size " + expected.size() + "; actual size is "
           + actual.size());
     }
 
     for (int i = 0; i < expected.size(); i++) {
-      Object t1 = expected.get(i);
-      Object t2 = actual.get(i);
+      final Object t1 = expected.get(i);
+      final Object t2 = actual.get(i);
 
-      boolean same = (t1 == t2) || (t1 != null && t1.equals(t2)) || (t2 != null && t2.equals(t1));
+      final boolean same = (t1 == t2) || (t1 != null && t1.equals(t2))
+          || (t2 != null && t2.equals(t1));
       if (!same) {
-        fail("Expected element " + t1 + " (" + ((t2 == null) ? "unknown type" : t2.getClass().getName()) + 
-            ") at index " + i + " != actual element " + t2 + 
-            " (" + ((t2 == null) ? "unknown type" : t2.getClass().getName()) + ")");
+        fail("Expected element " + t1 + " ("
+            + ((t2 == null) ? "unknown type" : t2.getClass().getName())
+            + ") at index " + i + " != actual element " + t2 + " ("
+            + ((t2 == null) ? "unknown type" : t2.getClass().getName()) + ")");
       }
     }
   }
@@ -52,24 +60,24 @@ public final class ExtendedAssert {
   /**
    * asserts x &gt; y
    */
-  public static void assertGreater(int x, int y) {
+  public static void assertGreater(final int x, final int y) {
     assertTrue("Expected " + x + " > " + y, x > y);
   }
 
   /** asserts x &gt;= y) */
-  public static void assertGreaterOrEqual(int x, int y) {
+  public static void assertGreaterOrEqual(final int x, final int y) {
     assertTrue("Expected " + x + " >= " + y, x >= y);
   }
 
   /**
    * asserts x &lt; y
    */
-  public static void assertLess(int x, int y) {
+  public static void assertLess(final int x, final int y) {
     assertTrue("Expected " + x + " < " + y, x < y);
   }
 
   /** asserts x &gt;= y) */
-  public static void assertLessOrEqual(int x, int y) {
+  public static void assertLessOrEqual(final int x, final int y) {
     assertTrue("Expected " + x + " <= " + y, x <= y);
   }
 }

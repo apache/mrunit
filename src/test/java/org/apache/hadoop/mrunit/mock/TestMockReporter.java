@@ -17,7 +17,7 @@
  */
 package org.apache.hadoop.mrunit.mock;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
@@ -28,11 +28,13 @@ import org.junit.Test;
 public class TestMockReporter {
 
   @Rule
-  public final ExpectedSuppliedException thrown = ExpectedSuppliedException.none();
+  public final ExpectedSuppliedException thrown = ExpectedSuppliedException
+      .none();
 
   @Test
   public void testGetInputSplitForMapper() {
-    InputSplit split = new MockReporter(MockReporter.ReporterType.Mapper, null).getInputSplit();
+    final InputSplit split = new MockReporter(MockReporter.ReporterType.Mapper,
+        null).getInputSplit();
     assertTrue(null != split);
   }
 
@@ -40,8 +42,8 @@ public class TestMockReporter {
   // if the reducer tries to grab the input split.
   @Test
   public void testGetInputSplitForReducer() {
-    thrown.expectMessage(UnsupportedOperationException.class, "Reducer cannot call getInputSplit()");
+    thrown.expectMessage(UnsupportedOperationException.class,
+        "Reducer cannot call getInputSplit()");
     new MockReporter(MockReporter.ReporterType.Reducer, null).getInputSplit();
   }
 }
-

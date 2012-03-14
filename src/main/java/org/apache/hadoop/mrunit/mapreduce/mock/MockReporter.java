@@ -23,14 +23,14 @@ import org.apache.hadoop.mapreduce.StatusReporter;
 
 public class MockReporter extends StatusReporter {
 
-  private Counters counters;
+  private final Counters counters;
 
   public MockReporter(final Counters ctrs) {
-    this.counters = ctrs;
+    counters = ctrs;
   }
 
   @Override
-  public void setStatus(String status) {
+  public void setStatus(final String status) {
     // do nothing.
   }
 
@@ -40,7 +40,7 @@ public class MockReporter extends StatusReporter {
   }
 
   @Override
-  public Counter getCounter(String group, String name) {
+  public Counter getCounter(final String group, final String name) {
     Counter counter = null;
     if (counters != null) {
       counter = counters.findCounter(group, name);
@@ -50,7 +50,7 @@ public class MockReporter extends StatusReporter {
   }
 
   @Override
-  public Counter getCounter(Enum<?> key) {
+  public Counter getCounter(final Enum<?> key) {
     Counter counter = null;
     if (counters != null) {
       counter = counters.findCounter(key);
@@ -58,9 +58,8 @@ public class MockReporter extends StatusReporter {
 
     return counter;
   }
-  
+
   public float getProgress() {
     return 0;
   }
 }
-

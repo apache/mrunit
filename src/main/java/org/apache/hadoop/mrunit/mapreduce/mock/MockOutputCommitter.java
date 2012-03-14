@@ -18,8 +18,8 @@
 
 package org.apache.hadoop.mrunit.mapreduce.mock;
 
-import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 /**
@@ -27,23 +27,28 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  */
 public class MockOutputCommitter extends OutputCommitter {
 
-  public void setupJob(JobContext jobContext) {
+  @Override
+  public void setupJob(final JobContext jobContext) {
   }
 
-  public void cleanupJob(JobContext jobContext) {
+  @Override
+  public void cleanupJob(final JobContext jobContext) {
   }
 
-  public void setupTask(TaskAttemptContext taskContext) {
+  @Override
+  public void setupTask(final TaskAttemptContext taskContext) {
   }
 
-  public boolean needsTaskCommit(TaskAttemptContext taskContext) {
+  @Override
+  public boolean needsTaskCommit(final TaskAttemptContext taskContext) {
     return false;
   }
 
-  public void commitTask(TaskAttemptContext taskContext) {
+  @Override
+  public void commitTask(final TaskAttemptContext taskContext) {
   }
 
-  public void abortTask(TaskAttemptContext taskContext) {
+  @Override
+  public void abortTask(final TaskAttemptContext taskContext) {
   }
 }
-

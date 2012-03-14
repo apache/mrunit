@@ -18,7 +18,8 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 
 import org.apache.hadoop.io.Text;
@@ -35,7 +36,8 @@ public class TestCounters {
   private static final String ELEM = "ELEM";
 
   private class CounterMapper extends Mapper<Text, Text, Text, Text> {
-    public void map(Text k, Text v, Context context)
+    @Override
+    public void map(final Text k, final Text v, final Context context)
         throws IOException, InterruptedException {
 
       context.getCounter(GROUP, ELEM).increment(1);
@@ -47,10 +49,11 @@ public class TestCounters {
   }
 
   private class CounterReducer extends Reducer<Text, Text, Text, Text> {
-    public void reduce(Text k, Iterable<Text> vals, Context context)
-        throws IOException, InterruptedException {
+    @Override
+    public void reduce(final Text k, final Iterable<Text> vals,
+        final Context context) throws IOException, InterruptedException {
 
-      for(Text val : vals) {
+      for (final Text val : vals) {
         context.getCounter(GROUP, ELEM).increment(1);
         context.write(k, val);
       }
@@ -59,36 +62,34 @@ public class TestCounters {
 
   @Test
   public void testMapper() throws IOException {
-    Mapper<Text, Text, Text, Text> mapper = new CounterMapper();
-    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver(mapper);
+    final Mapper<Text, Text, Text, Text> mapper = new CounterMapper();
+    final MapDriver<Text, Text, Text, Text> driver = MapDriver
+        .newMapDriver(mapper);
     driver.withInput(new Text("foo"), new Text("bar")).run();
-    assertEquals("Expected 1 counter increment", 1,
-        driver.getCounters().findCounter(GROUP, ELEM).getValue());
+    assertEquals("Expected 1 counter increment", 1, driver.getCounters()
+        .findCounter(GROUP, ELEM).getValue());
   }
 
   @Test
   public void testReducer() throws IOException {
-    Reducer<Text, Text, Text, Text> reducer = new CounterReducer();
-    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver(reducer);
-    driver.withInputKey(new Text("foo"))
-          .withInputValue(new Text("bar"))
-          .run();
-    assertEquals("Expected 1 counter increment", 1,
-        driver.getCounters().findCounter(GROUP, ELEM).getValue());
+    final Reducer<Text, Text, Text, Text> reducer = new CounterReducer();
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver(reducer);
+    driver.withInputKey(new Text("foo")).withInputValue(new Text("bar")).run();
+    assertEquals("Expected 1 counter increment", 1, driver.getCounters()
+        .findCounter(GROUP, ELEM).getValue());
   }
 
   @Test
   public void testMapReduce() throws IOException {
-    Mapper<Text, Text, Text, Text> mapper = new CounterMapper();
-    Reducer<Text, Text, Text, Text> reducer = new CounterReducer();
-    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver =
-        MapReduceDriver.newMapReduceDriver(mapper, reducer);
+    final Mapper<Text, Text, Text, Text> mapper = new CounterMapper();
+    final Reducer<Text, Text, Text, Text> reducer = new CounterReducer();
+    final MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
+        .newMapReduceDriver(mapper, reducer);
 
-    driver.withInput(new Text("foo"), new Text("bar"))
-          .run();
+    driver.withInput(new Text("foo"), new Text("bar")).run();
 
     assertEquals("Expected counter=3", 3,
         driver.getCounters().findCounter(GROUP, ELEM).getValue());
   }
 }
-

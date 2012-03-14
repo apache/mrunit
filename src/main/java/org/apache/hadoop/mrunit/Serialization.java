@@ -29,50 +29,59 @@ import org.apache.hadoop.io.serializer.Serializer;
 public class Serialization {
 
   /**
-   * Creates a new copy of the orig object. Depending on the serialization used, the serialization class
-   *   may or may not copy the orig object into the copy object based on the contract on
-   *   org.apache.hadoop.io.serializer.Deserializer.deserialize
-   *
+   * Creates a new copy of the orig object. Depending on the serialization used,
+   * the serialization class may or may not copy the orig object into the copy
+   * object based on the contract on
+   * org.apache.hadoop.io.serializer.Deserializer.deserialize
+   * 
    * @param orig
-   * @param copy if null always returns a new object, if not null may or may not copy orig into copy
-   *   depending on what serialization class is used
-   * @param conf specifies the serialization classes to use in io.serializations
+   * @param copy
+   *          if null always returns a new object, if not null may or may not
+   *          copy orig into copy depending on what serialization class is used
+   * @param conf
+   *          specifies the serialization classes to use in io.serializations
    * @return a copy of the orig object
    */
   @SuppressWarnings("unchecked")
-  public static Object copy(Object orig, Object copy, Configuration conf) {
-    if(orig == null) {
+  public static Object copy(final Object orig, final Object copy,
+      final Configuration conf) {
+    if (orig == null) {
       return null;
     }
-    if(copy != null && orig.getClass() != copy.getClass()) {
-      throw new IllegalArgumentException(orig.getClass() + "!=" +  copy.getClass());
+    if (copy != null && orig.getClass() != copy.getClass()) {
+      throw new IllegalArgumentException(orig.getClass() + "!="
+          + copy.getClass());
     }
-    Class<?> clazz = orig.getClass();
-    SerializationFactory serializationFactory = new SerializationFactory(conf);
-    Serializer<Object> serializer = (Serializer<Object>) serializationFactory.getSerializer(clazz);
-    Deserializer<Object> deserializer = (Deserializer<Object>) serializationFactory.getDeserializer(clazz);
+    final Class<?> clazz = orig.getClass();
+    final SerializationFactory serializationFactory = new SerializationFactory(
+        conf);
+    final Serializer<Object> serializer = (Serializer<Object>) serializationFactory
+        .getSerializer(clazz);
+    final Deserializer<Object> deserializer = (Deserializer<Object>) serializationFactory
+        .getDeserializer(clazz);
     try {
-      DataOutputBuffer outputBuffer = new DataOutputBuffer();
+      final DataOutputBuffer outputBuffer = new DataOutputBuffer();
       serializer.open(outputBuffer);
       serializer.serialize(orig);
-      DataInputBuffer inputBuffer = new DataInputBuffer();
+      final DataInputBuffer inputBuffer = new DataInputBuffer();
       inputBuffer.reset(outputBuffer.getData(), outputBuffer.getLength());
       deserializer.open(inputBuffer);
       return deserializer.deserialize(copy);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
 
   /**
    * Creates a new copy of the orig object
-   *
+   * 
    * @param orig
-   * @param conf specifies the serialization classes to use in io.serializations
+   * @param conf
+   *          specifies the serialization classes to use in io.serializations
    * @return a new copy of the orig object
    */
-  public static Object copy(Object orig, Configuration conf) {
-    if(orig == null) {
+  public static Object copy(final Object orig, final Configuration conf) {
+    if (orig == null) {
       return null;
     }
     return copy(orig, null, conf);

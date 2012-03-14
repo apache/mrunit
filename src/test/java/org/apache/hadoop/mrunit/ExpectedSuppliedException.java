@@ -17,8 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-import junit.framework.AssertionFailedError;
-
 import org.hamcrest.Matcher;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.MethodRule;

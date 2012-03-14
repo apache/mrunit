@@ -17,7 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-
 import java.io.IOException;
 import java.util.List;
 
@@ -32,13 +31,13 @@ import org.apache.hadoop.mrunit.mock.MockReporter;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * Harness that allows you to test a Mapper instance. You provide the input
- * key and value that should be sent to the Mapper, and outputs you expect to
- * be sent by the Mapper to the collector for those inputs. By calling
- * runTest(), the harness will deliver the input to the Mapper and will check
- * its outputs against the expected results. This is designed to handle a
- * single (k, v) -> (k, v)* case from the Mapper, representing a single unit
- * test. Multiple input (k, v) pairs should go in separate unit tests.
+ * Harness that allows you to test a Mapper instance. You provide the input key
+ * and value that should be sent to the Mapper, and outputs you expect to be
+ * sent by the Mapper to the collector for those inputs. By calling runTest(),
+ * the harness will deliver the input to the Mapper and will check its outputs
+ * against the expected results. This is designed to handle a single (k, v) ->
+ * (k, v)* case from the Mapper, representing a single unit test. Multiple input
+ * (k, v) pairs should go in separate unit tests.
  */
 @SuppressWarnings("deprecation")
 public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
@@ -62,8 +61,11 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     return counters;
   }
 
-  /** Sets the counters object to use for this test.
-   * @param ctrs The counters object to use.
+  /**
+   * Sets the counters object to use for this test.
+   * 
+   * @param ctrs
+   *          The counters object to use.
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
@@ -77,15 +79,16 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   /**
    * Set the Mapper instance to use with this test driver
-   *
-   * @param m the Mapper instance to use
+   * 
+   * @param m
+   *          the Mapper instance to use
    */
-  public void setMapper(Mapper<K1, V1, K2, V2> m) {
+  public void setMapper(final Mapper<K1, V1, K2, V2> m) {
     myMapper = m;
   }
 
   /** Sets the Mapper instance to use and returns self for fluent style */
-  public MapDriver<K1, V1, K2, V2> withMapper(Mapper<K1, V1, K2, V2> m) {
+  public MapDriver<K1, V1, K2, V2> withMapper(final Mapper<K1, V1, K2, V2> m) {
     setMapper(m);
     return this;
   }
@@ -99,92 +102,93 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   /**
    * Identical to setInputKey() but with fluent programming style
-   *
+   * 
    * @return this
    */
-  public MapDriver<K1, V1, K2, V2> withInputKey(K1 key) {
+  public MapDriver<K1, V1, K2, V2> withInputKey(final K1 key) {
     setInputKey(key);
     return this;
   }
 
   /**
    * Identical to setInputValue() but with fluent programming style
-   *
+   * 
    * @param val
    * @return this
    */
-  public MapDriver<K1, V1, K2, V2> withInputValue(V1 val) {
+  public MapDriver<K1, V1, K2, V2> withInputValue(final V1 val) {
     setInputValue(val);
     return this;
   }
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   *
+   * 
    * @return this
    */
-  public MapDriver<K1, V1, K2, V2> withInput(K1 key, V1 val) {
+  public MapDriver<K1, V1, K2, V2> withInput(final K1 key, final V1 val) {
     setInput(key, val);
     return this;
   }
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   *
+   * 
    * @param inputRecord
    * @return this
    */
-  public MapDriver<K1, V1, K2, V2> withInput(Pair<K1, V1> inputRecord) {
+  public MapDriver<K1, V1, K2, V2> withInput(final Pair<K1, V1> inputRecord) {
     setInput(inputRecord);
     return this;
   }
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   *
+   * 
    * @param outputRecord
    * @return this
    */
-  public MapDriver<K1, V1, K2, V2> withOutput(Pair<K2, V2> outputRecord) {
+  public MapDriver<K1, V1, K2, V2> withOutput(final Pair<K2, V2> outputRecord) {
     addOutput(outputRecord);
     return this;
   }
 
   /**
-   * Functions like addOutput() but returns self for fluent programming
-   * style
-   *
+   * Functions like addOutput() but returns self for fluent programming style
+   * 
    * @return this
    */
-  public MapDriver<K1, V1, K2, V2> withOutput(K2 key, V2 val) {
+  public MapDriver<K1, V1, K2, V2> withOutput(final K2 key, final V2 val) {
     addOutput(key, val);
     return this;
   }
 
   /**
    * Identical to setInputFromString, but with a fluent programming style
-   *
+   * 
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
    */
   @Deprecated
-  public MapDriver<K1, V1, K2, V2> withInputFromString(String input) {
+  public MapDriver<K1, V1, K2, V2> withInputFromString(final String input) {
     setInputFromString(input);
     return this;
   }
 
   /**
    * Identical to addOutputFromString, but with a fluent programming style
-   *
+   * 
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility with non Text Writables
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
    */
   @Deprecated
-  public MapDriver<K1, V1, K2, V2> withOutputFromString(String output) {
+  public MapDriver<K1, V1, K2, V2> withOutputFromString(final String output) {
     addOutputFromString(output);
     return this;
   }
@@ -192,15 +196,16 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
     if (myMapper == null) {
-        throw new IllegalStateException("No Mapper class was provided");
+      throw new IllegalStateException("No Mapper class was provided");
     }
 
-    MockOutputCollector<K2, V2> outputCollector =
-        new MockOutputCollector<K2, V2>(getConfiguration());
-    MockReporter reporter = new MockReporter(MockReporter.ReporterType.Mapper, getCounters());
+    final MockOutputCollector<K2, V2> outputCollector = new MockOutputCollector<K2, V2>(
+        getConfiguration());
+    final MockReporter reporter = new MockReporter(
+        MockReporter.ReporterType.Mapper, getCounters());
 
     if (myMapper instanceof Configurable) {
-      ((Configurable)myMapper).setConf(getConfiguration());
+      ((Configurable) myMapper).setConf(getConfiguration());
     }
     myMapper.configure(new JobConf(getConfiguration()));
     myMapper.map(inputKey, inputVal, outputCollector, reporter);
@@ -212,27 +217,26 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   public String toString() {
     return "MapDriver (" + myMapper + ")";
   }
-  
+
   /**
-   * Returns a new MapDriver without having to specify
-   * the generic types on the right hand side of the object create
-   * statement.
+   * Returns a new MapDriver without having to specify the generic types on the
+   * right hand side of the object create statement.
    * 
    * @return new MapDriver
    */
-  public static <K1, V1, K2, V2>  MapDriver<K1, V1, K2, V2> newMapDriver() {
+  public static <K1, V1, K2, V2> MapDriver<K1, V1, K2, V2> newMapDriver() {
     return new MapDriver<K1, V1, K2, V2>();
   }
+
   /**
-   * Returns a new MapDriver without having to specify
-   * the generic types on the right hand side of the object create
-   * statement.
+   * Returns a new MapDriver without having to specify the generic types on the
+   * right hand side of the object create statement.
    * 
-   * @param reducer passed to MapDriver constructor
+   * @param mapper
    * @return new MapDriver
    */
-  public static <K1, V1, K2, V2>  MapDriver<K1, V1, K2, V2> newMapDriver(Mapper<K1, V1, K2, V2> mapper) {
+  public static <K1, V1, K2, V2> MapDriver<K1, V1, K2, V2> newMapDriver(
+      final Mapper<K1, V1, K2, V2> mapper) {
     return new MapDriver<K1, V1, K2, V2>(mapper);
   }
 }
-
