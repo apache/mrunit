@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.Text;
@@ -339,6 +341,20 @@ public class TestMapReduceDriver {
     driver.withMapper(mapper).withInput(new Text("a"), new LongWritable(0));
     thrown.expectMessage(IllegalStateException.class,
         "No Reducer class was provided");
+    driver.runTest();
+  }
+
+  @Test
+  public void testConf() {
+    final Configuration conf = new Configuration();
+    conf.setStrings("io.serializations", conf.get("io.serializations"),
+        "org.apache.hadoop.io.serializer.JavaSerialization");
+    final MapReduceDriver<Integer, IntWritable, Integer, IntWritable, Integer, IntWritable> driver = MapReduceDriver
+        .newMapReduceDriver(new IdentityMapper<Integer, IntWritable>(),
+            new IdentityReducer<Integer, IntWritable>())
+        .withConfiguration(conf);
+    driver.addInput(1, new IntWritable(2));
+    driver.addOutput(1, new IntWritable(2));
     driver.runTest();
   }
 }

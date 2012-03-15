@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
@@ -216,6 +217,18 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   @Override
   public String toString() {
     return "MapDriver (" + myMapper + ")";
+  }
+
+  /**
+   * @param configuration
+   *          The configuration object that will given to the mapper associated
+   *          with the driver
+   * @return this object for fluent coding
+   */
+  public MapDriver<K1, V1, K2, V2> withConfiguration(
+      final Configuration configuration) {
+    setConfiguration(configuration);
+    return this;
   }
 
   /**

@@ -25,12 +25,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.map.InverseMapper;
+import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
 import org.apache.hadoop.mrunit.mapreduce.TestMapDriver.ConfigurationMapper;
@@ -315,5 +318,17 @@ public class TestMapReduceDriver {
     thrown.expectMessage(IllegalStateException.class,
         "No Reducer class was provided");
     driver.runTest();
+  }
+
+  @Test
+  public void testConf() {
+    final Configuration conf = new Configuration();
+    conf.setStrings("io.serializations", conf.get("io.serializations"),
+        "org.apache.hadoop.io.serializer.JavaSerialization");
+    final MapReduceDriver<IntWritable, Integer, Integer, IntWritable, Integer, IntWritable> driver = MapReduceDriver
+        .newMapReduceDriver(new InverseMapper<IntWritable, Integer>(),
+            new IntSumReducer<Integer>()).withConfiguration(conf);
+    driver.withInput(new IntWritable(1), 2).withOutput(2, new IntWritable(1))
+        .runTest();
   }
 }

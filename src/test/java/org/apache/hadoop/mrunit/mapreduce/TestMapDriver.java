@@ -25,9 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.map.InverseMapper;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
@@ -187,6 +189,19 @@ public class TestMapDriver {
     driver = MapDriver.newMapDriver();
     thrown.expectMessage(IllegalStateException.class,
         "No Mapper class was provided");
+    driver.runTest();
+  }
+
+  @Test
+  public void testConf() {
+    final Configuration conf = new Configuration();
+    conf.setStrings("io.serializations", conf.get("io.serializations"),
+        "org.apache.hadoop.io.serializer.JavaSerialization");
+    final MapDriver<Integer, IntWritable, IntWritable, Integer> driver = MapDriver
+        .newMapDriver(new InverseMapper<Integer, IntWritable>())
+        .withConfiguration(conf);
+    driver.setInput(1, new IntWritable(2));
+    driver.addOutput(new IntWritable(2), 1);
     driver.runTest();
   }
 }

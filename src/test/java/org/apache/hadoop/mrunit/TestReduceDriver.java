@@ -223,16 +223,14 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testJavaSerialization() {
-    final ReduceDriver<Integer, Integer, Integer, Integer> driver = ReduceDriver
-        .newReduceDriver(new IdentityReducer<Integer, Integer>());
+  public void testConf() {
     final Configuration conf = new Configuration();
-    conf.set("io.serializations",
+    conf.setStrings("io.serializations", conf.get("io.serializations"),
         "org.apache.hadoop.io.serializer.JavaSerialization");
-    driver.setConfiguration(conf);
-    driver.withInputKey(1).withInputValue(2).withInputValue(3)
-        .withInputValue(4).withOutput(1, 2).withOutput(1, 3).withOutput(1, 4)
-        .runTest();
+    final ReduceDriver<Integer, Integer, Integer, Integer> driver = ReduceDriver
+        .newReduceDriver(new IdentityReducer<Integer, Integer>())
+        .withConfiguration(conf);
+    driver.withInputKey(1).withInputValue(2).withOutput(1, 2).runTest();
   }
 
 }

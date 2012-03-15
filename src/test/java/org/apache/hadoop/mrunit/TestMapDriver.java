@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -236,6 +238,19 @@ public class TestMapDriver {
             + "Mismatch in value class: expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable, "
             + "Missing expected output (a, 1): Mismatch in value class: "
             + "expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable)");
+    driver.runTest();
+  }
+
+  @Test
+  public void testConf() {
+    final Configuration conf = new Configuration();
+    conf.setStrings("io.serializations", conf.get("io.serializations"),
+        "org.apache.hadoop.io.serializer.JavaSerialization");
+    final MapDriver<Integer, IntWritable, Integer, IntWritable> driver = MapDriver
+        .newMapDriver(new IdentityMapper<Integer, IntWritable>())
+        .withConfiguration(conf);
+    driver.setInput(1, new IntWritable(2));
+    driver.addOutput(1, new IntWritable(2));
     driver.runTest();
   }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Mapper;
@@ -281,8 +282,8 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
             + sb.toString() + ")");
 
         reduceOutputs.addAll(ReduceDriver.newReduceDriver(reducer)
-            .withCounters(getCounters()).withInputKey(inputKey)
-            .withInputValues(inputValues).run());
+            .withCounters(getCounters()).withConfiguration(configuration)
+            .withInputKey(inputKey).withInputValues(inputValues).run());
       }
 
       return reduceOutputs;
@@ -302,7 +303,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
       LOG.debug("Mapping input " + input.toString() + ")");
 
       mapOutputs.addAll(MapDriver.newMapDriver(myMapper).withInput(input)
-          .withCounters(getCounters()).run());
+          .withCounters(getCounters()).withConfiguration(configuration).run());
     }
 
     if (myCombiner != null) {
@@ -322,6 +323,18 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
   @Override
   public String toString() {
     return "MapReduceDriver (" + myMapper + ", " + myReducer + ")";
+  }
+
+  /**
+   * @param configuration
+   *          The configuration object that will given to the mapper and reducer
+   *          associated with the driver
+   * @return this driver object for fluent coding
+   */
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withConfiguration(
+      final Configuration configuration) {
+    setConfiguration(configuration);
+    return this;
   }
 
   /**

@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
@@ -158,6 +160,24 @@ public class TestPipelineMapReduceDriver {
     driver.addInput(new Text("a"), new Text("b"));
     thrown.expectMessage(IllegalStateException.class,
         "No Reducer class was provided for stage 2 of 3");
+    driver.runTest();
+  }
+
+  @Test
+  public void testConf() {
+    final Configuration conf = new Configuration();
+    conf.setStrings("io.serializations", conf.get("io.serializations"),
+        "org.apache.hadoop.io.serializer.JavaSerialization");
+    final PipelineMapReduceDriver<Integer, IntWritable, Integer, IntWritable> driver = PipelineMapReduceDriver
+        .newPipelineMapReduceDriver();
+    driver.addMapReduce(new IdentityMapper<Integer, IntWritable>(),
+        new IdentityReducer<Integer, IntWritable>());
+    driver.addMapReduce(new IdentityMapper<Integer, IntWritable>(),
+        new IdentityReducer<Integer, IntWritable>());
+    driver.withConfiguration(conf);
+
+    driver.addInput(1, new IntWritable(2));
+    driver.addOutput(1, new IntWritable(2));
     driver.runTest();
   }
 }

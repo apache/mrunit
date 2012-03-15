@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
@@ -226,6 +227,18 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   @Override
   public String toString() {
     return "ReduceDriver (" + myReducer + ")";
+  }
+
+  /**
+   * @param configuration
+   *          The configuration object that will given to the reducer associated
+   *          with the driver
+   * @return this object for fluent coding
+   */
+  public ReduceDriver<K1, V1, K2, V2> withConfiguration(
+      final Configuration configuration) {
+    setConfiguration(configuration);
+    return this;
   }
 
   /**

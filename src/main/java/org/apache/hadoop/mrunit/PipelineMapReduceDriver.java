@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Mapper;
@@ -369,6 +370,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
           job.getFirst(), job.getSecond());
 
       mrDriver.setCounters(getCounters());
+      mrDriver.setConfiguration(configuration);
 
       // Add the inputs from the user, or from the previous stage of the
       // pipeline.
@@ -403,6 +405,18 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
       LOG.error(ioe);
       throw new RuntimeException(ioe);
     }
+  }
+
+  /**
+   * @param configuration
+   *          The configuration object that will given to the mappers and
+   *          reducers associated with the driver
+   * @return this driver object for fluent coding
+   */
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withConfiguration(
+      final Configuration configuration) {
+    setConfiguration(configuration);
+    return this;
   }
 
   /**
