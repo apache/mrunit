@@ -223,7 +223,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testConf() {
+  public void testJavaSerialization() {
     final Configuration conf = new Configuration();
     conf.setStrings("io.serializations", conf.get("io.serializations"),
         "org.apache.hadoop.io.serializer.JavaSerialization");
