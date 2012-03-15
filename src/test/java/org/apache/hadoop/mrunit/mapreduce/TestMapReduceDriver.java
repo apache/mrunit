@@ -302,6 +302,41 @@ public class TestMapReduceDriver {
     driver.runTest();
   }
 
+  // Test "combining" with an IdentityReducer. Result should be the same.
+  @Test
+  public void testIdentityCombiner() {
+    driver.withCombiner(new Reducer<Text, LongWritable, Text, LongWritable>())
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+        .withInput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+  }
+
+  // Test "combining" with another LongSumReducer. Result should be the same.
+  @Test
+  public void testLongSumCombiner() {
+    driver.withCombiner(new LongSumReducer<Text>())
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+        .withInput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+  }
+
+  // Test "combining" with another LongSumReducer, and with the Reducer
+  // set to IdentityReducer. Result should be the same.
+  @Test
+  public void testLongSumCombinerAndIdentityReduce() {
+    driver.withCombiner(new LongSumReducer<Text>())
+        .withReducer(new Reducer<Text, LongWritable, Text, LongWritable>())
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+        .withInput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+  }
+
   @Test
   public void testNoMapper() {
     driver = MapReduceDriver.newMapReduceDriver();

@@ -49,12 +49,21 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
 
   private Mapper<K1, V1, K2, V2> myMapper;
   private Reducer<K2, V2, K3, V3> myReducer;
+  private Reducer<K2, V2, K2, V2> myCombiner;
   private Counters counters;
 
   public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
       final Reducer<K2, V2, K3, V3> r) {
     myMapper = m;
     myReducer = r;
+    counters = new Counters();
+  }
+
+  public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
+      final Reducer<K2, V2, K3, V3> r, final Reducer<K2, V2, K2, V2> c) {
+    myMapper = m;
+    myReducer = r;
+    myCombiner = c;
     counters = new Counters();
   }
 
@@ -114,6 +123,36 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    */
   public Reducer<K2, V2, K3, V3> getReducer() {
     return myReducer;
+  }
+
+  /**
+   * Sets the reducer object to use as a combiner for this test
+   * 
+   * @param c
+   *          The combiner object to use
+   */
+  public void setCombiner(final Reducer<K2, V2, K2, V2> c) {
+    myCombiner = c;
+  }
+
+  /**
+   * Identical to setCombiner(), but with fluent programming style
+   * 
+   * @param c
+   *          The Combiner to use
+   * @return this
+   */
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCombiner(
+      final Reducer<K2, V2, K2, V2> c) {
+    setCombiner(c);
+    return this;
+  }
+
+  /**
+   * @return the Combiner object being used for this test
+   */
+  public Reducer<K2, V2, K2, V2> getCombiner() {
+    return myCombiner;
   }
 
   /** @return the counters used in this test */
@@ -221,13 +260,41 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
     return this;
   }
 
+  /**
+   * The private class to manage starting the reduce phase is used for type
+   * genericity reasons. This class is used in the run() method.
+   */
+  private class ReducePhaseRunner<OUTKEY, OUTVAL> {
+    private List<Pair<OUTKEY, OUTVAL>> runReduce(
+        final List<Pair<K2, List<V2>>> inputs,
+        final Reducer<K2, V2, OUTKEY, OUTVAL> reducer) throws IOException {
+
+      final List<Pair<OUTKEY, OUTVAL>> reduceOutputs = new ArrayList<Pair<OUTKEY, OUTVAL>>();
+
+      for (final Pair<K2, List<V2>> input : inputs) {
+        final K2 inputKey = input.getFirst();
+        final List<V2> inputValues = input.getSecond();
+        final StringBuilder sb = new StringBuilder();
+        formatValueList(inputValues, sb);
+        LOG.debug("Reducing input (" + inputKey.toString() + ", "
+            + sb.toString() + ")");
+
+        reduceOutputs.addAll(ReduceDriver.newReduceDriver(reducer)
+            .withCounters(getCounters()).withConfiguration(configuration)
+            .withInputKey(inputKey).withInputValues(inputValues).run());
+      }
+
+      return reduceOutputs;
+    }
+  }
+
   @Override
   public List<Pair<K3, V3>> run() throws IOException {
     if (inputList.size() == 0) {
       LOG.warn("No inputs configured to send to Mapper and Reducer; this is a trivial test.");
     }
 
-    final List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
+    List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
 
     // run map component
     for (final Pair<K1, V1> input : inputList) {
@@ -237,23 +304,18 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
           .withCounters(getCounters()).withConfiguration(configuration).run());
     }
 
-    final List<Pair<K2, List<V2>>> reduceInputs = shuffle(mapOutputs);
-    final List<Pair<K3, V3>> reduceOutputs = new ArrayList<Pair<K3, V3>>();
-
-    for (final Pair<K2, List<V2>> input : reduceInputs) {
-      final K2 inputKey = input.getFirst();
-      final List<V2> inputValues = input.getSecond();
-      final StringBuilder sb = new StringBuilder();
-      formatValueList(inputValues, sb);
-      LOG.debug("Reducing input (" + inputKey.toString() + ", " + sb.toString()
-          + ")");
-
-      reduceOutputs.addAll(ReduceDriver.newReduceDriver(myReducer)
-          .withCounters(getCounters()).withConfiguration(configuration)
-          .withInputKey(inputKey).withInputValues(inputValues).run());
+    if (myCombiner != null) {
+      // User has specified a combiner. Run this and replace the mapper outputs
+      // with the result of the combiner.
+      LOG.debug("Starting combine phase with combiner: " + myCombiner);
+      mapOutputs = new ReducePhaseRunner<K2, V2>().runReduce(
+          shuffle(mapOutputs), myCombiner);
     }
 
-    return reduceOutputs;
+    // Run the reduce phase.
+    LOG.debug("Starting reduce phase with reducer: " + myReducer);
+    return new ReducePhaseRunner<K3, V3>().runReduce(shuffle(mapOutputs),
+        myReducer);
   }
 
   @Override
@@ -305,10 +367,6 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.
    * 
-   * @param mapper
-   *          passed to MapReduceDriver constructor
-   * @param reducer
-   *          passed to MapReduceDriver constructor
    * @return new MapReduceDriver
    */
   public static <K1, V1, K2 extends Comparable, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver() {
@@ -328,5 +386,25 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
   public static <K1, V1, K2 extends Comparable, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver(
       final Mapper<K1, V1, K2, V2> mapper, final Reducer<K2, V2, K3, V3> reducer) {
     return new MapReduceDriver<K1, V1, K2, V2, K3, V3>(mapper, reducer);
+  }
+
+  /**
+   * Returns a new MapReduceDriver without having to specify the generic types
+   * on the right hand side of the object create statement.
+   * 
+   * @param mapper
+   *          passed to MapReduceDriver constructor
+   * @param reducer
+   *          passed to MapReduceDriver constructor
+   * @param combiner
+   *          passed to MapReduceDriver constructor
+   * @return new MapReduceDriver
+   */
+  public static <K1, V1, K2 extends Comparable, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver(
+      final Mapper<K1, V1, K2, V2> mapper,
+      final Reducer<K2, V2, K3, V3> reducer,
+      final Reducer<K2, V2, K2, V2> combiner) {
+    return new MapReduceDriver<K1, V1, K2, V2, K3, V3>(mapper, reducer,
+        combiner);
   }
 }
