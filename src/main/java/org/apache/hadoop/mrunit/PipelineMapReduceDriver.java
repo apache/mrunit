@@ -404,4 +404,27 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
       throw new RuntimeException(ioe);
     }
   }
+
+  /**
+   * Returns a new PipelineMapReduceDriver without having to specify the generic
+   * types on the right hand side of the object create statement.
+   * 
+   * @return new PipelineMapReduceDriver
+   */
+  public static <K1, V1, K2, V2> PipelineMapReduceDriver<K1, V1, K2, V2> newPipelineMapReduceDriver() {
+    return new PipelineMapReduceDriver<K1, V1, K2, V2>();
+  }
+
+  /**
+   * Returns a new PipelineMapReduceDriver without having to specify the generic
+   * types on the right hand side of the object create statement.
+   * 
+   * @param pipeline
+   *          passed to PipelineMapReduceDriver constructor
+   * @return new PipelineMapReduceDriver
+   */
+  public static <K1, V1, K2, V2> PipelineMapReduceDriver<K1, V1, K2, V2> newPipelineMapReduceDriver(
+      final List<Pair<Mapper, Reducer>> pipeline) {
+    return new PipelineMapReduceDriver<K1, V1, K2, V2>(pipeline);
+  }
 }
