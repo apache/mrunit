@@ -28,6 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.MapDriverBase;
+import org.apache.hadoop.mrunit.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.mapreduce.mock.MockMapContextWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
@@ -49,11 +50,11 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   public MapDriver(final Mapper<K1, V1, K2, V2> m) {
     myMapper = m;
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   public MapDriver() {
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   /**
@@ -92,6 +93,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
+    counterWrapper = new CounterWrapper(counters);
   }
 
   /** Sets the counters to use and returns self for fluent style */
@@ -228,6 +230,22 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   public MapDriver<K1, V1, K2, V2> withConfiguration(
       final Configuration configuration) {
     setConfiguration(configuration);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public MapDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
+    super.withCounter(e, expectedValue);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public MapDriver<K1, V1, K2, V2> withCounter(String g, String n, long expectedValue) {
+    super.withCounter(g, n, expectedValue);
     return this;
   }
 

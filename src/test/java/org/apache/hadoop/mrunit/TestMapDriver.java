@@ -28,6 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -176,6 +177,60 @@ public class TestMapDriver {
       output.collect(new Text("a"), new Text("b"));
     }
 
+  }
+
+  @Test
+  public void testWithCounter() {
+    MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>();
+
+    driver
+      .withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), new Text("Hi"))
+      .withOutput(new Text("hie"), new Text("Hi"))
+      .withCounter(MapperWithCounters.Counters.X, 1)
+      .withCounter("category", "name", 1)
+      .runTest();
+  }
+
+  @Test
+  public void testWithFailedCounter() {
+    MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>();
+
+    thrown.expectAssertionErrorMessage("2 Error(s): (" +
+      "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 4, " +
+      "Counter with category category and name name have value 1 instead of expected 4)");
+
+    driver
+      .withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), new Text("Hi"))
+      .withOutput(new Text("hie"), new Text("Hi"))
+      .withCounter(MapperWithCounters.Counters.X, 4)
+      .withCounter("category", "name", 4)
+      .runTest();
+  }
+
+  /**
+   * Simple mapper that have custom counter that is increased each map() call
+   */
+  public static class MapperWithCounters<KI, VI, KO, VO> implements Mapper<KI, VI, KO, VO> {
+    @Override
+    public void map(KI ki, VI vi, OutputCollector<KO, VO> outputCollector, Reporter reporter) throws IOException {
+      outputCollector.collect((KO) ki, (VO) vi);
+      reporter.getCounter(Counters.X).increment(1);
+      reporter.getCounter("category", "name").increment(1);
+    }
+
+    public static enum Counters {
+      X
+    }
+
+    @Override
+    public void close() throws IOException {
+    }
+
+    @Override
+    public void configure(JobConf entries) {
+    }
   }
 
   @Test

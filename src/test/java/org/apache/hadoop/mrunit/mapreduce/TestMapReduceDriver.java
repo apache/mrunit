@@ -354,6 +354,40 @@ public class TestMapReduceDriver {
         "No Reducer class was provided");
     driver.runTest();
   }
+  
+  @Test
+  public void testWithCounter() {
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
+
+    driver
+      .withMapper(new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), new Text("Hi"))
+      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 1)
+      .withCounter("category", "name", 1)
+      .withReducer(new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
+      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 1)
+      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 1)
+      .withCounter("category", "count", 1)
+      .withCounter("category", "sum", 1)
+      .runTest();
+  }
+
+  @Test
+  public void testWithFailedCounter() {
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
+
+    thrown.expectAssertionErrorMessage("2 Error(s): (" +
+      "Counter org.apache.hadoop.mrunit.mapreduce.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 20, " +
+      "Counter with category category and name name have value 1 instead of expected 20)");
+
+    driver
+      .withMapper(new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), new Text("Hi"))
+      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 20)
+      .withReducer(new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
+      .withCounter("category", "name", 20)
+      .runTest();
+  }
 
   @Test
   public void testJavaSerialization() {

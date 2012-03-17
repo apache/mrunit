@@ -28,6 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.ReduceDriverBase;
+import org.apache.hadoop.mrunit.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.mapreduce.mock.MockReduceContextWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
@@ -51,11 +52,11 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   public ReduceDriver(final Reducer<K1, V1, K2, V2> r) {
     myReducer = r;
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   public ReduceDriver() {
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   /**
@@ -98,6 +99,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
+    counterWrapper = new CounterWrapper(ctrs);
   }
 
   /** Sets the counters to use and returns self for fluent style */
@@ -241,6 +243,22 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public ReduceDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
+    super.withCounter(e, expectedValue);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public ReduceDriver<K1, V1, K2, V2> withCounter(String g, String n, long e) {
+    super.withCounter(g, n, e);
+    return this;
+  }
+  
   /**
    * Returns a new ReduceDriver without having to specify the generic types on
    * the right hand side of the object create statement.

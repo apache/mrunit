@@ -28,6 +28,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mrunit.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -64,13 +65,13 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   public PipelineMapReduceDriver(final List<Pair<Mapper, Reducer>> pipeline) {
     this.mapReducePipeline = copyMapReduceList(pipeline);
     this.inputList = new ArrayList<Pair<K1, V1>>();
-    this.counters = new Counters();
+    setCounters(new Counters());
   }
 
   public PipelineMapReduceDriver() {
     this.mapReducePipeline = new ArrayList<Pair<Mapper, Reducer>>();
     this.inputList = new ArrayList<Pair<K1, V1>>();
-    this.counters = new Counters();
+    setCounters(new Counters());
   }
 
   private List<Pair<Mapper, Reducer>> copyMapReduceList(
@@ -97,6 +98,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
+    counterWrapper = new CounterWrapper(ctrs);
   }
 
   /** Sets the counters to use and returns self for fluent style */
@@ -308,6 +310,21 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
+    super.withCounter(e, expectedValue);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(String g, String n, long e) {
+    super.withCounter(g, n, e);
+    return this;
+  }
+	/*
    * Expects an input of the form "key \t val" Forces the Reducer output types
    * to Text.
    * 
@@ -401,6 +418,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     try {
       outputs = run();
       validate(outputs);
+      validate(counterWrapper);
     } catch (final IOException ioe) {
       LOG.error(ioe);
       throw new RuntimeException(ioe);

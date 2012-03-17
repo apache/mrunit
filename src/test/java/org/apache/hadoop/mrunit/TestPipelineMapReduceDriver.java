@@ -164,6 +164,56 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
+  public void testWithCounter() {
+    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+
+    driver.addMapReduce(
+      new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
+      new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>()
+    );
+    driver.addMapReduce(
+      new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
+      new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>()
+    );
+
+    driver
+      .withInput(new Text("hie"), new Text("Hi"))
+      .withOutput(new Text("hie"), new Text("Hi"))
+      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 2)
+      .withCounter("category", "name", 2)
+      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 2)
+      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 2)
+      .withCounter("category", "count", 2)
+      .withCounter("category", "sum", 2)
+      .runTest();
+  }
+
+  @Test
+  public void testWithFailedCounter() {
+    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+
+    driver.addMapReduce(
+      new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
+      new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>()
+    );
+    driver.addMapReduce(
+      new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
+      new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>()
+    );
+
+    thrown.expectAssertionErrorMessage("2 Error(s): (" +
+      "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 2 instead of expected 20, " +
+      "Counter with category category and name name have value 2 instead of expected 20)");
+
+    driver
+      .withInput(new Text("hie"), new Text("Hi"))
+      .withOutput(new Text("hie"), new Text("Hi"))
+      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 20)
+      .withCounter("category", "name", 20)
+      .runTest();
+  }
+
+  @Test
   public void testJavaSerialization() {
     final Configuration conf = new Configuration();
     conf.setStrings("io.serializations", conf.get("io.serializations"),

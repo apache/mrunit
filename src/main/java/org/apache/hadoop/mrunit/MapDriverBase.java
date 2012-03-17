@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mrunit.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -189,6 +190,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
     try {
       outputs = run();
       validate(outputs);
+      validate(counterWrapper);
     } catch (final IOException ioe) {
       LOG.error("IOException in mapper", ioe);
       throw new RuntimeException("IOException in mapper: ", ioe);

@@ -183,6 +183,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
     try {
       reduceOutputs = run();
       validate(reduceOutputs);
+      validate(counterWrapper);
     } catch (final IOException ioe) {
       LOG.error(ioe);
       throw new RuntimeException(ioe);

@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mrunit.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 public abstract class TestDriver<K1, V1, K2, V2> {
@@ -35,10 +36,17 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   protected List<Pair<K2, V2>> expectedOutputs;
 
+  protected List<Pair<Enum, Long>> expectedEnumCounters;
+  protected List<Pair<Pair<String, String>, Long>> expectedStringCounters;
+  
   protected Configuration configuration;
+
+  protected CounterWrapper counterWrapper;
 
   public TestDriver() {
     expectedOutputs = new ArrayList<Pair<K2, V2>>();
+    expectedEnumCounters = new ArrayList<Pair<Enum, Long>>();
+    expectedStringCounters = new ArrayList<Pair<Pair<String, String>, Long>>();
     configuration = new Configuration();
   }
 
@@ -54,6 +62,54 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    */
   public void resetOutput() {
     expectedOutputs.clear();
+  }
+
+  /**
+   * @return expected counters from this driver
+   */
+  public List<Pair<Enum, Long>> getExpectedEnumCounters() {
+    return expectedEnumCounters;
+  }
+
+  /**
+   * @return expected counters from this driver
+   */
+  public List<Pair<Pair<String, String>, Long>> getExpectedStringCounters() {
+    return expectedStringCounters;
+  }
+  
+  /**
+   * Clears the list of expected counters from this driver
+   */
+  public void resetExpectedCounters() {
+    expectedEnumCounters.clear();
+    expectedStringCounters.clear();
+  }
+
+  /**
+   * Register expected enumeration based counter value
+   *
+   * @param e Enumeration based counter
+   * @param expectedValue Expected value
+   * @return
+   */
+  public TestDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
+    expectedEnumCounters.add(new Pair<Enum, Long>(e, expectedValue));
+    return this;
+  }
+
+  /**
+   * Register expected name based counter value
+   *
+   * @param group Counter group
+   * @param name Counter name
+   * @param expectedValue Expected value
+   * @return
+   */
+  public TestDriver<K1, V1, K2, V2> withCounter(String group, String name, long expectedValue) {
+    expectedStringCounters.add(new Pair<Pair<String, String>, Long>(
+      new Pair<String, String>(group, name), expectedValue));
+    return this;
   }
 
   /**
@@ -217,6 +273,60 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       formatValueList(errors, buffer);
       fail(buffer.toString());
     }
+  }
+
+  /**
+   * Check that passed counter do contain all expected counters with proper
+   * values.
+   *
+   * @param counterWrapper
+   */
+  protected void validate(CounterWrapper counterWrapper) {
+    if(expectedEnumCounters.size() == 0 && expectedStringCounters.size() == 0) {
+      return;
+    }
+    
+    boolean success = true;
+    List<String> errors = new ArrayList<String>();
+  
+    // Firstly check enumeration based counters
+    for(Pair<Enum, Long> expected : expectedEnumCounters) {
+      long actualValue = counterWrapper.findCounterValue(expected.getFirst());
+      
+      if(actualValue != expected.getSecond()) {
+        String msg = "Counter " + expected.getFirst().getDeclaringClass().getCanonicalName()
+          + "." +  expected.getFirst().toString() + " have value "
+          + actualValue + " instead of expected " + expected.getSecond();
+        LOG.error(msg);
+        errors.add(msg);
+
+        success = false;
+      }
+    }
+    
+    // Second string based counters
+    for(Pair<Pair<String, String>, Long> expected : expectedStringCounters) {
+      Pair<String, String> counter = expected.getFirst();
+
+      long actualValue = counterWrapper.findCounterValue(counter.getFirst(), counter.getSecond());
+      
+      if(actualValue != expected.getSecond()) {
+        String msg = "Counter with category " + counter.getFirst() + " and name "
+          + counter.getSecond() + " have value " + actualValue
+          + " instead of expected " + expected.getSecond();
+        LOG.error(msg);
+        errors.add(msg);
+
+        success = false;
+      }
+    }
+    
+    if (!success) {
+      StringBuilder buffer = new StringBuilder();
+      buffer.append(errors.size()).append(" Error(s): ");
+      formatValueList(errors, buffer);
+      fail(buffer.toString());
+    }  
   }
 
   /**

@@ -26,6 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mrunit.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.mock.MockOutputCollector;
 import org.apache.hadoop.mrunit.mock.MockReporter;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -51,11 +52,11 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   public ReduceDriver(final Reducer<K1, V1, K2, V2> r) {
     myReducer = r;
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   public ReduceDriver() {
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   /** @return the counters used in this test */
@@ -71,6 +72,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
+    counterWrapper = new CounterWrapper(ctrs);
   }
 
   /** Sets the counters to use and returns self for fluent style */
@@ -201,6 +203,22 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   @Deprecated
   public ReduceDriver<K1, V1, K2, V2> withOutputFromString(final String output) {
     addOutputFromString(output);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public ReduceDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
+    super.withCounter(e, expectedValue);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public ReduceDriver<K1, V1, K2, V2> withCounter(String g, String n, long e) {
+    super.withCounter(g, n, e);
     return this;
   }
 

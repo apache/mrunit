@@ -22,11 +22,13 @@ import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
@@ -231,6 +233,76 @@ public class TestReduceDriver {
         .newReduceDriver(new IdentityReducer<Integer, Integer>())
         .withConfiguration(conf);
     driver.withInputKey(1).withInputValue(2).withOutput(1, 2).runTest();
+  }
+
+  @Test
+  public void testWithCounter() {
+    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>();
+
+    LinkedList<Text> values = new LinkedList<Text>();
+    values.add(new Text("a"));
+    values.add(new Text("b"));
+
+    driver
+      .withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), values)
+      .withOutput(new Text("hie"), new Text("a"))
+      .withOutput(new Text("hie"), new Text("b"))
+      .withCounter(ReducerWithCounters.Counters.COUNT, 1)
+      .withCounter(ReducerWithCounters.Counters.SUM, 2)
+      .withCounter("category", "count", 1)
+      .withCounter("category", "sum", 2)
+      .runTest();
+  }
+
+  @Test
+  public void testWithFailedEnumCounter() {
+    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>();
+
+    LinkedList<Text> inputValues = new LinkedList<Text>();
+    inputValues.add(new Text("Hi"));
+
+    thrown.expectAssertionErrorMessage("2 Error(s): (" +
+      "Counter org.apache.hadoop.mrunit.TestReduceDriver.ReducerWithCounters.Counters.SUM have value 1 instead of expected 4, " +
+      "Counter with category category and name sum have value 1 instead of expected 4)");
+
+    driver
+      .withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), inputValues)
+      .withOutput(new Text("hie"), new Text("Hi"))
+      .withCounter(ReducerWithCounters.Counters.SUM, 4)
+      .withCounter("category", "sum", 4)
+      .runTest();
+  }
+
+  /**
+   * Simple reducer that have custom counters that are increased each map() call
+   */
+  public static class ReducerWithCounters<KI, VI, KO, VO> implements Reducer<KI, VI, KO, VO> {
+    public static enum Counters {
+      COUNT,
+      SUM,
+    }
+
+    @Override
+    public void reduce(KI ki, Iterator<VI> viIterator, OutputCollector<KO, VO> outputCollector, Reporter reporter) throws IOException {
+      reporter.getCounter(Counters.COUNT).increment(1);
+      reporter.getCounter("category", "count").increment(1);
+      while(viIterator.hasNext()) {
+        VI vi = viIterator.next();
+        reporter.getCounter(Counters.SUM).increment(1);
+        reporter.getCounter("category", "sum").increment(1);
+        outputCollector.collect((KO)ki, (VO)vi);
+      }
+    }
+
+    @Override
+    public void close() throws IOException {
+    }
+
+    @Override
+    public void configure(JobConf entries) {
+    }
   }
 
 }

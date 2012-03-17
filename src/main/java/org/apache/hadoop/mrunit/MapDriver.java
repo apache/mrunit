@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mrunit.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.mock.MockOutputCollector;
 import org.apache.hadoop.mrunit.mock.MockReporter;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -50,11 +51,11 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   public MapDriver(final Mapper<K1, V1, K2, V2> m) {
     myMapper = m;
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   public MapDriver() {
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   /** @return the counters used in this test */
@@ -70,6 +71,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
+    counterWrapper = new CounterWrapper(counters);
   }
 
   /** Sets the counters to use and returns self for fluent style */
@@ -191,6 +193,22 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   @Deprecated
   public MapDriver<K1, V1, K2, V2> withOutputFromString(final String output) {
     addOutputFromString(output);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public MapDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
+    super.withCounter(e, expectedValue);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public MapDriver<K1, V1, K2, V2> withCounter(String g, String n, long expectedValue) {
+    super.withCounter(g, n, expectedValue);
     return this;
   }
 

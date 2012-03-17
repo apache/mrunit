@@ -28,6 +28,7 @@ import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mrunit.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -58,7 +59,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
       final Reducer<K2, V2, K3, V3> r) {
     myMapper = m;
     myReducer = r;
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
@@ -66,11 +67,11 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
     myMapper = m;
     myReducer = r;
     myCombiner = c;
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   public MapReduceDriver() {
-    counters = new Counters();
+    setCounters(new Counters());
   }
 
   /** @return the counters used in this test */
@@ -86,6 +87,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
+    counterWrapper = new CounterWrapper(counters);
   }
 
   /** Sets the counters to use and returns self for fluent style */
@@ -365,6 +367,22 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
     return this;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(Enum e, long expectedValue) {
+    super.withCounter(e, expectedValue);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(String g, String n, long e) {
+    super.withCounter(g, n, e);
+    return this;
+  }
+  
   /**
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.

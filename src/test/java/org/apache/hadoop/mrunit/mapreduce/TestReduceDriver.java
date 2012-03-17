@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -226,6 +227,40 @@ public class TestReduceDriver {
     assertEquals(reducer.setupConfiguration.get("TestKey"), "TestValue");
   }
 
+  @Test
+  public void testWithCounter() {
+    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>();
+
+    LinkedList<Text> values = new LinkedList<Text>();
+    values.add(new Text("a"));
+    values.add(new Text("b"));
+    
+    driver
+      .withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), values)
+      .withCounter(ReducerWithCounters.Counters.COUNT, 1)
+      .withCounter(ReducerWithCounters.Counters.SUM, 2)
+      .withCounter("category", "count", 1)
+      .withCounter("category", "sum", 2)
+      .runTest();
+  }
+
+  @Test
+  public void testWithFailedCounter() {
+    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>();
+
+    thrown.expectAssertionErrorMessage("2 Error(s): (" +
+      "Counter org.apache.hadoop.mrunit.mapreduce.TestReduceDriver.ReducerWithCounters.Counters.SUM have value 0 instead of expected 4, " +
+      "Counter with category category and name sum have value 0 instead of expected 4)");
+
+    driver
+      .withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), new LinkedList<Text>())
+      .withCounter(ReducerWithCounters.Counters.SUM, 4)
+      .withCounter("category", "sum", 4)
+      .runTest();
+  }
+
   /**
    * Test reducer which stores the configuration object it was passed during its
    * setup method
@@ -247,6 +282,26 @@ public class TestReduceDriver {
     thrown.expectMessage(IllegalStateException.class,
         "No Reducer class was provided");
     driver.runTest();
+  }
+  
+  /**
+   * Simple reducer that have custom counters that are increased each map() call
+   */
+  public static class ReducerWithCounters<KI, VI, KO, VO> extends Reducer<KI, VI, KO, VO> {
+    public static enum Counters {
+      COUNT,
+      SUM,
+    }
+  
+    @Override
+    protected void reduce(KI key, Iterable<VI> values, Context context) throws IOException, InterruptedException {
+      context.getCounter(Counters.COUNT).increment(1);
+      context.getCounter("category", "count").increment(1);
+      for(VI vi : values) {
+        context.getCounter(Counters.SUM).increment(1);
+        context.getCounter("category", "sum").increment(1);
+      }
+    }
   }
 
   @Test

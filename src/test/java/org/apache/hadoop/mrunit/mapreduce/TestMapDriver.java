@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -157,6 +158,36 @@ public class TestMapDriver {
   }
 
   @Test
+  public void testWithCounter() {
+    MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>();
+
+    driver
+      .withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), new Text("Hi"))
+      .withOutput(new Text("hie"), new Text("Hi"))
+      .withCounter(MapperWithCounters.Counters.X, 1)
+      .withCounter("category", "name", 1)
+      .runTest();
+  }
+
+  @Test
+  public void testWithFailedCounter() {
+    MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>();
+
+    thrown.expectAssertionErrorMessage("2 Error(s): (" +
+      "Counter org.apache.hadoop.mrunit.mapreduce.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 4, " +
+      "Counter with category category and name name have value 1 instead of expected 4)");
+
+    driver
+      .withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+      .withInput(new Text("hie"), new Text("Hi"))
+      .withOutput(new Text("hie"), new Text("Hi"))
+      .withCounter(MapperWithCounters.Counters.X, 4)
+      .withCounter("category", "name", 4)
+      .runTest();
+  }
+
+  @Test
   public void testConfiguration() {
     final Configuration conf = new Configuration();
     conf.set("TestKey", "TestValue");
@@ -190,6 +221,22 @@ public class TestMapDriver {
     thrown.expectMessage(IllegalStateException.class,
         "No Mapper class was provided");
     driver.runTest();
+  }
+
+  /**
+   * Simple mapper that have custom counter that is increased each map() call
+   */
+  public static class MapperWithCounters<KI, VI, KO, VO> extends Mapper<KI, VI, KO, VO> {
+    public static enum Counters {
+      X
+    }
+
+    @Override
+    protected void map(KI key, VI value, Context context) throws IOException, InterruptedException {
+      context.getCounter(Counters.X).increment(1);
+      context.getCounter("category", "name").increment(1);
+      super.map(key, value, context);
+    }
   }
 
   @Test

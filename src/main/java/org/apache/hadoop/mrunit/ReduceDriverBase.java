@@ -206,6 +206,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
     try {
       outputs = run();
       validate(outputs);
+      validate(counterWrapper);
     } catch (final IOException ioe) {
       LOG.error("IOException in reducer", ioe);
       throw new RuntimeException("IOException in reducer: ", ioe);
