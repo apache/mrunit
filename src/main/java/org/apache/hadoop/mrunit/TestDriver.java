@@ -38,7 +38,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   protected List<Pair<Enum, Long>> expectedEnumCounters;
   protected List<Pair<Pair<String, String>, Long>> expectedStringCounters;
-  
+
   protected Configuration configuration;
 
   protected CounterWrapper counterWrapper;
@@ -77,7 +77,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   public List<Pair<Pair<String, String>, Long>> getExpectedStringCounters() {
     return expectedStringCounters;
   }
-  
+
   /**
    * Clears the list of expected counters from this driver
    */
@@ -88,9 +88,11 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * Register expected enumeration based counter value
-   *
-   * @param e Enumeration based counter
-   * @param expectedValue Expected value
+   * 
+   * @param e
+   *          Enumeration based counter
+   * @param expectedValue
+   *          Expected value
    * @return
    */
   public TestDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
@@ -100,15 +102,19 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * Register expected name based counter value
-   *
-   * @param group Counter group
-   * @param name Counter name
-   * @param expectedValue Expected value
+   * 
+   * @param group
+   *          Counter group
+   * @param name
+   *          Counter name
+   * @param expectedValue
+   *          Expected value
    * @return
    */
-  public TestDriver<K1, V1, K2, V2> withCounter(String group, String name, long expectedValue) {
+  public TestDriver<K1, V1, K2, V2> withCounter(String group, String name,
+      long expectedValue) {
     expectedStringCounters.add(new Pair<Pair<String, String>, Long>(
-      new Pair<String, String>(group, name), expectedValue));
+        new Pair<String, String>(group, name), expectedValue));
     return this;
   }
 
@@ -278,55 +284,53 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   /**
    * Check that passed counter do contain all expected counters with proper
    * values.
-   *
+   * 
    * @param counterWrapper
    */
   protected void validate(CounterWrapper counterWrapper) {
-    if(expectedEnumCounters.size() == 0 && expectedStringCounters.size() == 0) {
-      return;
-    }
-    
     boolean success = true;
     List<String> errors = new ArrayList<String>();
-  
+
     // Firstly check enumeration based counters
-    for(Pair<Enum, Long> expected : expectedEnumCounters) {
+    for (Pair<Enum, Long> expected : expectedEnumCounters) {
       long actualValue = counterWrapper.findCounterValue(expected.getFirst());
-      
-      if(actualValue != expected.getSecond()) {
-        String msg = "Counter " + expected.getFirst().getDeclaringClass().getCanonicalName()
-          + "." +  expected.getFirst().toString() + " have value "
-          + actualValue + " instead of expected " + expected.getSecond();
+
+      if (actualValue != expected.getSecond()) {
+        String msg = "Counter "
+            + expected.getFirst().getDeclaringClass().getCanonicalName() + "."
+            + expected.getFirst().toString() + " have value " + actualValue
+            + " instead of expected " + expected.getSecond();
         LOG.error(msg);
         errors.add(msg);
 
         success = false;
       }
     }
-    
+
     // Second string based counters
-    for(Pair<Pair<String, String>, Long> expected : expectedStringCounters) {
+    for (Pair<Pair<String, String>, Long> expected : expectedStringCounters) {
       Pair<String, String> counter = expected.getFirst();
 
-      long actualValue = counterWrapper.findCounterValue(counter.getFirst(), counter.getSecond());
-      
-      if(actualValue != expected.getSecond()) {
-        String msg = "Counter with category " + counter.getFirst() + " and name "
-          + counter.getSecond() + " have value " + actualValue
-          + " instead of expected " + expected.getSecond();
+      long actualValue = counterWrapper.findCounterValue(counter.getFirst(),
+          counter.getSecond());
+
+      if (actualValue != expected.getSecond()) {
+        String msg = "Counter with category " + counter.getFirst()
+            + " and name " + counter.getSecond() + " have value " + actualValue
+            + " instead of expected " + expected.getSecond();
         LOG.error(msg);
         errors.add(msg);
 
         success = false;
       }
     }
-    
+
     if (!success) {
       StringBuilder buffer = new StringBuilder();
       buffer.append(errors.size()).append(" Error(s): ");
       formatValueList(errors, buffer);
       fail(buffer.toString());
-    }  
+    }
   }
 
   /**
