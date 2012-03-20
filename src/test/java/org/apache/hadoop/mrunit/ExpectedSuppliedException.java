@@ -19,14 +19,14 @@ package org.apache.hadoop.mrunit;
 
 import org.hamcrest.Matcher;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.MethodRule;
-import org.junit.runners.model.FrameworkMethod;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
  * Delegating class to add convenience methods to {@link ExpectedException}
  */
-public class ExpectedSuppliedException implements MethodRule {
+public class ExpectedSuppliedException implements TestRule {
 
   private final ExpectedException expectedException = ExpectedException.none();
 
@@ -38,9 +38,8 @@ public class ExpectedSuppliedException implements MethodRule {
   }
 
   @Override
-  public Statement apply(final Statement base, final FrameworkMethod method,
-      final Object target) {
-    return expectedException.apply(base, method, target);
+  public Statement apply(final Statement base, final Description description) {
+    return expectedException.apply(base, description);
   }
 
   public void expect(final Matcher<?> matcher) {
