@@ -117,15 +117,10 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testEmptyInput() {
+  public void testNoInput() {
+    driver = MapReduceDriver.newMapReduceDriver();
+    thrown.expectMessage(IllegalStateException.class, "No input was provided");
     driver.runTest();
-  }
-
-  @Test
-  public void testEmptyInputWithOutputFails() {
-    thrown
-        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 52) at position 0.)");
-    driver.withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
   }
 
   @Test

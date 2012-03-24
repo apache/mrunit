@@ -118,15 +118,10 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testEmptyInput() {
+  public void testNoInput() {
+    driver = MapReduceDriver.newMapReduceDriver();
+    thrown.expectMessage(IllegalStateException.class, "No input was provided");
     driver.runTest();
-  }
-
-  @Test
-  public void testEmptyInputWithOutputFails() {
-    thrown
-        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 52) at position 0.)");
-    driver.withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
   }
 
   @Test
@@ -354,22 +349,23 @@ public class TestMapReduceDriver {
         "No Reducer class was provided");
     driver.runTest();
   }
-  
+
   @Test
   public void testWithCounter() {
     MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
 
     driver
-      .withMapper(new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
-      .withInput(new Text("hie"), new Text("Hi"))
-      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 1)
-      .withCounter("category", "name", 1)
-      .withReducer(new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
-      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 1)
-      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 1)
-      .withCounter("category", "count", 1)
-      .withCounter("category", "sum", 1)
-      .runTest();
+        .withMapper(
+            new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 1)
+        .withCounter("category", "name", 1)
+        .withReducer(
+            new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 1)
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 1)
+        .withCounter("category", "count", 1).withCounter("category", "sum", 1)
+        .runTest();
   }
 
   @Test
@@ -381,12 +377,13 @@ public class TestMapReduceDriver {
       "Counter with category category and name name have value 1 instead of expected 20)");
 
     driver
-      .withMapper(new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
-      .withInput(new Text("hie"), new Text("Hi"))
-      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 20)
-      .withReducer(new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
-      .withCounter("category", "name", 20)
-      .runTest();
+        .withMapper(
+            new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 20)
+        .withReducer(
+            new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
+        .withCounter("category", "name", 20).runTest();
   }
 
   @Test

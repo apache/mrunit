@@ -77,19 +77,13 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun1() {
-    driver.withInputKey(new Text("foo"))
-        .withOutput(new Text("foo"), new LongWritable(0)).runTest();
-  }
-
-  @Test
-  public void testTestRun2() {
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest();
   }
 
   @Test
-  public void testTestRun3() {
+  public void testTestRun2() {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, 10), "
             + "Missing expected output (bar, 10) at position 0.)");
@@ -100,7 +94,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun4() {
+  public void testTestRun3() {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, 10), "
             + "Missing expected output (foo, 12) at position 0.)");
@@ -110,7 +104,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun5() {
+  public void testTestRun4() {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, 10), "
             + "Missing expected output (foo, 4) at position 0.)");
@@ -120,7 +114,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun6() {
+  public void testTestRun5() {
     thrown
         .expectAssertionErrorMessage("3 Error(s): (Received unexpected output (foo, 10), "
             + "Missing expected output (foo, 4) at position 0., "
@@ -132,7 +126,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun7() {
+  public void testTestRun6() {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 10) at position 1.)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
@@ -142,7 +136,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun8() {
+  public void testTestRun7() {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Matched expected output (foo, 10) but at incorrect position 0 (expected position 1), "
             + "Missing expected output (bar, 10) at position 0.)");
@@ -153,7 +147,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun9() {
+  public void testTestRun8() {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10) at position 1.)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
@@ -163,18 +157,9 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testEmptyInput() {
-    // (null, <empty>) will be forcibly fed as input
-    // since we use LongSumReducer, expect (null, 0) out.
-    driver.withOutput(null, new LongWritable(OUT_EMPTY)).runTest();
-  }
-
-  @Test
-  public void testEmptyInput2() {
-    // because a null key with zero inputs will be fed as input
-    // to this reducer, do not accept no outputs.
-    thrown
-        .expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., Received unexpected output (null, 0))");
+  public void testNoInput() {
+    driver = ReduceDriver.newReduceDriver();
+    thrown.expectMessage(IllegalStateException.class, "No input was provided");
     driver.runTest();
   }
 
@@ -234,15 +219,13 @@ public class TestReduceDriver {
     LinkedList<Text> values = new LinkedList<Text>();
     values.add(new Text("a"));
     values.add(new Text("b"));
-    
-    driver
-      .withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
-      .withInput(new Text("hie"), values)
-      .withCounter(ReducerWithCounters.Counters.COUNT, 1)
-      .withCounter(ReducerWithCounters.Counters.SUM, 2)
-      .withCounter("category", "count", 1)
-      .withCounter("category", "sum", 2)
-      .runTest();
+
+    driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), values)
+        .withCounter(ReducerWithCounters.Counters.COUNT, 1)
+        .withCounter(ReducerWithCounters.Counters.SUM, 2)
+        .withCounter("category", "count", 1).withCounter("category", "sum", 2)
+        .runTest();
   }
 
   @Test
@@ -250,15 +233,13 @@ public class TestReduceDriver {
     ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>();
 
     thrown.expectAssertionErrorMessage("2 Error(s): (" +
-      "Counter org.apache.hadoop.mrunit.mapreduce.TestReduceDriver.ReducerWithCounters.Counters.SUM have value 0 instead of expected 4, " +
-      "Counter with category category and name sum have value 0 instead of expected 4)");
+      "Counter org.apache.hadoop.mrunit.mapreduce.TestReduceDriver.ReducerWithCounters.Counters.SUM have value 1 instead of expected 4, " +
+      "Counter with category category and name sum have value 1 instead of expected 4)");
 
-    driver
-      .withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
-      .withInput(new Text("hie"), new LinkedList<Text>())
-      .withCounter(ReducerWithCounters.Counters.SUM, 4)
-      .withCounter("category", "sum", 4)
-      .runTest();
+    driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+        .withInputKey(new Text("hie")).withInputValue(new Text(""))
+        .withCounter(ReducerWithCounters.Counters.SUM, 4)
+        .withCounter("category", "sum", 4).runTest();
   }
 
   /**
@@ -281,23 +262,23 @@ public class TestReduceDriver {
     driver = ReduceDriver.newReduceDriver();
     thrown.expectMessage(IllegalStateException.class,
         "No Reducer class was provided");
-    driver.runTest();
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .runTest();
   }
-  
+
   /**
    * Simple reducer that have custom counters that are increased each map() call
    */
   public static class ReducerWithCounters<KI, VI, KO, VO> extends Reducer<KI, VI, KO, VO> {
     public static enum Counters {
-      COUNT,
-      SUM,
+      COUNT, SUM
     }
-  
+
     @Override
     protected void reduce(KI key, Iterable<VI> values, Context context) throws IOException, InterruptedException {
       context.getCounter(Counters.COUNT).increment(1);
       context.getCounter("category", "count").increment(1);
-      for(VI vi : values) {
+      for (VI vi : values) {
         context.getCounter(Counters.SUM).increment(1);
         context.getCounter("category", "sum").increment(1);
       }

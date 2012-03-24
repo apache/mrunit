@@ -324,12 +324,14 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     super.withCounter(g, n, e);
     return this;
   }
-	/*
+
+  /**
    * Expects an input of the form "key \t val" Forces the Reducer output types
    * to Text.
    * 
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
+   * 
    * @deprecated No replacement due to lack of type safety and incompatibility
    *             with non Text Writables
    */
@@ -372,12 +374,11 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     // inputs starts with the user-provided inputs.
     List<Pair<K1, V1>> inputs = this.inputList;
 
-    if (mapReducePipeline.size() == 0) {
-      LOG.warn("No Mapper or Reducer instances in pipeline; this is a trivial test.");
+    if (inputs.isEmpty()) {
+      throw new IllegalStateException("No input was provided");
     }
-
-    if (inputs.size() == 0) {
-      LOG.warn("No inputs configured to send to MapReduce pipeline; this is a trivial test.");
+    if (mapReducePipeline.isEmpty()) {
+      throw new IllegalStateException("No Mappers or Reducers in pipeline");
     }
 
     int stageNum = 1;

@@ -142,20 +142,9 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testEmptyInput() {
-    // MapDriver will forcibly map (null, null) as undefined input;
-    // identity mapper expects (null, null) back.
-    driver.withOutput(null, null).runTest();
-  }
-
-  @Test
-  public void testEmptyInput2() {
-    // it is an error to expect no output because we expect
-    // the mapper to be fed (null, null) as an input if the
-    // user doesn't set any input.
-    thrown
-        .expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., "
-            + "Received unexpected output (null, null))");
+  public void testNoInput() {
+    driver = MapDriver.newMapDriver();
+    thrown.expectMessage(IllegalStateException.class, "No input was provided");
     driver.runTest();
   }
 
@@ -164,7 +153,7 @@ public class TestMapDriver {
     driver = MapDriver.newMapDriver();
     thrown.expectMessage(IllegalStateException.class,
         "No Mapper class was provided");
-    driver.runTest();
+    driver.withInput(new Text("foo"), new Text("bar")).runTest();
   }
 
   private static class NonTextWritableInput extends MapReduceBase implements
@@ -183,13 +172,11 @@ public class TestMapDriver {
   public void testWithCounter() {
     MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>();
 
-    driver
-      .withMapper(new MapperWithCounters<Text, Text, Text, Text>())
-      .withInput(new Text("hie"), new Text("Hi"))
-      .withOutput(new Text("hie"), new Text("Hi"))
-      .withCounter(MapperWithCounters.Counters.X, 1)
-      .withCounter("category", "name", 1)
-      .runTest();
+    driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withCounter(MapperWithCounters.Counters.X, 1)
+        .withCounter("category", "name", 1).runTest();
   }
 
   @Test
@@ -200,13 +187,11 @@ public class TestMapDriver {
       "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 4, " +
       "Counter with category category and name name have value 1 instead of expected 4)");
 
-    driver
-      .withMapper(new MapperWithCounters<Text, Text, Text, Text>())
-      .withInput(new Text("hie"), new Text("Hi"))
-      .withOutput(new Text("hie"), new Text("Hi"))
-      .withCounter(MapperWithCounters.Counters.X, 4)
-      .withCounter("category", "name", 4)
-      .runTest();
+    driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withCounter(MapperWithCounters.Counters.X, 4)
+        .withCounter("category", "name", 4).runTest();
   }
 
   /**

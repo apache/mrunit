@@ -294,8 +294,8 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
 
   @Override
   public List<Pair<K3, V3>> run() throws IOException {
-    if (inputList.size() == 0) {
-      LOG.warn("No inputs configured to send to Mapper and Reducer; this is a trivial test.");
+    if (inputList.isEmpty()) {
+      throw new IllegalStateException("No input was provided");
     }
 
     List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
@@ -382,7 +382,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
     super.withCounter(g, n, e);
     return this;
   }
-  
+
   /**
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.

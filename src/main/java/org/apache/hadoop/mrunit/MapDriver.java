@@ -214,6 +214,9 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
+    if (inputKey == null || inputVal == null) {
+      throw new IllegalStateException("No input was provided");
+    }
     if (myMapper == null) {
       throw new IllegalStateException("No Mapper class was provided");
     }

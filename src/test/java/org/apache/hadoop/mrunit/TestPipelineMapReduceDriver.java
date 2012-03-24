@@ -17,12 +17,7 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
@@ -31,7 +26,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
-import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -49,34 +43,18 @@ public class TestPipelineMapReduceDriver {
       .none();
 
   @Test
-  public void testFullyEmpty() throws IOException {
-    // If no mappers or reducers are configured, then it should
-    // just return its inputs. If there are no inputs, this
-    // should be an empty list of outputs.
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
-    final List<Pair<Text, Text>> out = driver.run();
-    assertEquals("Expected empty output list", out.size(), 0);
-  }
-
-  @Test
   public void testEmptyPipeline() throws IOException {
-    // If no mappers or reducers are configured, then it should
-    // just return its inputs.
+    thrown.expectMessage(IllegalStateException.class,
+        "No Mappers or Reducers in pipeline");
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
-    driver.addInput(new Text("foo"), new Text("bar"));
-    final List<Pair<Text, Text>> out = driver.run();
-
-    final List<Pair<Text, Text>> expected = new ArrayList<Pair<Text, Text>>();
-    expected.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
-    assertListEquals(expected, out);
+    driver.withInput(new Text("foo"), new Text("bar")).runTest();
   }
 
   @Test
-  public void testEmptyPipelineWithRunTest() {
-    // Like testEmptyPipeline, but call runTest.
+  public void testNoInput() {
+    thrown.expectMessage(IllegalStateException.class, "No input was provided");
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
-    driver.withInput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("foo"), new Text("bar")).runTest();
+    driver.runTest();
   }
 
   @Test
@@ -168,24 +146,20 @@ public class TestPipelineMapReduceDriver {
     PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
 
     driver.addMapReduce(
-      new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
-      new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>()
-    );
+        new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
+        new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>());
     driver.addMapReduce(
-      new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
-      new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>()
-    );
+        new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
+        new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>());
 
-    driver
-      .withInput(new Text("hie"), new Text("Hi"))
-      .withOutput(new Text("hie"), new Text("Hi"))
-      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 2)
-      .withCounter("category", "name", 2)
-      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 2)
-      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 2)
-      .withCounter("category", "count", 2)
-      .withCounter("category", "sum", 2)
-      .runTest();
+    driver.withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 2)
+        .withCounter("category", "name", 2)
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 2)
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 2)
+        .withCounter("category", "count", 2).withCounter("category", "sum", 2)
+        .runTest();
   }
 
   @Test
@@ -193,24 +167,20 @@ public class TestPipelineMapReduceDriver {
     PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
 
     driver.addMapReduce(
-      new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
-      new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>()
-    );
+        new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
+        new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>());
     driver.addMapReduce(
-      new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
-      new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>()
-    );
+        new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
+        new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>());
 
     thrown.expectAssertionErrorMessage("2 Error(s): (" +
       "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 2 instead of expected 20, " +
       "Counter with category category and name name have value 2 instead of expected 20)");
 
-    driver
-      .withInput(new Text("hie"), new Text("Hi"))
-      .withOutput(new Text("hie"), new Text("Hi"))
-      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 20)
-      .withCounter("category", "name", 20)
-      .runTest();
+    driver.withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 20)
+        .withCounter("category", "name", 20).runTest();
   }
 
   @Test

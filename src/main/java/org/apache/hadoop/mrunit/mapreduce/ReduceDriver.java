@@ -208,6 +208,9 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
+    if (inputKey == null || getInputValues().isEmpty()) {
+      throw new IllegalStateException("No input was provided");
+    }
     if (myReducer == null) {
       throw new IllegalStateException("No Reducer class was provided");
     }
@@ -258,7 +261,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     super.withCounter(g, n, e);
     return this;
   }
-  
+
   /**
    * Returns a new ReduceDriver without having to specify the generic types on
    * the right hand side of the object create statement.

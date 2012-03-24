@@ -57,7 +57,7 @@ public class TestConfigureClose {
     };
     final MapDriver<Text, Text, Text, Text> driver = MapDriver
         .newMapDriver(mapper);
-    driver.runTest();
+    driver.withInput(new Text("foo"), new Text("bar")).runTest();
     assertTrue(configureWasCalled.get());
     assertTrue(closeWasCalled.get());
   }
@@ -85,7 +85,8 @@ public class TestConfigureClose {
     };
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
         .newReduceDriver(reducer);
-    driver.runTest();
+    driver.withInputKey(new Text("foo")).withInputValue(new Text("bar"))
+        .runTest();
     assertTrue(configureWasCalled.get());
     assertTrue(closeWasCalled.get());
   }
