@@ -17,10 +17,15 @@
  */
 package org.apache.hadoop.mrunit.types;
 
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
+
 import java.util.Comparator;
 
 /**
- * A very basic pair type.
+ * A very basic pair type that does not allow null values.
+ * 
+ * @param <S>
+ * @param <T>
  */
 @SuppressWarnings("unchecked")
 public class Pair<S, T> implements Comparable<Pair<S, T>> {
@@ -29,8 +34,8 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
   private final T second;
 
   public Pair(final S car, final T cdr) {
-    first = car;
-    second = cdr;
+    first = returnNonNull(car);
+    second = returnNonNull(cdr);
   }
 
   public S getFirst() {
@@ -43,54 +48,25 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
 
   @Override
   public boolean equals(final Object o) {
-    if (null == o) {
-      return false;
-    } else if (o instanceof Pair) {
+    if (o instanceof Pair) {
       final Pair<S, T> p = (Pair<S, T>) o;
-      if (first == null && second == null) {
-        return p.first == null && p.second == null;
-      } else if (first == null) {
-        return p.first == null && second.equals(p.second);
-      } else if (second == null) {
-        return p.second == null && first.equals(p.first);
-      } else {
-        return first.equals(p.first) && second.equals(p.second);
-      }
-    } else {
-      return false;
+      return first.equals(p.first) && second.equals(p.second);
     }
+    return false;
   }
 
   @Override
   public int hashCode() {
-    int code = 0;
-
-    if (null != first) {
-      code += first.hashCode();
-    }
-
-    if (null != second) {
-      code += second.hashCode() << 1;
-    }
-
-    return code;
+    return first.hashCode() + (second.hashCode() << 1);
   }
 
   @Override
   public int compareTo(final Pair<S, T> p) {
-    if (null == p) {
-      return 1;
-    }
-
-    final Comparable<S> firstCompare = (Comparable<S>) first;
-
-    final int firstResult = firstCompare.compareTo(p.first);
+    final int firstResult = ((Comparable<S>) first).compareTo(p.first);
     if (firstResult == 0) {
-      final Comparable<T> secondCompare = (Comparable<T>) second;
-      return secondCompare.compareTo(p.second);
-    } else {
-      return firstResult;
+      return ((Comparable<T>) second).compareTo(p.second);
     }
+    return firstResult;
   }
 
   // TODO: Can this be made static? Same with SecondElemComparator?
@@ -100,8 +76,7 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
 
     @Override
     public int compare(final Pair<S, T> p1, final Pair<S, T> p2) {
-      final Comparable<S> cS = (Comparable<S>) p1.first;
-      return cS.compareTo(p2.first);
+      return ((Comparable<S>) p1.first).compareTo(p2.first);
     }
   }
 
@@ -111,24 +86,12 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
 
     @Override
     public int compare(final Pair<S, T> p1, final Pair<S, T> p2) {
-      final Comparable<T> cT = (Comparable<T>) p1.second;
-      return cT.compareTo(p2.second);
+      return ((Comparable<T>) p1.second).compareTo(p2.second);
     }
   }
 
   @Override
   public String toString() {
-    String firstString = "null";
-    String secondString = "null";
-
-    if (null != first) {
-      firstString = first.toString();
-    }
-
-    if (null != second) {
-      secondString = second.toString();
-    }
-
-    return "(" + firstString + ", " + secondString + ")";
+    return "(" + first + ", " + second + ")";
   }
 }

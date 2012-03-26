@@ -17,6 +17,8 @@
  */
 package org.apache.hadoop.mrunit;
 
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +30,6 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.RawComparator;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -91,11 +92,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
    *          The (k, v) pair to add to the input list.
    */
   public void addInput(final Pair<K1, V1> input) {
-    if (null == input) {
-      throw new IllegalArgumentException("Null input in addInput()");
-    }
-
-    inputList.add(input);
+    inputList.add(returnNonNull(input));
   }
 
   /**
@@ -105,11 +102,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
    *          The (k, v) pair to add
    */
   public void addOutput(final Pair<K3, V3> outputRecord) {
-    if (null != outputRecord) {
-      expectedOutputs.add(outputRecord);
-    } else {
-      throw new IllegalArgumentException("Tried to add null outputRecord");
-    }
+    expectedOutputs.add(returnNonNull(outputRecord));
   }
 
   /**
@@ -134,18 +127,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
   @Deprecated
   @SuppressWarnings("unchecked")
   public void addInputFromString(final String input) {
-    if (null == input) {
-      throw new IllegalArgumentException("null input");
-    } else {
-      final Pair<Text, Text> inputPair = parseTabbedPair(input);
-      if (null != inputPair) {
-        // I know this is not type-safe, but I don't
-        // know a better way to do this.
-        addInput((Pair<K1, V1>) inputPair);
-      } else {
-        throw new IllegalArgumentException("Could not parse input pair");
-      }
-    }
+    addInput((Pair<K1, V1>) parseTabbedPair(input));
   }
 
   /**
@@ -160,18 +142,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
   @Deprecated
   @SuppressWarnings("unchecked")
   public void addOutputFromString(final String output) {
-    if (null == output) {
-      throw new IllegalArgumentException("null input");
-    } else {
-      final Pair<Text, Text> outputPair = parseTabbedPair(output);
-      if (null != outputPair) {
-        // I know this is not type-safe,
-        // but I don't know a better way to do this.
-        addOutput((Pair<K3, V3>) outputPair);
-      } else {
-        throw new IllegalArgumentException("Could not parse output pair");
-      }
-    }
+    addOutput((Pair<K3, V3>) parseTabbedPair(output));
   }
 
   @Override
@@ -179,9 +150,8 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
 
   @Override
   public void runTest() {
-    List<Pair<K3, V3>> reduceOutputs = null;
     try {
-      reduceOutputs = run();
+      final List<Pair<K3, V3>> reduceOutputs = run();
       validate(reduceOutputs);
       validate(counterWrapper);
     } catch (final IOException ioe) {
@@ -261,7 +231,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
    */
   public void setKeyGroupingComparator(
       final RawComparator<K2> groupingComparator) {
-    keyGroupComparator = groupingComparator;
+    keyGroupComparator = returnNonNull(groupingComparator);
   }
 
   /**
@@ -275,6 +245,6 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
    * @param orderComparator
    */
   public void setKeyOrderComparator(final RawComparator<K2> orderComparator) {
-    keyValueOrderComparator = orderComparator;
+    keyValueOrderComparator = returnNonNull(orderComparator);
   }
 }

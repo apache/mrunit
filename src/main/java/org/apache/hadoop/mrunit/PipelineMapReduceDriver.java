@@ -17,6 +17,8 @@
  */
 package org.apache.hadoop.mrunit;
 
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.Reducer;
@@ -58,31 +59,19 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   public static final Log LOG = LogFactory
       .getLog(PipelineMapReduceDriver.class);
 
-  private final List<Pair<Mapper, Reducer>> mapReducePipeline;
+  private List<Pair<Mapper, Reducer>> mapReducePipeline;
   private final List<Pair<K1, V1>> inputList;
   private Counters counters;
 
   public PipelineMapReduceDriver(final List<Pair<Mapper, Reducer>> pipeline) {
-    this.mapReducePipeline = copyMapReduceList(pipeline);
-    this.inputList = new ArrayList<Pair<K1, V1>>();
-    setCounters(new Counters());
+    this();
+    mapReducePipeline = returnNonNull(pipeline);
   }
 
   public PipelineMapReduceDriver() {
-    this.mapReducePipeline = new ArrayList<Pair<Mapper, Reducer>>();
-    this.inputList = new ArrayList<Pair<K1, V1>>();
+    mapReducePipeline = new ArrayList<Pair<Mapper, Reducer>>();
+    inputList = new ArrayList<Pair<K1, V1>>();
     setCounters(new Counters());
-  }
-
-  private List<Pair<Mapper, Reducer>> copyMapReduceList(
-      final List<Pair<Mapper, Reducer>> lst) {
-    final List<Pair<Mapper, Reducer>> outList = new ArrayList<Pair<Mapper, Reducer>>();
-    for (final Pair<Mapper, Reducer> p : lst) {
-      // Take advantage of the fact that Pair is immutable.
-      outList.add(p);
-    }
-
-    return outList;
   }
 
   /** @return the counters used in this test */
@@ -97,7 +86,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    *          The counters object to use.
    */
   public void setCounters(final Counters ctrs) {
-    this.counters = ctrs;
+    counters = ctrs;
     counterWrapper = new CounterWrapper(ctrs);
   }
 
@@ -118,8 +107,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    *          The Reducer instance to add to the pipeline
    */
   public void addMapReduce(final Mapper m, final Reducer r) {
-    final Pair<Mapper, Reducer> p = new Pair<Mapper, Reducer>(m, r);
-    this.mapReducePipeline.add(p);
+    mapReducePipeline.add(new Pair<Mapper, Reducer>(m, r));
   }
 
   /**
@@ -130,7 +118,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    *          The Mapper and Reducer instances to add to the pipeline
    */
   public void addMapReduce(final Pair<Mapper, Reducer> p) {
-    this.mapReducePipeline.add(p);
+    mapReducePipeline.add(returnNonNull(p));
   }
 
   /**
@@ -165,7 +153,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    * @return A copy of the list of Mapper and Reducer objects under test
    */
   public List<Pair<Mapper, Reducer>> getMapReducePipeline() {
-    return copyMapReduceList(this.mapReducePipeline);
+    return new ArrayList<Pair<Mapper, Reducer>>(mapReducePipeline);
   }
 
   /**
@@ -198,11 +186,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    *          The (k, v) pair to add to the input list.
    */
   public void addInput(final Pair<K1, V1> input) {
-    if (null == input) {
-      throw new IllegalArgumentException("Null input in addInput()");
-    }
-
-    inputList.add(input);
+    inputList.add(returnNonNull(input));
   }
 
   /**
@@ -225,11 +209,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    *          The (k, v) pair to add
    */
   public void addOutput(final Pair<K2, V2> outputRecord) {
-    if (null != outputRecord) {
-      expectedOutputs.add(outputRecord);
-    } else {
-      throw new IllegalArgumentException("Tried to add null outputRecord");
-    }
+    expectedOutputs.add(returnNonNull(outputRecord));
   }
 
   /**
@@ -279,18 +259,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   @Deprecated
   @SuppressWarnings("unchecked")
   public void addInputFromString(final String input) {
-    if (null == input) {
-      throw new IllegalArgumentException("null input");
-    } else {
-      final Pair<Text, Text> inputPair = parseTabbedPair(input);
-      if (null != inputPair) {
-        // I know this is not type-safe, but I don't
-        // know a better way to do this.
-        addInput((Pair<K1, V1>) inputPair);
-      } else {
-        throw new IllegalArgumentException("Could not parse input pair");
-      }
-    }
+    addInput((Pair<K1, V1>) parseTabbedPair(input));
   }
 
   /**
@@ -309,18 +278,16 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
+  @Override
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(final Enum e,
+      final long expectedValue) {
     super.withCounter(e, expectedValue);
     return this;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(String g, String n, long e) {
+  @Override
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(final String g,
+      final String n, final long e) {
     super.withCounter(g, n, e);
     return this;
   }
@@ -338,18 +305,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   @Deprecated
   @SuppressWarnings("unchecked")
   public void addOutputFromString(final String output) {
-    if (null == output) {
-      throw new IllegalArgumentException("null input");
-    } else {
-      final Pair<Text, Text> outputPair = parseTabbedPair(output);
-      if (null != outputPair) {
-        // I know this is not type-safe,
-        // but I don't know a better way to do this.
-        addOutput((Pair<K2, V2>) outputPair);
-      } else {
-        throw new IllegalArgumentException("Could not parse output pair");
-      }
-    }
+    addOutput((Pair<K2, V2>) parseTabbedPair(output));
   }
 
   /**
@@ -372,7 +328,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   @SuppressWarnings({ "unchecked" })
   public List<Pair<K2, V2>> run() throws IOException {
     // inputs starts with the user-provided inputs.
-    List<Pair<K1, V1>> inputs = this.inputList;
+    List<Pair<K1, V1>> inputs = inputList;
 
     if (inputs.isEmpty()) {
       throw new IllegalStateException("No input was provided");
@@ -381,7 +337,6 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
       throw new IllegalStateException("No Mappers or Reducers in pipeline");
     }
 
-    int stageNum = 1;
     for (final Pair<Mapper, Reducer> job : mapReducePipeline) {
       // Create a MapReduceDriver to run this phase of the pipeline.
       final MapReduceDriver mrDriver = MapReduceDriver.newMapReduceDriver(
@@ -398,13 +353,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
       // Run the MapReduce "job". The output of this job becomes
       // the input to the next job.
-      try {
-        inputs = mrDriver.run();
-      } catch (final IllegalStateException e) {
-        throw new IllegalStateException(e.getMessage() + " for stage "
-            + stageNum + " of " + mapReducePipeline.size());
-      }
-      stageNum++;
+      inputs = mrDriver.run();
     }
 
     // The last list of values stored in "inputs" is actually the outputs.
@@ -415,9 +364,8 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   @Override
   public void runTest() {
-    List<Pair<K2, V2>> outputs = null;
     try {
-      outputs = run();
+      final List<Pair<K2, V2>> outputs = run();
       validate(outputs);
       validate(counterWrapper);
     } catch (final IOException ioe) {

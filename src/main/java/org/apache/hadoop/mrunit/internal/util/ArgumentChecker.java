@@ -15,41 +15,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.mapreduce.mock;
+package org.apache.hadoop.mrunit.internal.util;
 
-import org.apache.hadoop.mapreduce.Counter;
-import org.apache.hadoop.mapreduce.Counters;
-import org.apache.hadoop.mapreduce.StatusReporter;
+import java.util.List;
 
-public class MockReporter extends StatusReporter {
+public final class ArgumentChecker {
 
-  private final Counters counters;
-
-  public MockReporter(final Counters ctrs) {
-    counters = ctrs;
+  private ArgumentChecker() {
+    // dont create this class
   }
 
-  @Override
-  public void setStatus(final String status) {
-    // do nothing.
+  /**
+   * @param object
+   * @return object if not null
+   */
+  public static <T> T returnNonNull(final T object) {
+    if (object == null) {
+      throw new NullPointerException();
+    }
+    return object;
   }
 
-  @Override
-  public void progress() {
-    // do nothing.
+  /**
+   * @param list
+   * @return list if all entries not null
+   */
+  public static <T> List<T> returnNonNull(final List<T> list) {
+    for (int i = 0; i < list.size(); i++) {
+      if (list.get(i) == null) {
+        throw new NullPointerException("entry " + i + " in list is null");
+      }
+    }
+    return list;
   }
 
-  @Override
-  public Counter getCounter(final String group, final String name) {
-    return counters.findCounter(group, name);
-  }
-
-  @Override
-  public Counter getCounter(final Enum<?> key) {
-    return counters.findCounter(key);
-  }
-
-  public float getProgress() {
-    return 0;
-  }
 }

@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.mrunit.counters;
 
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 
 /**
  * Wrapper around Counters from both mapred and mapreduce packages so that we
@@ -36,27 +37,30 @@ public class CounterWrapper {
 
   /**
    * Wrap old counter object
+   * 
    * @param counters
    */
-  public CounterWrapper(org.apache.hadoop.mapred.Counters counters) {
-    mapred = counters;
+  public CounterWrapper(final org.apache.hadoop.mapred.Counters counters) {
+    mapred = returnNonNull(counters);
   }
 
   /**
    * Wrap new counter object
+   * 
    * @param counters
    */
-  public CounterWrapper(org.apache.hadoop.mapreduce.Counters counters) {
-    mapreduce = counters;
+  public CounterWrapper(final org.apache.hadoop.mapreduce.Counters counters) {
+    mapreduce = returnNonNull(counters);
   }
 
   /**
    * Get counter value based on Enumeration
+   * 
    * @param e
    * @return
    */
-  public long findCounterValue(Enum e) {
-    if(mapred != null) {
+  public long findCounterValue(final Enum e) {
+    if (mapred != null) {
       return mapred.findCounter(e).getValue();
     } else {
       return mapreduce.findCounter(e).getValue();
@@ -65,12 +69,13 @@ public class CounterWrapper {
 
   /**
    * Get counter value based on name
+   * 
    * @param group
    * @param name
    * @return
    */
-  public long findCounterValue(String group, String name) {
-    if(mapred != null) {
+  public long findCounterValue(final String group, final String name) {
+    if (mapred != null) {
       return mapred.findCounter(group, name).getValue();
     } else {
       return mapreduce.findCounter(group, name).getValue();

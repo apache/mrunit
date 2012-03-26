@@ -57,7 +57,7 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
       final Configuration conf) throws IOException, InterruptedException {
     super(counters, conf);
     this.inputs = inputs;
-    this.context = create();
+    context = create();
   }
 
   @SuppressWarnings({ "unchecked" })

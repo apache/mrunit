@@ -61,48 +61,6 @@ public class TestPair {
         .valueOf(VAL_A), Integer.valueOf(VAL_D))));
   }
 
-  @Test
-  public void testEqualsNullNull() {
-    assertTrue(new Pair<Integer, Integer>(null, null)
-        .equals(new Pair<Integer, Integer>(null, null)));
-  }
-
-  @Test
-  public void testEqualsNullIntFirst0() {
-    assertTrue(new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null)
-        .equals(new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null)));
-  }
-
-  @Test
-  public void testEqualsNullIntFirst1() {
-    assertFalse(new Pair<Integer, Integer>(null, null)
-        .equals(new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null)));
-  }
-
-  @Test
-  public void testEqualsNullIntFirst2() {
-    assertFalse(new Pair<Integer, Integer>(Integer.valueOf(VAL_A), null)
-        .equals(new Pair<Integer, Integer>(null, null)));
-  }
-
-  @Test
-  public void testEqualsNullIntSecond0() {
-    assertTrue(new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A))
-        .equals(new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A))));
-  }
-
-  @Test
-  public void testEqualsNullIntSecond1() {
-    assertFalse(new Pair<Integer, Integer>(null, null)
-        .equals(new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A))));
-  }
-
-  @Test
-  public void testEqualsNullIntSecond2() {
-    assertFalse(new Pair<Integer, Integer>(null, Integer.valueOf(VAL_A))
-        .equals(new Pair<Integer, Integer>(null, null)));
-  }
-
   /**
    * Test method for
    * {@link org.apache.hadoop.mrunit.types.Pair#compareTo(org.apache.hadoop.mrunit.types.Pair)}

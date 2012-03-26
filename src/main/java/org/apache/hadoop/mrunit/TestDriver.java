@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.mrunit;
 
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -95,7 +96,8 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    *          Expected value
    * @return
    */
-  public TestDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
+  public TestDriver<K1, V1, K2, V2> withCounter(final Enum e,
+      final long expectedValue) {
     expectedEnumCounters.add(new Pair<Enum, Long>(e, expectedValue));
     return this;
   }
@@ -111,8 +113,8 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    *          Expected value
    * @return
    */
-  public TestDriver<K1, V1, K2, V2> withCounter(String group, String name,
-      long expectedValue) {
+  public TestDriver<K1, V1, K2, V2> withCounter(final String group,
+      final String name, final long expectedValue) {
     expectedStringCounters.add(new Pair<Pair<String, String>, Long>(
         new Pair<String, String>(group, name), expectedValue));
     return this;
@@ -135,24 +137,15 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    * Split "key \t val" into Pair(Text(key), Text(val))
    * 
    * @param tabSeparatedPair
+   * @return
    */
   public static Pair<Text, Text> parseTabbedPair(final String tabSeparatedPair) {
-
-    String key, val;
-
-    if (null == tabSeparatedPair) {
-      return null;
-    }
-
     final int split = tabSeparatedPair.indexOf('\t');
-    if (-1 == split) {
-      return null;
+    if (split == -1) {
+      throw new IllegalArgumentException("String pair missing a tab separator");
     }
-
-    key = tabSeparatedPair.substring(0, split);
-    val = tabSeparatedPair.substring(split + 1);
-
-    return new Pair<Text, Text>(new Text(key), new Text(val));
+    return new Pair<Text, Text>(new Text(tabSeparatedPair.substring(0, split)),
+        new Text(tabSeparatedPair.substring(split + 1)));
   }
 
   /**
@@ -164,10 +157,6 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   protected static List<Text> parseCommaDelimitedList(
       final String commaDelimList) {
     final ArrayList<Text> outList = new ArrayList<Text>();
-
-    if (null == commaDelimList) {
-      return null;
-    }
 
     final int len = commaDelimList.length();
     int curPos = 0;
@@ -287,16 +276,17 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    * 
    * @param counterWrapper
    */
-  protected void validate(CounterWrapper counterWrapper) {
+  protected void validate(final CounterWrapper counterWrapper) {
     boolean success = true;
-    List<String> errors = new ArrayList<String>();
+    final List<String> errors = new ArrayList<String>();
 
     // Firstly check enumeration based counters
-    for (Pair<Enum, Long> expected : expectedEnumCounters) {
-      long actualValue = counterWrapper.findCounterValue(expected.getFirst());
+    for (final Pair<Enum, Long> expected : expectedEnumCounters) {
+      final long actualValue = counterWrapper.findCounterValue(expected
+          .getFirst());
 
       if (actualValue != expected.getSecond()) {
-        String msg = "Counter "
+        final String msg = "Counter "
             + expected.getFirst().getDeclaringClass().getCanonicalName() + "."
             + expected.getFirst().toString() + " have value " + actualValue
             + " instead of expected " + expected.getSecond();
@@ -308,14 +298,14 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     }
 
     // Second string based counters
-    for (Pair<Pair<String, String>, Long> expected : expectedStringCounters) {
-      Pair<String, String> counter = expected.getFirst();
+    for (final Pair<Pair<String, String>, Long> expected : expectedStringCounters) {
+      final Pair<String, String> counter = expected.getFirst();
 
-      long actualValue = counterWrapper.findCounterValue(counter.getFirst(),
-          counter.getSecond());
+      final long actualValue = counterWrapper.findCounterValue(
+          counter.getFirst(), counter.getSecond());
 
       if (actualValue != expected.getSecond()) {
-        String msg = "Counter with category " + counter.getFirst()
+        final String msg = "Counter with category " + counter.getFirst()
             + " and name " + counter.getSecond() + " have value " + actualValue
             + " instead of expected " + expected.getSecond();
         LOG.error(msg);
@@ -326,7 +316,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     }
 
     if (!success) {
-      StringBuilder buffer = new StringBuilder();
+      final StringBuilder buffer = new StringBuilder();
       buffer.append(errors.size()).append(" Error(s): ");
       formatValueList(errors, buffer);
       fail(buffer.toString());
@@ -405,17 +395,13 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       final StringBuilder sb) {
     sb.append("(");
 
-    if (null != values) {
-      boolean first = true;
-
-      for (final Object val : values) {
-        if (!first) {
-          sb.append(", ");
-        }
-
-        first = false;
-        sb.append(val.toString());
+    boolean first = true;
+    for (final Object val : values) {
+      if (!first) {
+        sb.append(", ");
       }
+      first = false;
+      sb.append(val);
     }
 
     sb.append(")");
@@ -435,6 +421,6 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    *          reducer associated with the driver (new API only)
    */
   public void setConfiguration(final Configuration configuration) {
-    this.configuration = configuration;
+    this.configuration = returnNonNull(configuration);
   }
 }

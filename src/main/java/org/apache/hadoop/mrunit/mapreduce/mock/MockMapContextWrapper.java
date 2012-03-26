@@ -56,7 +56,7 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
       InterruptedException {
     super(counters, conf);
     this.inputs = inputs;
-    this.context = create();
+    context = create();
   }
 
   @SuppressWarnings({ "unchecked" })

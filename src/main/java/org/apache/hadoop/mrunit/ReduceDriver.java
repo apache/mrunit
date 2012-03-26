@@ -17,6 +17,8 @@
  */
 package org.apache.hadoop.mrunit;
 
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -51,8 +53,8 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   private Counters counters;
 
   public ReduceDriver(final Reducer<K1, V1, K2, V2> r) {
-    myReducer = r;
-    setCounters(new Counters());
+    this();
+    setReducer(r);
   }
 
   public ReduceDriver() {
@@ -71,7 +73,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    *          The counters object to use.
    */
   public void setCounters(final Counters ctrs) {
-    this.counters = ctrs;
+    counters = ctrs;
     counterWrapper = new CounterWrapper(ctrs);
   }
 
@@ -88,7 +90,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    *          The reducer object to use
    */
   public void setReducer(final Reducer<K1, V1, K2, V2> r) {
-    myReducer = r;
+    myReducer = returnNonNull(r);
   }
 
   /**
@@ -206,18 +208,16 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public ReduceDriver<K1, V1, K2, V2> withCounter(Enum e, long expectedValue) {
+  @Override
+  public ReduceDriver<K1, V1, K2, V2> withCounter(final Enum e,
+      final long expectedValue) {
     super.withCounter(e, expectedValue);
     return this;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public ReduceDriver<K1, V1, K2, V2> withCounter(String g, String n, long e) {
+  @Override
+  public ReduceDriver<K1, V1, K2, V2> withCounter(final String g,
+      final String n, final long e) {
     super.withCounter(g, n, e);
     return this;
   }

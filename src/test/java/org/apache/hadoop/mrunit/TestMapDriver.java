@@ -136,8 +136,7 @@ public class TestMapDriver {
 
   @Test
   public void testSetInputNull() {
-    thrown.expectMessage(IllegalArgumentException.class,
-        "null inputRecord in setInput()");
+    thrown.expect(NullPointerException.class);
     driver.setInput((Pair<Text, Text>) null);
   }
 

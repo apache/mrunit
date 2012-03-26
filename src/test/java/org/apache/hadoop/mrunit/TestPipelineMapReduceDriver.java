@@ -18,14 +18,19 @@
 package org.apache.hadoop.mrunit;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
+import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -120,30 +125,30 @@ public class TestPipelineMapReduceDriver {
   @Test
   public void testNoMapper() {
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    thrown.expect(NullPointerException.class);
     driver.addMapReduce(null, new IdentityReducer<Text, Text>());
     driver.addInput(new Text("a"), new Text("b"));
-    thrown.expectMessage(IllegalStateException.class,
-        "No Mapper class was provided for stage 1 of 1");
     driver.runTest();
   }
 
   @Test
   public void testNoReducer() {
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
-    driver.addMapReduce(new IdentityMapper<Text, Text>(),
-        new IdentityReducer<Text, Text>());
-    driver.addMapReduce(new IdentityMapper<Text, Text>(), null);
-    driver.addMapReduce(new IdentityMapper<Text, Text>(),
-        new IdentityReducer<Text, Text>());
+    final List<Pair<Mapper, Reducer>> pipeline = new ArrayList<Pair<Mapper, Reducer>>();
+    pipeline.add(new Pair<Mapper, Reducer>(new IdentityMapper<Text, Text>(),
+        new IdentityReducer<Text, Text>()));
+    pipeline.add(null);
+    pipeline.add(new Pair<Mapper, Reducer>(new IdentityMapper<Text, Text>(),
+        new IdentityReducer<Text, Text>()));
+    thrown.expectMessage(NullPointerException.class, "entry 1 in list is null");
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver
+        .newPipelineMapReduceDriver(pipeline);
     driver.addInput(new Text("a"), new Text("b"));
-    thrown.expectMessage(IllegalStateException.class,
-        "No Reducer class was provided for stage 2 of 3");
     driver.runTest();
   }
 
   @Test
   public void testWithCounter() {
-    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
 
     driver.addMapReduce(
         new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
@@ -164,7 +169,7 @@ public class TestPipelineMapReduceDriver {
 
   @Test
   public void testWithFailedCounter() {
-    PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
 
     driver.addMapReduce(
         new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
@@ -173,9 +178,10 @@ public class TestPipelineMapReduceDriver {
         new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
         new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>());
 
-    thrown.expectAssertionErrorMessage("2 Error(s): (" +
-      "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 2 instead of expected 20, " +
-      "Counter with category category and name name have value 2 instead of expected 20)");
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): ("
+            + "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 2 instead of expected 20, "
+            + "Counter with category category and name name have value 2 instead of expected 20)");
 
     driver.withInput(new Text("hie"), new Text("Hi"))
         .withOutput(new Text("hie"), new Text("Hi"))

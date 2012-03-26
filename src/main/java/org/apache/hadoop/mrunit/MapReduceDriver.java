@@ -17,6 +17,8 @@
  */
 package org.apache.hadoop.mrunit;
 
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,17 +59,15 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
 
   public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
       final Reducer<K2, V2, K3, V3> r) {
-    myMapper = m;
-    myReducer = r;
-    setCounters(new Counters());
+    this();
+    setMapper(m);
+    setReducer(r);
   }
 
   public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
       final Reducer<K2, V2, K3, V3> r, final Reducer<K2, V2, K2, V2> c) {
-    myMapper = m;
-    myReducer = r;
-    myCombiner = c;
-    setCounters(new Counters());
+    this(m, r);
+    setCombiner(c);
   }
 
   public MapReduceDriver() {
@@ -86,7 +86,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    *          The counters object to use.
    */
   public void setCounters(final Counters ctrs) {
-    this.counters = ctrs;
+    counters = ctrs;
     counterWrapper = new CounterWrapper(counters);
   }
 
@@ -104,7 +104,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    *          the Mapper instance to use
    */
   public void setMapper(final Mapper<K1, V1, K2, V2> m) {
-    myMapper = m;
+    myMapper = returnNonNull(m);
   }
 
   /** Sets the Mapper instance to use and returns self for fluent style */
@@ -128,7 +128,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    *          The reducer object to use
    */
   public void setReducer(final Reducer<K2, V2, K3, V3> r) {
-    myReducer = r;
+    myReducer = returnNonNull(r);
   }
 
   /**
@@ -158,7 +158,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    *          The combiner object to use
    */
   public void setCombiner(final Reducer<K2, V2, K2, V2> c) {
-    myCombiner = c;
+    myCombiner = returnNonNull(c);
   }
 
   /**
@@ -297,6 +297,12 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
     if (inputList.isEmpty()) {
       throw new IllegalStateException("No input was provided");
     }
+    if (myMapper == null) {
+      throw new IllegalStateException("No Mapper class was provided");
+    }
+    if (myReducer == null) {
+      throw new IllegalStateException("No Reducer class was provided");
+    }
 
     List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
 
@@ -367,18 +373,16 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
     return this;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(Enum e, long expectedValue) {
+  @Override
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(final Enum e,
+      final long expectedValue) {
     super.withCounter(e, expectedValue);
     return this;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(String g, String n, long e) {
+  @Override
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(final String g,
+      final String n, final long e) {
     super.withCounter(g, n, e);
     return this;
   }
@@ -387,10 +391,6 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.
    * 
-   * @param mapper
-   *          passed to MapReduceDriver constructor
-   * @param reducer
-   *          passed to MapReduceDriver constructor
    * @return new MapReduceDriver
    */
   public static <K1, V1, K2 extends Comparable, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver() {

@@ -17,13 +17,14 @@
  */
 package org.apache.hadoop.mrunit;
 
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
+
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mrunit.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -46,9 +47,10 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   /**
    * Sets the input key to send to the mapper
    * 
+   * @param key
    */
   public void setInputKey(final K1 key) {
-    inputKey = key;
+    inputKey = returnNonNull(key);
   }
 
   public K1 getInputKey() {
@@ -61,7 +63,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    * @param val
    */
   public void setInputValue(final V1 val) {
-    inputVal = val;
+    inputVal = returnNonNull(val);
   }
 
   public V1 getInputValue() {
@@ -84,12 +86,8 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    *          a (key, val) pair
    */
   public void setInput(final Pair<K1, V1> inputRecord) {
-    if (null != inputRecord) {
-      setInputKey(inputRecord.getFirst());
-      setInputValue(inputRecord.getSecond());
-    } else {
-      throw new IllegalArgumentException("null inputRecord in setInput()");
-    }
+    setInputKey(inputRecord.getFirst());
+    setInputValue(inputRecord.getSecond());
   }
 
   /**
@@ -99,11 +97,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    *          The (k, v) pair to add
    */
   public void addOutput(final Pair<K2, V2> outputRecord) {
-    if (null != outputRecord) {
-      expectedOutputs.add(outputRecord);
-    } else {
-      throw new IllegalArgumentException("Tried to add null outputRecord");
-    }
+    expectedOutputs.add(returnNonNull(outputRecord));
   }
 
   /**
@@ -126,19 +120,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   @Deprecated
   @SuppressWarnings("unchecked")
   public void setInputFromString(final String input) {
-    if (null == input) {
-      throw new IllegalArgumentException("null input");
-    } else {
-      final Pair<Text, Text> inputPair = parseTabbedPair(input);
-      if (null != inputPair) {
-        // I know this is not type-safe, but I don't know a better way to do
-        // this.
-        setInputKey((K1) inputPair.getFirst());
-        setInputValue((V1) inputPair.getSecond());
-      } else {
-        throw new IllegalArgumentException("Could not parse input pair");
-      }
-    }
+    final Pair<Text, Text> inputPair = parseTabbedPair(input);
+    setInputKey((K1) inputPair.getFirst());
+    setInputValue((V1) inputPair.getSecond());
   }
 
   /**
@@ -153,18 +137,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   @Deprecated
   @SuppressWarnings("unchecked")
   public void addOutputFromString(final String output) {
-    if (null == output) {
-      throw new IllegalArgumentException("null input");
-    } else {
-      final Pair<Text, Text> outputPair = parseTabbedPair(output);
-      if (null != outputPair) {
-        // I know this is not type-safe, but I don't know a better way to do
-        // this.
-        addOutput((Pair<K2, V2>) outputPair);
-      } else {
-        throw new IllegalArgumentException("Could not parse output pair");
-      }
-    }
+    addOutput((Pair<K2, V2>) parseTabbedPair(output));
   }
 
   @Override
@@ -172,23 +145,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
 
   @Override
   public void runTest() {
-    String inputKeyStr = "(null)";
-    String inputValStr = "(null)";
-
-    if (null != inputKey) {
-      inputKeyStr = inputKey.toString();
-    }
-
-    if (null != inputVal) {
-      inputValStr = inputVal.toString();
-    }
-
-    LOG.debug("Mapping input (" + inputKeyStr + ", " + inputValStr + ")");
-
-    List<Pair<K2, V2>> outputs = null;
-
+    LOG.debug("Mapping input (" + inputKey + ", " + inputVal + ")");
     try {
-      outputs = run();
+      final List<Pair<K2, V2>> outputs = run();
       validate(outputs);
       validate(counterWrapper);
     } catch (final IOException ioe) {

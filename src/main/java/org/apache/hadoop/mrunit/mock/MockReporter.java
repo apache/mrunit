@@ -51,17 +51,13 @@ public class MockReporter implements Reporter {
 
   @Override
   public void incrCounter(final Enum<?> key, final long amount) {
-    if (null != counters) {
-      counters.incrCounter(key, amount);
-    }
+    counters.incrCounter(key, amount);
   }
 
   @Override
   public void incrCounter(final String group, final String counter,
       final long amount) {
-    if (null != counters) {
-      counters.incrCounter(group, counter, amount);
-    }
+    counters.incrCounter(group, counter, amount);
   }
 
   @Override
@@ -76,22 +72,12 @@ public class MockReporter implements Reporter {
 
   @Override
   public Counter getCounter(final String group, final String name) {
-    Counters.Counter counter = null;
-    if (counters != null) {
-      counter = counters.findCounter(group, name);
-    }
-
-    return counter;
+    return counters.findCounter(group, name);
   }
 
   @Override
   public Counter getCounter(final Enum<?> key) {
-    Counters.Counter counter = null;
-    if (counters != null) {
-      counter = counters.findCounter(key);
-    }
-
-    return counter;
+    return counters.findCounter(key);
   }
 
   public float getProgress() {

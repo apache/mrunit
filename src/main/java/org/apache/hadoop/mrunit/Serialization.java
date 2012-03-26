@@ -45,9 +45,6 @@ public class Serialization {
   @SuppressWarnings("unchecked")
   public static Object copy(final Object orig, final Object copy,
       final Configuration conf) {
-    if (orig == null) {
-      return null;
-    }
     if (copy != null && orig.getClass() != copy.getClass()) {
       throw new IllegalArgumentException(orig.getClass() + "!="
           + copy.getClass());
@@ -81,9 +78,6 @@ public class Serialization {
    * @return a new copy of the orig object
    */
   public static Object copy(final Object orig, final Configuration conf) {
-    if (orig == null) {
-      return null;
-    }
     return copy(orig, null, conf);
   }
 
