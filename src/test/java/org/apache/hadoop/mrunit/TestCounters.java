@@ -105,7 +105,7 @@ public class TestCounters {
   public void testPipeline() throws IOException {
     final Mapper<Text, Text, Text, Text> mapper = new CounterMapper();
     final Reducer<Text, Text, Text, Text> reducer = new CounterReducer();
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
 
     driver.withMapReduce(mapper, reducer).withMapReduce(mapper, reducer)
         .withInput(new Text("foo"), new Text("bar")).run();

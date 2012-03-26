@@ -146,7 +146,7 @@ public class TestMapDriver {
 
   @Test
   public void testWithCounter() {
-    MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>();
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
 
     driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
         .withInput(new Text("hie"), new Text("Hi"))
@@ -157,7 +157,7 @@ public class TestMapDriver {
 
   @Test
   public void testWithFailedCounter() {
-    MapDriver<Text, Text, Text, Text> driver = new MapDriver<Text, Text, Text, Text>();
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
 
     thrown.expectAssertionErrorMessage("2 Error(s): (" +
       "Counter org.apache.hadoop.mrunit.mapreduce.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 4, " +

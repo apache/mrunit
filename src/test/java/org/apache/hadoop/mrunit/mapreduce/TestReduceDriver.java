@@ -214,7 +214,7 @@ public class TestReduceDriver {
 
   @Test
   public void testWithCounter() {
-    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>();
+    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver();
 
     LinkedList<Text> values = new LinkedList<Text>();
     values.add(new Text("a"));
@@ -230,7 +230,7 @@ public class TestReduceDriver {
 
   @Test
   public void testWithFailedCounter() {
-    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>();
+    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver();
 
     thrown.expectAssertionErrorMessage("2 Error(s): (" +
       "Counter org.apache.hadoop.mrunit.mapreduce.TestReduceDriver.ReducerWithCounters.Counters.SUM have value 1 instead of expected 4, " +

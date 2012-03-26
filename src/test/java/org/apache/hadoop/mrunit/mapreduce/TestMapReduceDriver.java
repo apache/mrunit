@@ -352,7 +352,7 @@ public class TestMapReduceDriver {
 
   @Test
   public void testWithCounter() {
-    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver.newMapReduceDriver();
 
     driver
         .withMapper(
@@ -370,7 +370,7 @@ public class TestMapReduceDriver {
 
   @Test
   public void testWithFailedCounter() {
-    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver.newMapReduceDriver();
 
     thrown.expectAssertionErrorMessage("2 Error(s): (" +
       "Counter org.apache.hadoop.mrunit.mapreduce.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 20, " +

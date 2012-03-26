@@ -51,21 +51,21 @@ public class TestPipelineMapReduceDriver {
   public void testEmptyPipeline() throws IOException {
     thrown.expectMessage(IllegalStateException.class,
         "No Mappers or Reducers in pipeline");
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver.withInput(new Text("foo"), new Text("bar")).runTest();
   }
 
   @Test
   public void testNoInput() {
     thrown.expectMessage(IllegalStateException.class, "No input was provided");
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver.runTest();
   }
 
   @Test
   public void testSingleIdentity() {
     // Test that an identity mapper and identity reducer work
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver
         .withMapReduce(new IdentityMapper<Text, Text>(),
             new IdentityReducer<Text, Text>())
@@ -76,7 +76,7 @@ public class TestPipelineMapReduceDriver {
   @Test
   public void testMultipleIdentities() {
     // Test that a pipeline of identity mapper and reducers work
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver
         .withMapReduce(new IdentityMapper<Text, Text>(),
             new IdentityReducer<Text, Text>())
@@ -90,7 +90,7 @@ public class TestPipelineMapReduceDriver {
 
   @Test
   public void testSumAtEnd() {
-    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = new PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable>();
+    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver
         .withMapReduce(new IdentityMapper<Text, LongWritable>(),
             new IdentityReducer<Text, LongWritable>())
@@ -107,7 +107,7 @@ public class TestPipelineMapReduceDriver {
 
   @Test
   public void testSumInMiddle() {
-    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = new PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable>();
+    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver
         .withMapReduce(new IdentityMapper<Text, LongWritable>(),
             new IdentityReducer<Text, LongWritable>())
@@ -124,7 +124,7 @@ public class TestPipelineMapReduceDriver {
 
   @Test
   public void testNoMapper() {
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     thrown.expect(NullPointerException.class);
     driver.addMapReduce(null, new IdentityReducer<Text, Text>());
     driver.addInput(new Text("a"), new Text("b"));
@@ -148,7 +148,7 @@ public class TestPipelineMapReduceDriver {
 
   @Test
   public void testWithCounter() {
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
 
     driver.addMapReduce(
         new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),
@@ -169,7 +169,7 @@ public class TestPipelineMapReduceDriver {
 
   @Test
   public void testWithFailedCounter() {
-    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = new PipelineMapReduceDriver<Text, Text, Text, Text>();
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
 
     driver.addMapReduce(
         new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>(),

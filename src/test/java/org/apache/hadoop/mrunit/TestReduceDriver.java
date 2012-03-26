@@ -223,7 +223,7 @@ public class TestReduceDriver {
 
   @Test
   public void testWithCounter() {
-    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>();
+    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver();
 
     LinkedList<Text> values = new LinkedList<Text>();
     values.add(new Text("a"));
@@ -241,7 +241,7 @@ public class TestReduceDriver {
 
   @Test
   public void testWithFailedEnumCounter() {
-    ReduceDriver<Text, Text, Text, Text> driver = new ReduceDriver<Text, Text, Text, Text>();
+    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver();
 
     LinkedList<Text> inputValues = new LinkedList<Text>();
     inputValues.add(new Text("Hi"));
