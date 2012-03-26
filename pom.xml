@@ -25,7 +25,7 @@
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
     <version>7</version>
-  </parent> 
+  </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.mrunit</groupId>
@@ -148,7 +148,7 @@
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
-            <classifier>${envClassifier}</classifier>
+          <classifier>${envClassifier}</classifier>
         </configuration>
       </plugin>
 
@@ -183,7 +183,6 @@
             </goals>
             <configuration>
               <excludes>
-                <exclude>.git/**</exclude>
                 <exclude>BUILD.txt</exclude>
                 <exclude>CHANGES.txt</exclude>
               </excludes>
@@ -196,14 +195,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>3.0-beta-3</version>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8</version>
-        <configuration>
-        </configuration>
       </plugin>
 
       <plugin>
@@ -279,7 +270,7 @@
         </exclusion>
       </exclusions>
     </dependency>
-    
+
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
@@ -300,7 +291,7 @@
         <artifactId>maven-surefire-report-plugin</artifactId>
         <version>2.8.1</version>
       </plugin>
-        <plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
         <version>2.2</version>
@@ -308,27 +299,42 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8</version>
+        <version>2.8.1</version>
+        <configuration>
+          <excludePackageNames>*.internal</excludePackageNames>
+        </configuration>
       </plugin>
     </plugins>
   </reporting>
-  
+
   <profiles>
     <profile>
-      <!-- Used only when cutting a full release.  Configures the deploy plugin to mark
-          each artifact as a release (especially important for the archetype). Signs each
-          file deployed (it actually signs way too many files and we have to clean up a bit
-          once deployed). -->
+      <!-- Used only when cutting a full release to sign the artifacts and 
+        generate javadoc -->
       <id>deploy</id>
       <build>
         <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.8.1</version>
+            <configuration>
+              <excludePackageNames>*.internal</excludePackageNames>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>1.1</version>
               <executions>
               <execution>
-                <id>sign-artifacts</id>
                 <phase>verify</phase>
                 <goals>
                   <goal>sign</goal>
@@ -340,39 +346,7 @@
       </build>
       <properties>
         <update-release-info>true</update-release-info>
-        <!--  Don't re-run tests as part of the deploy build.
-              Note we use skipTests, not maven.test.skip, since the latter skips
-              compilation too and we want to deploy tests. -->
-        <skipTests>true</skipTests>
       </properties>
-    </profile>
-    <profile>
-      <!--  Only bind Javadoc JARs when the javadoc profile is active, since it is slow. -->
-      <id>javadoc</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.7</version>
-            <executions>
-              <execution>
-                <id>aggregate</id>
-                <goals>
-                  <goal>aggregate</goal>
-                </goals>
-                <phase>site</phase>
-              </execution>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
     <profile>
       <id>hadoop-0.20</id>
@@ -402,7 +376,7 @@
         </property>
       </activation>
       <properties>
-          <envClassifier>hadoop100</envClassifier>
+        <envClassifier>hadoop100</envClassifier>
       </properties>
       <dependencies>
         <dependency>
@@ -422,8 +396,8 @@
         </property>
       </activation>
       <properties>
-          <envClassifier>hadoop023</envClassifier>
-          <specificHadoopVersion>0.23.1</specificHadoopVersion>
+        <envClassifier>hadoop023</envClassifier>
+        <specificHadoopVersion>0.23.1</specificHadoopVersion>
       </properties>
       <dependencies>
         <dependency>
