@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
@@ -30,7 +29,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.mrunit</groupId>
   <artifactId>mrunit</artifactId>
-  <version>1.0.0-incubating-SNAPSHOT</version>
+  <version>0.9.0-incubating-SNAPSHOT</version>
+
   <name>MRUnit</name>
   <url>http://incubator.apache.org/mrunit/</url>
 
@@ -199,12 +199,26 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8.1</version>
+        <configuration>
+          <excludePackageNames>*.internal</excludePackageNames>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>2.1.2</version>
         <executions>
           <execution>
-            <id>attach-sources</id>
-            <phase>verify</phase>
             <goals>
               <goal>jar-no-fork</goal>
             </goals>
@@ -309,33 +323,16 @@
 
   <profiles>
     <profile>
-      <!-- Used only when cutting a full release to sign the artifacts and 
-        generate javadoc -->
+      <!-- Used only when cutting a full release to sign the artifacts -->
       <id>deploy</id>
       <build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.8.1</version>
-            <configuration>
-              <excludePackageNames>*.internal</excludePackageNames>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>1.1</version>
-              <executions>
+            <executions>
               <execution>
-                <phase>verify</phase>
                 <goals>
                   <goal>sign</goal>
                 </goals>
