@@ -35,11 +35,6 @@
         <include>src/**</include>
       </includes>
     </fileSet>
-
-    <fileSet>
-      <directory>${project.build.directory}/site</directory>
-      <outputDirectory>docs</outputDirectory>
-    </fileSet>
   </fileSets>
 
 </component>
