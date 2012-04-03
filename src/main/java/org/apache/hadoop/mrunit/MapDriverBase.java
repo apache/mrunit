@@ -144,11 +144,11 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   @Override
-  public void runTest() {
+  public void runTest(final boolean orderMatters) {
     LOG.debug("Mapping input (" + inputKey + ", " + inputVal + ")");
     try {
       final List<Pair<K2, V2>> outputs = run();
-      validate(outputs);
+      validate(outputs, orderMatters);
       validate(counterWrapper);
     } catch (final IOException ioe) {
       LOG.error("IOException in mapper", ioe);

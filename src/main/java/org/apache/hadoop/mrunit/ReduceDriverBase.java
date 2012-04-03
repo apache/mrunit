@@ -166,7 +166,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   @Override
-  public void runTest() {
+  public void runTest(final boolean orderMatters) {
     final StringBuilder sb = new StringBuilder();
     formatValueList(inputValues, sb);
 
@@ -175,7 +175,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
     List<Pair<K2, V2>> outputs = null;
     try {
       outputs = run();
-      validate(outputs);
+      validate(outputs, orderMatters);
       validate(counterWrapper);
     } catch (final IOException ioe) {
       LOG.error("IOException in reducer", ioe);

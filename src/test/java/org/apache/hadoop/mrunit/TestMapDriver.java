@@ -75,7 +75,7 @@ public class TestMapDriver {
   public void testTestRun2() {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., "
-            + "Received unexpected output (foo, bar))");
+            + "Received unexpected output (foo, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar")).runTest();
   }
 
@@ -85,7 +85,16 @@ public class TestMapDriver {
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, bar) at position 1.)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("foo"), new Text("bar")).runTest();
+        .withOutput(new Text("foo"), new Text("bar")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun3OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar")).runTest(false);
   }
 
   @Test
@@ -94,25 +103,52 @@ public class TestMapDriver {
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bonusfoo, bar) at position 1.)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("bonusfoo"), new Text("bar")).runTest();
+        .withOutput(new Text("bonusfoo"), new Text("bar")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun4OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bonusfoo, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("bonusfoo"), new Text("bar")).runTest(false);
   }
 
   @Test
   public void testTestRun5() {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, bar), "
-            + "Missing expected output (foo, somethingelse) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, somethingelse) at position 0., "
+            + "Received unexpected output (foo, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("foo"), new Text("somethingelse")).runTest();
+        .withOutput(new Text("foo"), new Text("somethingelse")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun5OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, somethingelse), "
+            + "Received unexpected output (foo, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("somethingelse")).runTest(false);
   }
 
   @Test
   public void testTestRun6() {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, bar), "
-            + "Missing expected output (someotherkey, bar) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar) at position 0., "
+            + "Received unexpected output (foo, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("someotherkey"), new Text("bar")).runTest();
+        .withOutput(new Text("someotherkey"), new Text("bar")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun6OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar), "
+        		+ "Received unexpected output (foo, bar)");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("someotherkey"), new Text("bar")).runTest(false);
   }
 
   @Test
@@ -123,7 +159,69 @@ public class TestMapDriver {
             + "Missing expected output (someotherkey, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("someotherkey"), new Text("bar"))
-        .withOutput(new Text("foo"), new Text("bar")).runTest();
+        .withOutput(new Text("foo"), new Text("bar")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun7OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (someotherkey, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("someotherkey"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar")).runTest(false);
+  }
+  
+  @Test
+  public void testTestRun8OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, bar), "
+           + "Missing expected output (foo, bar), "
+           + "Missing expected output (foo, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar")).runTest(false);
+  }
+  
+  @Test
+  public void testUnexpectedOutput() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar) at position 1.)");
+    driver.withMapper(new DuplicatingMapper()).withInput(new Text("foo"),new Text("bar"))
+        .withOutput(new Text("foo"),new Text("bar"))
+        .runTest(true);
+  }
+  
+  @Test
+  public void testUnexpectedOutputMultiple() {
+    thrown
+        .expectAssertionErrorMessage("3 Error(s): (Received unexpected output (foo, bar) at position 1., "
+            + "Received unexpected output (foo, bar) at position 2., "
+            + "Received unexpected output (foo, bar) at position 3.)");
+    driver.withMapper(new DuplicatingMapper(4)).withInput(new Text("foo"),new Text("bar"))
+        .withOutput(new Text("foo"),new Text("bar"))
+        .runTest(true);
+  }
+  
+  @Test
+  public void testUnexpectedOutputOrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar))");
+    driver.withMapper(new DuplicatingMapper()).withInput(new Text("foo"),new Text("bar"))
+        .withOutput(new Text("foo"),new Text("bar"))
+        .runTest(false);
+  }
+  
+  @Test
+  public void testUnexpectedOutputMultipleOrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("3 Error(s): (Received unexpected output (foo, bar), "
+            + "Received unexpected output (foo, bar), "
+            + "Received unexpected output (foo, bar))");
+    driver.withMapper(new DuplicatingMapper(4)).withInput(new Text("foo"),new Text("bar"))
+        .withOutput(new Text("foo"),new Text("bar"))
+        .runTest(false);
   }
 
   @Test
@@ -247,10 +345,10 @@ public class TestMapDriver {
     driver.withInputFromString("a\tb");
     driver.withOutputFromString("1\ta");
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (1, a): "
-            + "Mismatch in key class: expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable, "
-            + "Missing expected output (1, a): Mismatch in key class: "
-            + "expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (1, a): Mismatch in key class: "
+            + "expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable, "
+            + "Received unexpected output (1, a): "
+            + "Mismatch in key class: expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable)");
     driver.runTest();
   }
 
@@ -265,6 +363,26 @@ public class TestMapDriver {
     }
 
   }
+  
+  /**
+   * Similar to IdentityMapper, but outputs each key/value pair twice
+   */
+  private static class DuplicatingMapper extends MapReduceBase
+    implements Mapper<Text, Text, Text, Text> {
+    private int duplicationFactor = 2;
+    public DuplicatingMapper() {
+     
+    }
+    public DuplicatingMapper(int factor) {
+      duplicationFactor = factor;
+    }
+    @Override
+    public void map(Text key, Text value, OutputCollector<Text, Text> output,
+        Reporter reporter) throws IOException {
+      for (int i = 0; i < duplicationFactor; i++)
+        output.collect(key,value);
+    }
+  }
 
   @Test
   public void testNonTextWritableValueWithOutputFromString() {
@@ -273,10 +391,10 @@ public class TestMapDriver {
     driver.withInputFromString("a\tb");
     driver.withOutputFromString("a\t1");
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (a, 1): "
-            + "Mismatch in value class: expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable, "
-            + "Missing expected output (a, 1): Mismatch in value class: "
-            + "expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (a, 1): Mismatch in value class: "
+            + "expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable, "
+            + "Received unexpected output (a, 1): Mismatch in value class: expected: class "
+            + "org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable)");
     driver.runTest();
   }
 

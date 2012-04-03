@@ -106,14 +106,34 @@ public class TestMapReduceDriver {
   @Test
   public void testTestRun3() {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Matched expected output (bar, 12) but at "
-            + "incorrect position 0 (expected position 1), Matched expected output (foo, 52) but at "
-            + "incorrect position 1 (expected position 0))");
+        .expectAssertionErrorMessage("2 Error(s): (Matched expected output (foo, 52) but at "
+            + "incorrect position 1 (expected position 0), Matched expected output (bar, 12) but at "
+            + "incorrect position 0 (expected position 1))");
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("bar"), new LongWritable(BAR_IN))
         .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
         .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-        .withOutput(new Text("bar"), new LongWritable(BAR_IN)).runTest();
+        .withOutput(new Text("bar"), new LongWritable(BAR_IN)).runTest(true);
+  }
+
+  @Test
+  public void testTestRun3OrderInsensitive() {
+    driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+        .withInput(new Text("bar"), new LongWritable(BAR_IN))
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+        .withOutput(new Text("bar"), new LongWritable(BAR_IN)).runTest(false);
+  }
+
+  @Test 
+  public void testDuplicateOutputOrderInsensitive() { 
+    thrown 
+        .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar))"); 
+    driver2.withMapper(new IdentityMapper<Text, Text>()).withReducer( 
+        new IdentityReducer<Text, Text>()); 
+    driver2.withInput(new Text("foo"), new Text("bar")) 
+        .withInput(new Text("foo"), new Text("bar")) 
+        .withOutput(new Text("foo"), new Text("bar")).runTest(false); 
   }
 
   @Test

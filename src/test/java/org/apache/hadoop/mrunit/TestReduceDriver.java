@@ -47,8 +47,6 @@ public class TestReduceDriver {
   private static final int IN_B = 6;
   private static final int OUT_VAL = 10;
   private static final int INCORRECT_OUT = 12;
-  private static final int OUT_EMPTY = 0;
-
   @Rule
   public final ExpectedSuppliedException thrown = ExpectedSuppliedException
       .none();
@@ -85,43 +83,87 @@ public class TestReduceDriver {
   @Test
   public void testTestRun2() {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, 10), "
-            + "Missing expected output (bar, 10) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (bar, 10) at position 0., "
+            + "Received unexpected output (foo, 10) at position 0.)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
-        .withOutput(new Text("bar"), new LongWritable(OUT_VAL)).runTest();
+        .withOutput(new Text("bar"), new LongWritable(OUT_VAL)).runTest(true);
+  }
+
+  @Test
+  public void testTestRun2OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (bar, 10), "
+            + "Received unexpected output (foo, 10))");
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .withInputValue(new LongWritable(IN_B))
+        .withOutput(new Text("bar"), new LongWritable(OUT_VAL)).runTest(false);
   }
 
   @Test
   public void testTestRun3() {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, 10), "
-            + "Missing expected output (foo, 12) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 12) at position 0., "
+            + "Received unexpected output (foo, 10) at position 0.)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
-        .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT)).runTest();
+        .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT))
+        .runTest(true);
+  }
+
+  @Test
+  public void testTestRun3OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 12), "
+            + "Received unexpected output (foo, 10))");
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .withInputValue(new LongWritable(IN_B))
+        .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT))
+        .runTest(false);
   }
 
   @Test
   public void testTestRun4() {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, 10), "
-            + "Missing expected output (foo, 4) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 4) at position 0., "
+            + "Received unexpected output (foo, 10) at position 0.)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
-        .withOutput(new Text("foo"), new LongWritable(IN_A)).runTest();
+        .withOutput(new Text("foo"), new LongWritable(IN_A)).runTest(true);
+  }
+
+  @Test
+  public void testTestRun4OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 4), "
+            + "Received unexpected output (foo, 10))");
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .withInputValue(new LongWritable(IN_B))
+        .withOutput(new Text("foo"), new LongWritable(IN_A)).runTest(false);
   }
 
   @Test
   public void testTestRun5() {
     thrown
-        .expectAssertionErrorMessage("3 Error(s): (Received unexpected output (foo, 10), "
+        .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, 6) at position 1., "
             + "Missing expected output (foo, 4) at position 0., "
-            + "Missing expected output (foo, 6) at position 1.)");
+            + "Received unexpected output (foo, 10) at position 0.)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(IN_A))
-        .withOutput(new Text("foo"), new LongWritable(IN_B)).runTest();
+        .withOutput(new Text("foo"), new LongWritable(IN_B)).runTest(true);
+  }
+
+  @Test
+  public void testTestRun5OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, 6), "
+            + "Missing expected output (foo, 4), "
+            + "Received unexpected output (foo, 10))");
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .withInputValue(new LongWritable(IN_B))
+        .withOutput(new Text("foo"), new LongWritable(IN_A))
+        .withOutput(new Text("foo"), new LongWritable(IN_B)).runTest(false);
   }
 
   @Test
@@ -131,19 +173,39 @@ public class TestReduceDriver {
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
-        .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest();
+        .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest(true);
+  }
+
+  @Test
+  public void testTestRun6OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 10))");
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .withInputValue(new LongWritable(IN_B))
+        .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+        .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest(false);
   }
 
   @Test
   public void testTestRun7() {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Matched expected output (foo, 10) but at "
-            + "incorrect position 0 (expected position 1), "
-            + "Missing expected output (bar, 10) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (bar, 10) at position 0., "
+            + "Matched expected output (foo, 10) but at "
+            + "incorrect position 0 (expected position 1))");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
-        .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest();
+        .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest(true);
+  }
+
+  @Test
+  public void testTestRun7OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10))");
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .withInputValue(new LongWritable(IN_B))
+        .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
+        .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest(false);
   }
 
   @Test
@@ -153,7 +215,28 @@ public class TestReduceDriver {
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
-        .withOutput(new Text("bar"), new LongWritable(OUT_VAL)).runTest();
+        .withOutput(new Text("bar"), new LongWritable(OUT_VAL)).runTest(true);
+  }
+
+  @Test
+  public void testTestRun8OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10))");
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .withInputValue(new LongWritable(IN_B))
+        .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+        .withOutput(new Text("bar"), new LongWritable(OUT_VAL)).runTest(false);
+  }
+
+  @Test
+  public void testDuplicateOutputOrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar))");
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver(new IdentityReducer<Text, Text>());
+    driver.withInputKey(new Text("foo")).withInputValue(new Text("bar"))
+        .withInputValue(new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar")).runTest(false);
   }
 
   @Test
@@ -223,9 +306,10 @@ public class TestReduceDriver {
 
   @Test
   public void testWithCounter() {
-    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver();
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver();
 
-    LinkedList<Text> values = new LinkedList<Text>();
+    final LinkedList<Text> values = new LinkedList<Text>();
     values.add(new Text("a"));
     values.add(new Text("b"));
 
@@ -241,14 +325,16 @@ public class TestReduceDriver {
 
   @Test
   public void testWithFailedEnumCounter() {
-    ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver.newReduceDriver();
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver();
 
-    LinkedList<Text> inputValues = new LinkedList<Text>();
+    final LinkedList<Text> inputValues = new LinkedList<Text>();
     inputValues.add(new Text("Hi"));
 
-    thrown.expectAssertionErrorMessage("2 Error(s): (" +
-      "Counter org.apache.hadoop.mrunit.TestReduceDriver.ReducerWithCounters.Counters.SUM have value 1 instead of expected 4, " +
-      "Counter with category category and name sum have value 1 instead of expected 4)");
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): ("
+            + "Counter org.apache.hadoop.mrunit.TestReduceDriver.ReducerWithCounters.Counters.SUM have value 1 instead of expected 4, "
+            + "Counter with category category and name sum have value 1 instead of expected 4)");
 
     driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
         .withInput(new Text("hie"), inputValues)
@@ -260,17 +346,20 @@ public class TestReduceDriver {
   /**
    * Simple reducer that have custom counters that are increased each map() call
    */
-  public static class ReducerWithCounters<KI, VI, KO, VO> implements Reducer<KI, VI, KO, VO> {
+  public static class ReducerWithCounters<KI, VI, KO, VO> implements
+      Reducer<KI, VI, KO, VO> {
     public static enum Counters {
       COUNT, SUM
     }
 
     @Override
-    public void reduce(KI ki, Iterator<VI> viIterator, OutputCollector<KO, VO> outputCollector, Reporter reporter) throws IOException {
+    public void reduce(final KI ki, final Iterator<VI> viIterator,
+        final OutputCollector<KO, VO> outputCollector, final Reporter reporter)
+        throws IOException {
       reporter.getCounter(Counters.COUNT).increment(1);
       reporter.getCounter("category", "count").increment(1);
       while (viIterator.hasNext()) {
-        VI vi = viIterator.next();
+        final VI vi = viIterator.next();
         reporter.getCounter(Counters.SUM).increment(1);
         reporter.getCounter("category", "sum").increment(1);
         outputCollector.collect((KO) ki, (VO) vi);
@@ -282,7 +371,7 @@ public class TestReduceDriver {
     }
 
     @Override
-    public void configure(JobConf entries) {
+    public void configure(final JobConf entries) {
     }
   }
 

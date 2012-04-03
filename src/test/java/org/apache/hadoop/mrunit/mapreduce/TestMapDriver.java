@@ -72,7 +72,7 @@ public class TestMapDriver {
   public void testTestRun2() {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., "
-            + "Received unexpected output (foo, bar))");
+            + "Received unexpected output (foo, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar")).runTest();
   }
 
@@ -82,7 +82,16 @@ public class TestMapDriver {
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, bar) at position 1.)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("foo"), new Text("bar")).runTest();
+        .withOutput(new Text("foo"), new Text("bar")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun3OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar")).runTest(false);
   }
 
   @Test
@@ -91,26 +100,53 @@ public class TestMapDriver {
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bonusfoo, bar) at position 1.)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("bonusfoo"), new Text("bar")).runTest();
+        .withOutput(new Text("bonusfoo"), new Text("bar")).runTest(true);
 
+  }
+
+  @Test
+  public void testTestRun4OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bonusfoo, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("bonusfoo"), new Text("bar")).runTest(false);
   }
 
   @Test
   public void testTestRun5() {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, bar), "
-            + "Missing expected output (foo, somethingelse) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, somethingelse) at position 0.," 
+            + " Received unexpected output (foo, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("foo"), new Text("somethingelse")).runTest();
+        .withOutput(new Text("foo"), new Text("somethingelse")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun5OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, somethingelse), "
+            + "Received unexpected output (foo, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("somethingelse")).runTest(false);
   }
 
   @Test
   public void testTestRun6() {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Received unexpected output (foo, bar), "
-            + "Missing expected output (someotherkey, bar) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar) at position 0.,"
+            + " Received unexpected output (foo, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("someotherkey"), new Text("bar")).runTest();
+        .withOutput(new Text("someotherkey"), new Text("bar")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun6OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar), "
+            + "Received unexpected output (foo, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("someotherkey"), new Text("bar")).runTest(false);
   }
 
   @Test
@@ -120,7 +156,16 @@ public class TestMapDriver {
             + "incorrect position 0 (expected position 1), Missing expected output (someotherkey, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("someotherkey"), new Text("bar"))
-        .withOutput(new Text("foo"), new Text("bar")).runTest();
+        .withOutput(new Text("foo"), new Text("bar")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun7OrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (someotherkey, bar))");
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("someotherkey"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar")).runTest(false);
   }
 
   @Test

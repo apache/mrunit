@@ -363,10 +363,10 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   }
 
   @Override
-  public void runTest() {
+  public void runTest(final boolean orderMatters) {
     try {
       final List<Pair<K2, V2>> outputs = run();
-      validate(outputs);
+      validate(outputs, orderMatters);
       validate(counterWrapper);
     } catch (final IOException ioe) {
       LOG.error(ioe);

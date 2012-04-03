@@ -22,7 +22,9 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -131,7 +133,17 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   /**
    * Runs the test and validates the results
    */
-  public abstract void runTest();
+  public void runTest() {
+    runTest(true);
+  }
+
+  /**
+   * Runs the test and validates the results
+   * 
+   * @param orderMatters
+   *          Whether or not output ordering is important
+   */
+  public abstract void runTest(boolean orderMatters);
 
   /**
    * Split "key \t val" into Pair(Text(key), Text(val))
@@ -182,92 +194,163 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    * 
    * @param outputs
    *          The actual output (k, v) pairs
+   * @param orderMatters
+   *          Whether or not output ordering is important when validating test
+   *          result
    */
-  protected void validate(final List<Pair<K2, V2>> outputs) {
+  protected void validate(final List<Pair<K2, V2>> outputs,
+      final boolean orderMatters) {
 
-    boolean success = true;
     final List<String> errors = new ArrayList<String>();
+
     // were we supposed to get output in the first place?
-    // return false if we don't.
-    if (expectedOutputs.size() == 0 && outputs.size() > 0) {
-      final String msg = "Expected no outputs; got " + outputs.size()
-          + " outputs.";
-      LOG.error(msg);
-      errors.add(msg);
-      success = false;
+    if (expectedOutputs.isEmpty() && !outputs.isEmpty()) {
+      logError(errors,
+          String.format("Expected no outputs; got %d outputs.", outputs.size()));
     }
 
-    // make sure all actual outputs are in the expected set,
-    // and at the proper position.
-    for (int i = 0; i < outputs.size(); i++) {
-      final Pair<K2, V2> actual = outputs.get(i);
-      success = lookupExpectedValue(actual, i, errors) && success;
-    }
+    final Map<Pair<K2, V2>, List<Integer>> expectedPositions = buildPositionMap(expectedOutputs);
+    final Map<Pair<K2, V2>, List<Integer>> actualPositions = buildPositionMap(outputs);
 
-    // make sure all expected outputs were accounted for.
-    if (expectedOutputs.size() != outputs.size() || !success) {
-      // something is unaccounted for. Figure out what.
-
-      final ArrayList<Pair<K2, V2>> actuals = new ArrayList<Pair<K2, V2>>();
-      actuals.addAll(outputs);
-
-      for (int i = 0; i < expectedOutputs.size(); i++) {
-        final Pair<K2, V2> expected = expectedOutputs.get(i);
-
-        String expectedStr = "(null)";
-        if (null != expected) {
-          expectedStr = expected.toString();
-        }
-
-        boolean found = false;
-        for (int j = 0; j < actuals.size() && !found; j++) {
-          final Pair<K2, V2> actual = actuals.get(j);
-
-          if (actual.equals(expected)) {
-            // don't match against this actual output again
-            actuals.remove(j);
-
-            found = true;
-          } else if (actual.getFirst().getClass() != expected.getFirst()
-              .getClass()) {
-            final String msg = "Missing expected output " + expectedStr
-                + ": Mismatch in key class: expected: "
-                + expected.getFirst().getClass() + " " + "actual: "
-                + actual.getFirst().getClass();
-            LOG.error(msg);
-            errors.add(msg);
-
-            found = true;
-          } else if (actual.getSecond().getClass() != expected.getSecond()
-              .getClass()) {
-            final String msg = "Missing expected output " + expectedStr
-                + ": Mismatch in value class: expected: "
-                + expected.getSecond().getClass() + " " + "actual: "
-                + actual.getSecond().getClass();
-            LOG.error(msg);
-            errors.add(msg);
-
-            found = true;
+    for (final Pair<K2, V2> output : expectedPositions.keySet()) {
+      final List<Integer> expectedPositionList = expectedPositions.get(output);
+      final List<Integer> actualPositionList = actualPositions.get(output);
+      if (actualPositionList != null) {
+        // the expected value has been seen - check positions
+        final int expectedPositionsCount = expectedPositionList.size();
+        final int actualPositionsCount = actualPositionList.size();
+        if (orderMatters) {
+          // order is important, so the positions must match exactly
+          if (expectedPositionList.equals(actualPositionList)) {
+            LOG.debug(String.format("Matched expected output %s at "
+                + "positions %s", output, expectedPositionList.toString()));
+          } else {
+            int i = 0;
+            while (expectedPositionsCount > i || actualPositionsCount > i) {
+              if (expectedPositionsCount > i && actualPositionsCount > i) {
+                final int expectedPosition = expectedPositionList.get(i);
+                final int actualPosition = actualPositionList.get(i);
+                if (expectedPosition == actualPosition) {
+                  LOG.debug(String.format("Matched expected output %s at "
+                      + "position %d", output, expectedPosition));
+                } else {
+                  logError(errors, String.format(
+                      "Matched expected output %s but at "
+                          + "incorrect position %d (expected position %d)",
+                      output, actualPosition, expectedPosition));
+                }
+              } else if (expectedPositionsCount > i) {
+                // not ok, value wasn't seen enough times
+                logError(errors, String.format(
+                    "Missing expected output %s at position %d.", output,
+                    expectedPositionList.get(i)));
+              } else {
+                // not ok, value seen too many times
+                logError(errors, String.format(
+                    "Received unexpected output %s at position %d.", output,
+                    actualPositionList.get(i)));
+              }
+              i++;
+            }
+          }
+        } else {
+          // order is unimportant, just check that the count of times seen match
+          if (expectedPositionsCount == actualPositionsCount) {
+            // ok, counts match
+            LOG.debug(String.format("Matched expected output %s in "
+                + "%d positions", output, expectedPositionsCount));
+          } else if (expectedPositionsCount > actualPositionsCount) {
+            // not ok, value wasn't seen enough times
+            for (int i = 0; i < expectedPositionsCount - actualPositionsCount; i++) {
+              logError(errors,
+                  String.format("Missing expected output %s", output));
+            }
+          } else {
+            // not ok, value seen too many times
+            for (int i = 0; i < actualPositionsCount - expectedPositionsCount; i++) {
+              logError(errors,
+                  String.format("Received unexpected output %s", output));
+            }
           }
         }
-
-        if (!found) {
-          final String msg = "Missing expected output " + expectedStr
-              + " at position " + i + ".";
-          LOG.error(msg);
-          errors.add(msg);
-        }
+        actualPositions.remove(output);
+      } else {
+        // the expected value was not found anywhere - output errors
+        checkTypesAndLogError(outputs, output, expectedPositionList,
+            orderMatters, errors, "Missing expected output");
       }
-
-      success = false;
     }
 
-    if (!success) {
+    for (final Pair<K2, V2> output : actualPositions.keySet()) {
+      // anything left in actual set is unexpected
+      checkTypesAndLogError(outputs, output, actualPositions.get(output),
+          orderMatters, errors, "Received unexpected output");
+    }
+
+    if (!errors.isEmpty()) {
       final StringBuilder buffer = new StringBuilder();
       buffer.append(errors.size()).append(" Error(s): ");
       formatValueList(errors, buffer);
       fail(buffer.toString());
     }
+
+  }
+
+  private void checkTypesAndLogError(final List<Pair<K2, V2>> outputs,
+      final Pair<K2, V2> output, final List<Integer> positions,
+      final boolean orderMatters, final List<String> errors,
+      final String errorString) {
+    for (final int pos : positions) {
+      String msg = null;
+      if (expectedOutputs.size() > pos && outputs.size() > pos) {
+        final Pair<K2, V2> actual = outputs.get(pos);
+        final Pair<K2, V2> expected = expectedOutputs.get(pos);
+        final Class<?> actualKeyClass = actual.getFirst().getClass();
+        final Class<?> actualValueClass = actual.getSecond().getClass();
+        final Class<?> expectedKeyClass = expected.getFirst().getClass();
+        final Class<?> expectedValueClass = expected.getSecond().getClass();
+        if (actualKeyClass != expectedKeyClass) {
+          msg = String.format(
+              "%s %s: Mismatch in key class: expected: %s actual: %s",
+              errorString, output, expectedKeyClass, actualKeyClass);
+        } else if (actualValueClass != expectedValueClass) {
+          msg = String.format(
+              "%s %s: Mismatch in value class: expected: %s actual: %s",
+              errorString, output, expectedValueClass, actualValueClass);
+        }
+      }
+      if (msg == null) {
+        if (orderMatters) {
+          msg = String
+              .format("%s %s at position %d.", errorString, output, pos);
+        } else {
+          msg = String.format("%s %s", errorString, output);
+        }
+      }
+      logError(errors, msg);
+    }
+  }
+
+  private Map<Pair<K2, V2>, List<Integer>> buildPositionMap(
+      final List<Pair<K2, V2>> values) {
+    final Map<Pair<K2, V2>, List<Integer>> valuePositions = new HashMap<Pair<K2, V2>, List<Integer>>();
+    for (int i = 0; i < values.size(); i++) {
+      final Pair<K2, V2> output = values.get(i);
+      List<Integer> positions;
+      if (valuePositions.containsKey(output)) {
+        positions = valuePositions.get(output);
+      } else {
+        positions = new ArrayList<Integer>();
+        valuePositions.put(output, positions);
+      }
+      positions.add(i);
+    }
+    return valuePositions;
+  }
+
+  private void logError(final List<String> errors, final String msg) {
+    LOG.error(msg);
+    errors.add(msg);
   }
 
   /**
@@ -290,8 +373,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
             + expected.getFirst().getDeclaringClass().getCanonicalName() + "."
             + expected.getFirst().toString() + " have value " + actualValue
             + " instead of expected " + expected.getSecond();
-        LOG.error(msg);
-        errors.add(msg);
+        logError(errors, msg);
 
         success = false;
       }
@@ -308,8 +390,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
         final String msg = "Counter with category " + counter.getFirst()
             + " and name " + counter.getSecond() + " have value " + actualValue
             + " instead of expected " + expected.getSecond();
-        LOG.error(msg);
-        errors.add(msg);
+        logError(errors, msg);
 
         success = false;
       }
@@ -321,74 +402,6 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       formatValueList(errors, buffer);
       fail(buffer.toString());
     }
-  }
-
-  /**
-   * Part of the validation system.
-   * 
-   * @param actualVal
-   *          A (k, v) pair we got from the Mapper
-   * @param actualPos
-   *          The position of this pair in the actual output
-   * @return true if the expected val at 'actualPos' in the expected list equals
-   *         actualVal
-   */
-  private boolean lookupExpectedValue(final Pair<K2, V2> actualVal,
-      final int actualPos, final List<String> errors) {
-
-    // first: Do we have the success condition?
-    if (expectedOutputs.size() > actualPos
-        && expectedOutputs.get(actualPos).equals(actualVal)) {
-      LOG.debug("Matched expected output " + actualVal.toString()
-          + " at position " + actualPos);
-      return true;
-    }
-
-    // second: can we find this output somewhere else in
-    // the expected list?
-    boolean foundSomewhere = false;
-
-    for (int i = 0; i < expectedOutputs.size() && !foundSomewhere; i++) {
-      final Pair<K2, V2> expected = expectedOutputs.get(i);
-
-      if (expected.equals(actualVal)) {
-        final String msg = "Matched expected output " + actualVal.toString()
-            + " but at incorrect position " + actualPos
-            + " (expected position " + i + ")";
-        LOG.error(msg);
-        errors.add(msg);
-
-        foundSomewhere = true;
-      } else if (actualVal.getFirst().getClass() != expected.getFirst()
-          .getClass()) {
-        final String msg = "Received unexpected output " + actualVal.toString()
-            + ": Mismatch in key class: expected: "
-            + expected.getFirst().getClass() + " " + "actual: "
-            + actualVal.getFirst().getClass();
-        LOG.error(msg);
-        errors.add(msg);
-
-        foundSomewhere = true;
-      } else if (actualVal.getSecond().getClass() != expected.getSecond()
-          .getClass()) {
-        final String msg = "Received unexpected output " + actualVal.toString()
-            + ": Mismatch in value class: expected: "
-            + expected.getSecond().getClass() + " " + "actual: "
-            + actualVal.getSecond().getClass();
-        LOG.error(msg);
-        errors.add(msg);
-
-        foundSomewhere = true;
-      }
-    }
-
-    if (!foundSomewhere) {
-      final String msg = "Received unexpected output " + actualVal.toString();
-      LOG.error(msg);
-      errors.add(msg);
-    }
-
-    return false;
   }
 
   protected static void formatValueList(final List<?> values,

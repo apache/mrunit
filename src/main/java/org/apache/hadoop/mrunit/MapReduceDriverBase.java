@@ -149,10 +149,10 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
   public abstract List<Pair<K3, V3>> run() throws IOException;
 
   @Override
-  public void runTest() {
+  public void runTest(final boolean orderMatters) {
     try {
       final List<Pair<K3, V3>> reduceOutputs = run();
-      validate(reduceOutputs);
+      validate(reduceOutputs, orderMatters);
       validate(counterWrapper);
     } catch (final IOException ioe) {
       LOG.error(ioe);
