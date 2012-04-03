@@ -1,3 +1,34 @@
+Release Notes - MRUnit - Version 0.9.0
+
+** Bug
+    * [MRUNIT-54] - Driver.runTest throws RuntimeException should it throw AssertionError?
+    * [MRUNIT-70] - copy(orig, conf) in Serialization shouldn't require objects to have a no-args constructor, and copy(orig, copy, conf) seems to violate contract for deserializer.deserialize()
+    * [MRUNIT-77] - cannot use serializations that do not clone into object, or serializations without no arg constructors with reduce driver
+    * [MRUNIT-86] - Configuration not passed to individual mappers/reducers in mapred MapReducerDriver, PipelineMapReduceDriver
+
+** Dependency upgrade
+    * [MRUNIT-90] - upgrade junit to 4.10 and change ExpectedSuppliedException to implement TestRule instead 
+
+** Improvement
+    * [MRUNIT-45] - MockOutputCollector.deepCopy should use o.a.h.mrunit.Serialization.copy
+    * [MRUNIT-46] - Tests should use *Driver.new*Driver factory methods for cleaner code
+    * [MRUNIT-48] - Test and Deprecate Driver.{*OutputFromString,*InputFromString} Methods
+    * [MRUNIT-49] - o.a.h.mrunit.mapreduce.ReduceDriverBase.ValueClassInstanceReuseList Configuration not modifable
+    * [MRUNIT-62] - Add Maven Profile Build Information to BUILD.txt
+    * [MRUNIT-65] - return better error message when mapper or reducer is null for MapDriver or ReduceDriver
+    * [MRUNIT-66] - null input checks and behavior on no input to a driver are inconsistent
+    * [MRUNIT-72] - MRUnit pom.xml should not depend on 0.23.1-SNAPSHOT
+    * [MRUNIT-74] - Matching output but at incorrect position is not returned as an Error in the message string thrown in the RuntimeException
+    * [MRUNIT-75] - cleanup exception checking in tests to use a @Rule ExpectedException
+    * [MRUNIT-85] - Run java conventions formatter that comes with eclipse on all source code
+    * [MRUNIT-89] - add static convenience methods to PipelineMapReduceDriver class
+    * [MRUNIT-91] - runTest() should optionally ignore output order
+    * [MRUNIT-92] - cleanup multiple release profile and javadoc handling in pom
+
+** New Feature
+    * [MRUNIT-67] - o.a.h.mrunit.mapreduce.MapReduceDriver should support a combiner
+    * [MRUNIT-68] - Support custom counter checking
+
 Release Notes - MRUnit - Version 0.8.1
 
 ** Bug
