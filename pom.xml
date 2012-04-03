@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>7</version>
+    <version>10</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -38,15 +38,6 @@
     MRUnit is a Java library that helps developers unit test Apache Hadoop map
     reduce jobs.
   </description>
-
-  <organization>
-    <name>Apache Software Foundation</name>
-    <url>http://www.apache.org</url>
-  </organization>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
 
   <issueManagement>
     <system>JIRA</system>
@@ -63,13 +54,6 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/mrunit/trunk/</developerConnection>
     <url>http://svn.apache.org/viewvc/incubator/mrunit/trunk/</url>
   </scm>
-
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
 
   <mailingLists>
     <mailingList>
@@ -247,23 +231,6 @@
 
     </plugins>
   </build>
-
-  <repositories>
-    <repository>
-      <id>apache.snapshots</id>
-      <name>Apache Snapshot Repository</name>
-      <url>http://repository.apache.org/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>apache-snapshots</id>
-      <url>https://repository.apache.org/content/repositories/snapshots</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <dependencies>
 
