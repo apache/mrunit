@@ -129,7 +129,7 @@
             <fileset>
               <directory>${project.build.directory}</directory>
               <excludes>
-                <exclude>*hadoop*.jar</exclude>
+                <exclude>*hadoop?.jar</exclude>
               </excludes>
             </fileset>
           </filesets>
@@ -169,7 +169,7 @@
               <excludes>
                 <exclude>BUILD.txt</exclude>
                 <exclude>CHANGES.txt</exclude>
-                <exclude>NOTICE-src.txt</exclude>
+                <exclude>BIN-NOTICE.txt</exclude>
               </excludes>
             </configuration>
           </execution>

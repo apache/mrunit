@@ -3,9 +3,3 @@ Copyright 2011-2012 The Apache Software Foundation
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
-
-This product includes Mockito (Copyright (c) 2007 Mockito contributors)
-(http://code.google.com/p/mockito/) distributed under the MIT license.
-
-This product includes Hamcrest (Copyright (c) 2000-2006, www.hamcrest.org)
-(http://code.google.com/p/hamcrest/) distributed under the BSD 2-Clause License.
