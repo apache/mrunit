@@ -23,8 +23,6 @@
 
   <id>bin</id>
 
-  <baseDirectory>${project.build.finalName}-${envClassifier}</baseDirectory>
-
   <formats>
     <format>tar.gz</format>
   </formats>
@@ -45,7 +43,7 @@
       <directory>${project.build.directory}</directory>
       <outputDirectory>lib</outputDirectory>
       <includes>
-        <include>${project.build.finalName}-${envClassifier}.jar</include>
+        <include>*hadoop*.jar</include>
       </includes>
     </fileSet>
   </fileSets>
@@ -53,11 +51,6 @@
   <dependencySets>
     <dependencySet>
       <outputDirectory>lib</outputDirectory>
-      <!-- assembly plugin throws exception on target/classes folder is not 
-        a file if dont exclude itself -->
-      <excludes>
-        <exclude>org.apache.mrunit:mrunit</exclude>
-      </excludes>
     </dependencySet>
   </dependencySets>
 </assembly>
