@@ -29,7 +29,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.mrunit</groupId>
   <artifactId>mrunit</artifactId>
-  <version>1.0.0-incubating-SNAPSHOT</version>
+  <version>0.9.0-incubating</version>
 
   <name>MRUnit</name>
   <url>http://incubator.apache.org/mrunit/</url>
@@ -105,10 +105,36 @@
       <email>brock@apache.org</email>
       <name>Brock Noland</name>
     </developer>
+    <developer>
+      <id>jdonofrio.apache.org</id>
+      <email>jdonofrio@apache.org</email>
+      <name>Jim Donofrio</name>
+    </developer>
+    <developer>
+      <id>jarcec.apache.org</id>
+      <email>jarcec@apache.org</email>
+      <name>Jarek Jarcec Cecho</name>
+    </developer>
   </developers>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.4.1</version>
+        <configuration>
+          <excludeDefaultDirectories>true</excludeDefaultDirectories>
+          <filesets>
+            <fileset>
+              <directory>${project.build.directory}</directory>
+              <excludes>
+                <exclude>*hadoop*.jar</exclude>
+              </excludes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -130,56 +156,12 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <classifier>${envClassifier}</classifier>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.3</version>
-        <configuration>
-          <tarLongFileMode>gnu</tarLongFileMode>
-        </configuration>
-        <executions>
-          <execution>
-            <id>src</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/src-assembly.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-          <execution>
-            <id>bin</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/bin-assembly.xml</descriptor>
-              </descriptors>
-              <finalName>${project.build.finalName}-${envClassifier}</finalName>
-              <appendAssemblyId>false</appendAssemblyId>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
         <version>0.8</version>
         <executions>
           <execution>
-            <phase>verify</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>check</goal>
             </goals>
@@ -192,6 +174,15 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <classifier>${envClassifier}</classifier>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -223,11 +214,129 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.7</version>
+      </plugin>
     </plugins>
   </build>
 
-  <dependencies>
+  <profiles>
+    <profile>
+      <id>hadoop1</id>
+      <activation>
+        <property>
+          <name>!hadoop.version</name>
+        </property>
+      </activation>
+      <properties>
+        <envClassifier>hadoop1</envClassifier>
+      </properties>
 
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-core</artifactId>
+          <version>1.0.2</version>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <profile>
+      <id>hadoop2</id>
+      <activation>
+        <property>
+          <name>hadoop.version</name>
+          <value>2</value>
+        </property>
+      </activation>
+
+      <properties>
+        <envClassifier>hadoop2</envClassifier>
+        <specificHadoopVersion>0.23.1</specificHadoopVersion>
+      </properties>
+
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+          <version>${specificHadoopVersion}</version>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-core</artifactId>
+          <version>${specificHadoopVersion}</version>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <profile>
+      <id>sign</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>dist-src</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>2.3</version>
+            <configuration>
+              <tarLongFileMode>gnu</tarLongFileMode>
+              <descriptors>
+                <descriptor>src/main/assembly/src-assembly.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>dist-bin</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>2.3</version>
+            <configuration>
+              <tarLongFileMode>gnu</tarLongFileMode>
+              <descriptors>
+                <descriptor>src/main/assembly/bin-assembly.xml</descriptor>
+              </descriptors>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -244,7 +353,6 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.15</version>
-
       <exclusions>
         <exclusion>
           <groupId>com.sun.jdmk</groupId>
@@ -270,116 +378,5 @@
       <artifactId>mockito-all</artifactId>
       <version>1.8.5</version>
     </dependency>
-
   </dependencies>
-
-  <profiles>
-    <profile>
-      <!-- Used only when cutting a full release to sign the artifacts -->
-      <id>deploy</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.1</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-      <properties>
-        <update-release-info>true</update-release-info>
-      </properties>
-    </profile>
-    <profile>
-      <id>hadoop-0.20</id>
-      <activation>
-        <property>
-          <name>hadoop.version</name>
-          <value>0.20</value>
-        </property>
-      </activation>
-      <properties>
-        <envClassifier>hadoop020</envClassifier>
-      </properties>
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-core</artifactId>
-          <version>0.20.2</version>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>hadoop-1.0</id>
-      <activation>
-        <property>
-          <name>!hadoop.version</name>
-        </property>
-      </activation>
-      <properties>
-        <envClassifier>hadoop100</envClassifier>
-      </properties>
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-core</artifactId>
-          <version>1.0.0</version>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>hadoop-0.23</id>
-      <activation>
-        <property>
-          <name>hadoop.version</name>
-          <value>0.23</value>
-        </property>
-      </activation>
-      <properties>
-        <envClassifier>hadoop023</envClassifier>
-        <specificHadoopVersion>0.23.1</specificHadoopVersion>
-      </properties>
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-common</artifactId>
-          <version>${specificHadoopVersion}</version>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-common</artifactId>
-          <version>${specificHadoopVersion}</version>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-core</artifactId>
-          <version>${specificHadoopVersion}</version>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.codehaus.jackson</groupId>
-          <artifactId>jackson-core-asl</artifactId>
-          <version>1.8.2</version>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.codehaus.jackson</groupId>
-          <artifactId>jackson-mapper-asl</artifactId>
-          <version>1.8.2</version>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
 </project>
