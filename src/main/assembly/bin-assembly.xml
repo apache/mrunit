@@ -33,8 +33,9 @@
 
   <files>
     <file>
-      <source>NOTICE.txt</source>
+      <source>BIN-NOTICE.txt</source>
       <outputDirectory>/</outputDirectory>
+      <destName>NOTICE.txt</destName>
     </file>
   </files>
 

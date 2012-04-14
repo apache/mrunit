@@ -35,9 +35,8 @@
 
   <files>
     <file>
-      <source>NOTICE-src.txt</source>
+      <source>NOTICE.txt</source>
       <outputDirectory>/</outputDirectory>
-      <destName>NOTICE.txt</destName>
     </file>
   </files>
 
