@@ -24,10 +24,15 @@ Release Notes - MRUnit - Version 0.9.0
     * [MRUNIT-89] - add static convenience methods to PipelineMapReduceDriver class
     * [MRUNIT-91] - runTest() should optionally ignore output order
     * [MRUNIT-92] - cleanup multiple release profile and javadoc handling in pom
+    * [MRUNIT-96] - Cleanup release: remove unnecesssary artifacts from nexus and distribute single binary distribution with 2 build artifacts, 1 for hadoop 1+ and 1 for hadoop 2+
 
 ** New Feature
     * [MRUNIT-67] - o.a.h.mrunit.mapreduce.MapReduceDriver should support a combiner
     * [MRUNIT-68] - Support custom counter checking
+
+** Task
+    * [MRUNIT-61] - Build separate source and binary tar balls
+    * [MRUNIT-94] - upgrade parent pom to version 10 and remove info in pom that is inherited from parent
 
 Release Notes - MRUnit - Version 0.8.1
 
