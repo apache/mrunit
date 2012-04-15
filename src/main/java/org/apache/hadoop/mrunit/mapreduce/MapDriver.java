@@ -28,9 +28,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.MapDriverBase;
 import org.apache.hadoop.mrunit.counters.CounterWrapper;
+import org.apache.hadoop.mrunit.mapreduce.mock.MockInputSplit;
 import org.apache.hadoop.mrunit.mapreduce.mock.MockMapContextWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
@@ -209,9 +211,11 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     final List<Pair<K1, V1>> inputs = new ArrayList<Pair<K1, V1>>();
     inputs.add(new Pair<K1, V1>(inputKey, inputVal));
 
+    final InputSplit inputSplit = new MockInputSplit();
+    
     try {
       final MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(
-          inputs, getCounters(), getConfiguration());
+          inputs, getCounters(), getConfiguration(), inputSplit);
 
       final Mapper<K1, V1, K2, V2>.Context context = wrapper.getMockContext();
       myMapper.run(context);

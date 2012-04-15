@@ -26,9 +26,11 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.map.InverseMapper;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -240,6 +242,24 @@ public class TestMapDriver {
     protected void setup(final Context context) throws IOException,
         InterruptedException {
       setupConfiguration = context.getConfiguration();
+    }
+  }
+
+  @Test
+  public void testInputSplitDetails() {
+    final MapDriver<NullWritable, NullWritable, Text, LongWritable> driver = 
+        MapDriver.newMapDriver(new InputSplitDetailMapper());
+    driver.withInput(NullWritable.get(), NullWritable.get())
+      .withOutput(new Text("somefile"), new LongWritable(0L)).runTest();
+  }
+  
+  public static class InputSplitDetailMapper
+    extends Mapper<NullWritable, NullWritable, Text, LongWritable> {
+    protected void map(NullWritable key, NullWritable value, Context context) 
+        throws IOException, InterruptedException {
+      FileSplit split = (FileSplit)context.getInputSplit();
+      context.write(new Text(split.getPath().toString()), 
+          new LongWritable(split.getLength()));
     }
   }
 
