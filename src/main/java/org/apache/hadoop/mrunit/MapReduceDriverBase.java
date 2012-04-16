@@ -157,7 +157,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
    */
   public List<Pair<K2, List<V2>>> shuffle(final List<Pair<K2, V2>> mapOutputs) {
     // step 1 - use the key group comparator to organise map outputs
-    Comparator<K2> keyGroupComparator;
+    final Comparator<K2> keyGroupComparator;
     if (this.keyGroupComparator == null) {
       keyGroupComparator = new JobConf(getConfiguration())
           .getOutputValueGroupingComparator();
