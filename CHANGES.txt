@@ -6,6 +6,7 @@ Release Notes - MRUnit - Version 0.9.0
     * [MRUNIT-77] - cannot use serializations that do not clone into object, or serializations without no arg constructors with reduce driver
     * [MRUNIT-86] - Configuration not passed to individual mappers/reducers in mapred MapReducerDriver, PipelineMapReduceDriver
     * [MRUNIT-97] - InputSplit causes NullPointerException in mapreduce api
+    * [MRUNIT-99] - dont force K2 in MapReduceDriver's to be Comparable since Hadoop dont enforce this on the map output key and value classes
 
 ** Dependency upgrade
     * [MRUNIT-90] - upgrade junit to 4.10 and change ExpectedSuppliedException to implement TestRule instead 
