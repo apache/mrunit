@@ -45,8 +45,8 @@ import org.apache.hadoop.mrunit.types.Pair;
  * pair, representing a single unit test.
  */
 @SuppressWarnings("rawtypes")
-public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3, V3>
-    extends TestDriver<K1, V1, K3, V3> {
+public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
+    TestDriver<K1, V1, K3, V3> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriverBase.class);
 
@@ -60,19 +60,6 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
 
   public MapReduceDriverBase() {
     inputList = new ArrayList<Pair<K1, V1>>();
-
-    // create a simple comparator for key grouping and ordering
-    final Comparator<K2> simpleComparator = new Comparator<K2>() {
-      @SuppressWarnings("unchecked")
-      @Override
-      public int compare(final K2 o1, final K2 o2) {
-        return o1.compareTo(o2);
-      }
-    };
-
-    // assign simple key grouping and ordering comparator
-    keyGroupComparator = simpleComparator;
-    keyValueOrderComparator = null;
   }
 
   /**
@@ -170,6 +157,13 @@ public abstract class MapReduceDriverBase<K1, V1, K2 extends Comparable, V2, K3,
    */
   public List<Pair<K2, List<V2>>> shuffle(final List<Pair<K2, V2>> mapOutputs) {
     // step 1 - use the key group comparator to organise map outputs
+    Comparator<K2> keyGroupComparator;
+    if (this.keyGroupComparator == null) {
+      keyGroupComparator = new JobConf(getConfiguration())
+          .getOutputValueGroupingComparator();
+    } else {
+      keyGroupComparator = this.keyGroupComparator;
+    }
     final TreeMap<K2, List<Pair<K2, V2>>> groupedByKey = new TreeMap<K2, List<Pair<K2, V2>>>(
         keyGroupComparator);
 
