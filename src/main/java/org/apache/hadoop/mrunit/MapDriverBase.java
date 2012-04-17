@@ -17,8 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -50,7 +48,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    * @param key
    */
   public void setInputKey(final K1 key) {
-    inputKey = returnNonNull(key);
+    inputKey = copy(key);
   }
 
   public K1 getInputKey() {
@@ -63,7 +61,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    * @param val
    */
   public void setInputValue(final V1 val) {
-    inputVal = returnNonNull(val);
+    inputVal = copy(val);
   }
 
   public V1 getInputValue() {
@@ -97,7 +95,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    *          The (k, v) pair to add
    */
   public void addOutput(final Pair<K2, V2> outputRecord) {
-    expectedOutputs.add(returnNonNull(outputRecord));
+    addOutput(outputRecord.getFirst(), outputRecord.getSecond());
   }
 
   /**
@@ -105,7 +103,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    * 
    */
   public void addOutput(final K2 key, final V2 val) {
-    addOutput(new Pair<K2, V2>(key, val));
+    expectedOutputs.add(copyPair(key, val));
   }
 
   /**

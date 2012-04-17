@@ -28,8 +28,11 @@ import org.apache.hadoop.io.serializer.Serializer;
 
 public class Serialization {
 
-  private final SerializationFactory serializationFactory;
+  private SerializationFactory serializationFactory;
 
+  /**
+   * @param conf
+   */
   public Serialization(Configuration conf) {
     serializationFactory = new SerializationFactory(conf);
   }
@@ -47,7 +50,7 @@ public class Serialization {
    * @return a copy of the orig object
    */
   @SuppressWarnings("unchecked")
-  public Object copy(final Object orig, final Object copy) {
+  public <T> T copy(final T orig, final T copy) {
     if (copy != null && orig.getClass() != copy.getClass()) {
       throw new IllegalArgumentException(orig.getClass() + " != "
           + copy.getClass());
@@ -62,7 +65,8 @@ public class Serialization {
           .getDeserializer(clazz);
     } catch (NullPointerException e) {
       throw new IllegalStateException(
-          "No applicable class implementing Serialization in conf at io.serializations");
+          "No applicable class implementing Serialization in conf at io.serializations for "
+              + orig.getClass(), e);
     }
     try {
       final DataOutputBuffer outputBuffer = new DataOutputBuffer();
@@ -71,7 +75,7 @@ public class Serialization {
       final DataInputBuffer inputBuffer = new DataInputBuffer();
       inputBuffer.reset(outputBuffer.getData(), outputBuffer.getLength());
       deserializer.open(inputBuffer);
-      return deserializer.deserialize(copy);
+      return (T) deserializer.deserialize(copy);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
@@ -83,8 +87,21 @@ public class Serialization {
    * @param orig
    * @return a new copy of the orig object
    */
-  public Object copy(final Object orig) {
+  public <T> T copy(final T orig) {
     return copy(orig, null);
+  }
+
+  /**
+   * Creates a new copy of the orig object
+   * 
+   * @param orig
+   * @param conf
+   *          new Configuration object to use
+   * @return a new copy of the orig object
+   */
+  public <T> T copyWithConf(final T orig, final Configuration conf) {
+    serializationFactory = new SerializationFactory(conf);
+    return copy(orig);
   }
 
 }

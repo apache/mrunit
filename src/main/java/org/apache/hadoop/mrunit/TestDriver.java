@@ -46,11 +46,14 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   protected CounterWrapper counterWrapper;
 
+  protected Serialization serialization;
+
   public TestDriver() {
     expectedOutputs = new ArrayList<Pair<K2, V2>>();
     expectedEnumCounters = new ArrayList<Pair<Enum, Long>>();
     expectedStringCounters = new ArrayList<Pair<Pair<String, String>, Long>>();
     configuration = new Configuration();
+    serialization = new Serialization(configuration);
   }
 
   /**
@@ -123,6 +126,23 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   }
 
   /**
+   * @return The configuration object that will given to the mapper and/or
+   *         reducer associated with the driver
+   */
+  public Configuration getConfiguration() {
+    return configuration;
+  }
+
+  /**
+   * @param configuration
+   *          The configuration object that will given to the mapper and/or
+   *          reducer associated with the driver
+   */
+  public void setConfiguration(final Configuration configuration) {
+    this.configuration = returnNonNull(configuration);
+  }
+
+  /**
    * Runs the test but returns the result set instead of validating it (ignores
    * any addOutput(), etc calls made before this)
    * 
@@ -187,6 +207,14 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     }
 
     return outList;
+  }
+
+  protected <T> T copy(T object) {
+    return serialization.copyWithConf(object, configuration);
+  }
+
+  protected <S, T> Pair<S, T> copyPair(S first, T second) {
+    return new Pair<S, T>(copy(first), copy(second));
   }
 
   /**
@@ -418,22 +446,5 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     }
 
     sb.append(")");
-  }
-
-  /**
-   * @return The configuration object that will given to the mapper and/or
-   *         reducer associated with the driver (new API only)
-   */
-  public Configuration getConfiguration() {
-    return configuration;
-  }
-
-  /**
-   * @param configuration
-   *          The configuration object that will given to the mapper and/or
-   *          reducer associated with the driver (new API only)
-   */
-  public void setConfiguration(final Configuration configuration) {
-    this.configuration = returnNonNull(configuration);
   }
 }

@@ -47,8 +47,8 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
   @Override
   @SuppressWarnings("unchecked")
   public void collect(final K key, final V value) throws IOException {
-    collectedOutputs.add(new Pair<K, V>((K) serialization.copy(key),
-        (V) serialization.copy(value)));
+    collectedOutputs.add(new Pair<K, V>(serialization.copy(key), serialization
+        .copy(value)));
   }
 
   /**

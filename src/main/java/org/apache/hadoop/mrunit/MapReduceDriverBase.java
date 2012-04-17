@@ -50,17 +50,13 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriverBase.class);
 
-  protected List<Pair<K1, V1>> inputList;
+  protected List<Pair<K1, V1>> inputList = new ArrayList<Pair<K1, V1>>();
 
   /** Key group comparator */
   protected Comparator<K2> keyGroupComparator;
 
   /** Key value order comparator */
   protected Comparator<K2> keyValueOrderComparator;
-
-  public MapReduceDriverBase() {
-    inputList = new ArrayList<Pair<K1, V1>>();
-  }
 
   /**
    * Adds an input to send to the mapper
@@ -69,7 +65,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
    * @param val
    */
   public void addInput(final K1 key, final V1 val) {
-    inputList.add(new Pair<K1, V1>(key, val));
+    inputList.add(copyPair(key, val));
   }
 
   /**
@@ -79,7 +75,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
    *          The (k, v) pair to add to the input list.
    */
   public void addInput(final Pair<K1, V1> input) {
-    inputList.add(returnNonNull(input));
+    addInput(input.getFirst(), input.getSecond());
   }
 
   /**
@@ -89,7 +85,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
    *          The (k, v) pair to add
    */
   public void addOutput(final Pair<K3, V3> outputRecord) {
-    expectedOutputs.add(returnNonNull(outputRecord));
+    addOutput(outputRecord.getFirst(), outputRecord.getSecond());
   }
 
   /**
@@ -99,7 +95,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
    * @param val
    */
   public void addOutput(final K3 key, final V3 val) {
-    addOutput(new Pair<K3, V3>(key, val));
+    expectedOutputs.add(copyPair(key, val));
   }
 
   /**

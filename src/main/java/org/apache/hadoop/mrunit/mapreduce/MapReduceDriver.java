@@ -308,8 +308,9 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     for (final Pair<K1, V1> input : inputList) {
       LOG.debug("Mapping input " + input.toString() + ")");
 
-      mapOutputs.addAll(MapDriver.newMapDriver(myMapper).withInput(input)
-          .withCounters(getCounters()).withConfiguration(configuration).run());
+      mapOutputs.addAll(MapDriver.newMapDriver(myMapper)
+          .withCounters(getCounters()).withConfiguration(configuration)
+          .withInput(input).run());
     }
 
     if (myCombiner != null) {

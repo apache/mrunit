@@ -17,8 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -64,7 +62,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    */
   public void setInputKey(final K1 key) {
-    inputKey = returnNonNull(key);
+    inputKey = copy(key);
   }
 
   /**
@@ -73,7 +71,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * @param val
    */
   public void addInputValue(final V1 val) {
-    inputValues.add(returnNonNull(val));
+    inputValues.add(copy(val));
   }
 
   /**
@@ -92,7 +90,9 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * @param values
    */
   public void addInputValues(final List<V1> values) {
-    inputValues.addAll(returnNonNull(values));
+    for (V1 value : values) {
+      addInputValue(value);
+    }
   }
 
   /**
@@ -113,7 +113,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    *          The (k, v) pair to add
    */
   public void addOutput(final Pair<K2, V2> outputRecord) {
-    expectedOutputs.add(returnNonNull(outputRecord));
+    addOutput(outputRecord.getFirst(), outputRecord.getSecond());
   }
 
   /**
@@ -125,7 +125,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    *          The val part of a (k, v) pair to add
    */
   public void addOutput(final K2 key, final V2 val) {
-    addOutput(new Pair<K2, V2>(key, val));
+    expectedOutputs.add(copyPair(key, val));
   }
 
   /**
@@ -210,7 +210,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
         @Override
         public T next() {
           final T next = iterator.next();
-          value = (T) serialization.copy(next, value);
+          value = serialization.copy(next, value);
           return value;
         }
 

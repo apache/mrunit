@@ -163,7 +163,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    * @param val
    */
   public void addInput(final K1 key, final V1 val) {
-    inputList.add(new Pair<K1, V1>(key, val));
+    inputList.add(copyPair(key, val));
   }
 
   /**
@@ -186,7 +186,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    *          The (k, v) pair to add to the input list.
    */
   public void addInput(final Pair<K1, V1> input) {
-    inputList.add(returnNonNull(input));
+    addInput(input.getFirst(), input.getSecond());
   }
 
   /**
@@ -209,7 +209,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    *          The (k, v) pair to add
    */
   public void addOutput(final Pair<K2, V2> outputRecord) {
-    expectedOutputs.add(returnNonNull(outputRecord));
+    addOutput(outputRecord.getFirst(), outputRecord.getSecond());
   }
 
   /**
@@ -231,7 +231,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
    * @param val
    */
   public void addOutput(final K2 key, final V2 val) {
-    addOutput(new Pair<K2, V2>(key, val));
+    expectedOutputs.add(copyPair(key, val));
   }
 
   /**
