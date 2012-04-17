@@ -34,15 +34,11 @@ import org.apache.hadoop.mrunit.types.Pair;
 public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
 
   private final ArrayList<Pair<K, V>> collectedOutputs;
-  private final Configuration conf;
+  private final Serialization serialization;
 
-  public MockOutputCollector(final Configuration config) {
+  public MockOutputCollector(final Configuration conf) {
     collectedOutputs = new ArrayList<Pair<K, V>>();
-    conf = config;
-  }
-
-  private Object deepCopy(final Object obj) {
-    return Serialization.copy(obj, conf);
+    serialization = new Serialization(conf);
   }
 
   /**
@@ -51,8 +47,8 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
   @Override
   @SuppressWarnings("unchecked")
   public void collect(final K key, final V value) throws IOException {
-    collectedOutputs
-        .add(new Pair<K, V>((K) deepCopy(key), (V) deepCopy(value)));
+    collectedOutputs.add(new Pair<K, V>((K) serialization.copy(key),
+        (V) serialization.copy(value)));
   }
 
   /**

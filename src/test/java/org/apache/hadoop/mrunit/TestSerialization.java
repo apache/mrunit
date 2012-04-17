@@ -30,15 +30,16 @@ public class TestSerialization {
     final Configuration conf = new Configuration();
     conf.setStrings("io.serializations",
         "org.apache.hadoop.io.serializer.JavaSerialization");
-    assertEquals(new Integer(1), Serialization.copy(new Integer(1), conf));
+    Serialization serialization = new Serialization(conf);
+    assertEquals(new Integer(1), serialization.copy(new Integer(1)));
   }
 
   @Test
   public void testChangeStateOfCopyArgument() {
     final IntWritable int1 = new IntWritable(1);
     final IntWritable int2 = new IntWritable(2);
-    final IntWritable copy = (IntWritable) Serialization.copy(int1, int2,
-        new Configuration());
+    Serialization serialization = new Serialization(new Configuration());
+    final IntWritable copy = (IntWritable) serialization.copy(int1, int2);
     assertEquals(int1, copy);
     assertEquals(int1, int2);
   }
@@ -50,7 +51,8 @@ public class TestSerialization {
         "org.apache.hadoop.io.serializer.JavaSerialization");
     final Integer int1 = new Integer(1);
     final Integer int2 = new Integer(2);
-    final Integer copy = (Integer) Serialization.copy(int1, int2, conf);
+    Serialization serialization = new Serialization(conf);
+    final Integer copy = (Integer) serialization.copy(int1, int2);
     assertEquals(int1, copy);
     assertEquals(new Integer(2), int2);
   }

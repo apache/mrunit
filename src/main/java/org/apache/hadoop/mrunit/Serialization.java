@@ -28,6 +28,12 @@ import org.apache.hadoop.io.serializer.Serializer;
 
 public class Serialization {
 
+  private final SerializationFactory serializationFactory;
+
+  public Serialization(Configuration conf) {
+    serializationFactory = new SerializationFactory(conf);
+  }
+
   /**
    * Creates a new copy of the orig object. Depending on the serialization used,
    * the serialization class may or may not copy the orig object into the copy
@@ -38,24 +44,26 @@ public class Serialization {
    * @param copy
    *          if null always returns a new object, if not null may or may not
    *          copy orig into copy depending on what serialization class is used
-   * @param conf
-   *          specifies the serialization classes to use in io.serializations
    * @return a copy of the orig object
    */
   @SuppressWarnings("unchecked")
-  public static Object copy(final Object orig, final Object copy,
-      final Configuration conf) {
+  public Object copy(final Object orig, final Object copy) {
     if (copy != null && orig.getClass() != copy.getClass()) {
-      throw new IllegalArgumentException(orig.getClass() + "!="
+      throw new IllegalArgumentException(orig.getClass() + " != "
           + copy.getClass());
     }
     final Class<?> clazz = orig.getClass();
-    final SerializationFactory serializationFactory = new SerializationFactory(
-        conf);
-    final Serializer<Object> serializer = (Serializer<Object>) serializationFactory
-        .getSerializer(clazz);
-    final Deserializer<Object> deserializer = (Deserializer<Object>) serializationFactory
-        .getDeserializer(clazz);
+    final Serializer<Object> serializer;
+    final Deserializer<Object> deserializer;
+    try {
+      serializer = (Serializer<Object>) serializationFactory
+          .getSerializer(clazz);
+      deserializer = (Deserializer<Object>) serializationFactory
+          .getDeserializer(clazz);
+    } catch (NullPointerException e) {
+      throw new IllegalStateException(
+          "No applicable class implementing Serialization in conf at io.serializations");
+    }
     try {
       final DataOutputBuffer outputBuffer = new DataOutputBuffer();
       serializer.open(outputBuffer);
@@ -73,12 +81,10 @@ public class Serialization {
    * Creates a new copy of the orig object
    * 
    * @param orig
-   * @param conf
-   *          specifies the serialization classes to use in io.serializations
    * @return a new copy of the orig object
    */
-  public static Object copy(final Object orig, final Configuration conf) {
-    return copy(orig, null, conf);
+  public Object copy(final Object orig) {
+    return copy(orig, null);
   }
 
 }

@@ -18,7 +18,6 @@
 
 package org.apache.hadoop.mrunit.mapreduce.mock;
 
-import static org.apache.hadoop.mrunit.Serialization.copy;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -32,6 +31,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mrunit.Serialization;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -39,10 +39,12 @@ import org.mockito.stubbing.Answer;
 public abstract class MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
   protected final Counters counters;
   protected final Configuration conf;
+  protected final Serialization serialization;
   protected final List<Pair<KEYOUT, VALUEOUT>> outputs = new ArrayList<Pair<KEYOUT, VALUEOUT>>();
 
   public MockContextWrapper(final Counters counters, final Configuration conf) {
     this.conf = conf;
+    serialization = new Serialization(conf);
     this.counters = counters;
   }
 
@@ -75,7 +77,8 @@ public abstract class MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
       @Override
       public Object answer(final InvocationOnMock invocation) {
         final Object[] args = invocation.getArguments();
-        outputs.add(new Pair(copy(args[0], conf), copy(args[1], conf)));
+        outputs.add(new Pair(serialization.copy(args[0]), serialization
+            .copy(args[1])));
         return null;
       }
     }).when(context).write((KEYOUT) any(), (VALUEOUT) any());

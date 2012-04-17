@@ -17,7 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.apache.hadoop.mrunit.Serialization.copy;
 import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 
 import java.io.IOException;
@@ -186,13 +185,13 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   protected static class ValueClassInstanceReuseList<T> extends ArrayList<T> {
     private static final long serialVersionUID = 1L;
     private T value;
-    private final Configuration conf;
+    private final Serialization serialization;
 
     @SuppressWarnings("unchecked")
     public ValueClassInstanceReuseList(final List<T> list,
         final Configuration conf) {
       super(list);
-      this.conf = conf;
+      serialization = new Serialization(conf);
     }
 
     @Override
@@ -211,7 +210,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
         @Override
         public T next() {
           final T next = iterator.next();
-          value = (T) copy(next, value, conf);
+          value = (T) serialization.copy(next, value);
           return value;
         }
 
