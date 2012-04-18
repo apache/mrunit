@@ -35,6 +35,7 @@ Release Notes - MRUnit - Version 0.9.0
 ** Task
     * [MRUNIT-61] - Build separate source and binary tar balls
     * [MRUNIT-94] - upgrade parent pom to version 10 and remove info in pom that is inherited from parent
+    * [MRUNIT-103] - JUnit license not in NOTICE.txt in a binary tarball
 
 Release Notes - MRUnit - Version 0.8.1
 
