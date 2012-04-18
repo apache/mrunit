@@ -343,6 +343,24 @@ public class TestReduceDriver {
         .withCounter("category", "sum", 4).runTest();
   }
 
+  @Test
+  public void testCopy() {
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver(new IdentityReducer<Text, Text>());
+    final Text input = new Text("a");
+    driver.withInputKey(input);
+    input.set("b");
+    driver.withInputValue(input);
+    input.set("c");
+    driver.withInputValue(input);
+
+    final Text output = new Text("a");
+    driver.withOutput(output, new Text("b"));
+    output.set("c");
+    driver.withOutput(new Text("a"), output);
+    driver.runTest();
+  }
+
   /**
    * Simple reducer that have custom counters that are increased each map() call
    */

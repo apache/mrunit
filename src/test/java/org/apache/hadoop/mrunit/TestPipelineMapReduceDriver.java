@@ -206,4 +206,26 @@ public class TestPipelineMapReduceDriver {
     driver.addOutput(1, new IntWritable(2));
     driver.runTest();
   }
+
+  @Test
+  public void testCopy() {
+    final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver
+        .newPipelineMapReduceDriver();
+    driver.withMapReduce(new IdentityMapper<Text, Text>(),
+        new IdentityReducer<Text, Text>());
+    final Text key = new Text("a");
+    final Text value = new Text("b");
+    driver.addInput(key, value);
+    key.set("c");
+    value.set("d");
+    driver.addInput(key, value);
+
+    key.set("a");
+    value.set("b");
+    driver.addOutput(key, value);
+    key.set("c");
+    value.set("d");
+    driver.addOutput(key, value);
+    driver.runTest();
+  }
 }

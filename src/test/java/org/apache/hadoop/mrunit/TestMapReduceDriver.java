@@ -408,4 +408,22 @@ public class TestMapReduceDriver {
     driver.addOutput(1, new IntWritable(2));
     driver.runTest();
   }
+
+  @Test
+  public void testCopy() {
+    final Text key = new Text("a");
+    final LongWritable value = new LongWritable(1);
+    driver.addInput(key, value);
+    key.set("b");
+    value.set(2);
+    driver.addInput(key, value);
+
+    key.set("a");
+    value.set(1);
+    driver.addOutput(key, value);
+    key.set("b");
+    value.set(2);
+    driver.addOutput(key, value);
+    driver.runTest();
+  }
 }

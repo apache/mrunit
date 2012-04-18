@@ -410,4 +410,20 @@ public class TestMapDriver {
     driver.addOutput(1, new IntWritable(2));
     driver.runTest();
   }
+
+  @Test
+  public void testCopy() {
+    driver = MapDriver.newMapDriver(new DuplicatingMapper());
+    final Text input = new Text("a");
+    driver.withInputKey(input);
+    input.set("b");
+    driver.withInputValue(input);
+    input.set("c");
+
+    final Text output = new Text("a");
+    driver.withOutput(output, new Text("b"));
+    output.set("b");
+    driver.withOutput(new Text("a"), output);
+    driver.runTest();
+  }
 }
