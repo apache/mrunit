@@ -9,3 +9,6 @@ This product includes Mockito (Copyright (c) 2007 Mockito contributors)
 
 This product includes Hamcrest (Copyright (c) 2000-2006, www.hamcrest.org)
 (http://code.google.com/p/hamcrest/) distributed under the BSD 2-Clause License.
+
+This product includes JUnit (Copyright (c) 2006 JUnit.org)
+(http://junit.sourceforge.net/) distributed under the Common Public License.
