@@ -12,17 +12,13 @@ From the command line:
 
 Building MRUnit is dependent upon the version of Hadoop Map Reduce you intend to use.
 
-Hadoop Map Reduce 1.0.0:
+Hadoop Map Reduce 1.X or 0.20.X:
 $ mvn package
-This produces mrunit-${VERSION}-hadoop100.tar.gz and mrunit-${VERSION}-hadoop100.jar in the target directory.
+This produces mrunit-${VERSION}-hadoop1.jar in the target directory.
 
-Hadoop Map Reduce 0.23.1:
-$ mvn package -Dhadoop.version=0.23
-This produces mrunit-${VERSION}-hadoop023.tar.gz and mrunit-${VERSION}-hadoop023.jar in the target directory.
-
-Hadoop Map Reduce 0.20.2:
-$ mvn package -Dhadoop.version=0.20
-This produces mrunit-${VERSION}-hadoop020.tar.gz and mrunit-${VERSION}-hadoop020.jar in the target directory.
+Hadoop Map Reduce 2.X or 0.23.X:
+$ mvn package -Dhadoop.version=2
+This produces mrunit-${VERSION}-hadoop2.jar in the target directory.
 
 If you wish you skip the unit tests (not advised):
 

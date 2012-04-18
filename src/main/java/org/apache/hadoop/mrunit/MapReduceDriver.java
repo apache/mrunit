@@ -47,7 +47,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * and before the Reducer.
  */
 @SuppressWarnings({ "deprecation", "rawtypes" })
-public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
+public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     MapReduceDriverBase<K1, V1, K2, V2, K3, V3> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriver.class);
@@ -393,7 +393,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    * 
    * @return new MapReduceDriver
    */
-  public static <K1, V1, K2 extends Comparable, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver() {
+  public static <K1, V1, K2, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver() {
     return new MapReduceDriver<K1, V1, K2, V2, K3, V3>();
   }
 
@@ -407,7 +407,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    *          passed to MapReduceDriver constructor
    * @return new MapReduceDriver
    */
-  public static <K1, V1, K2 extends Comparable, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver(
+  public static <K1, V1, K2, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver(
       final Mapper<K1, V1, K2, V2> mapper, final Reducer<K2, V2, K3, V3> reducer) {
     return new MapReduceDriver<K1, V1, K2, V2, K3, V3>(mapper, reducer);
   }
@@ -424,7 +424,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3> extends
    *          passed to MapReduceDriver constructor
    * @return new MapReduceDriver
    */
-  public static <K1, V1, K2 extends Comparable, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver(
+  public static <K1, V1, K2, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver(
       final Mapper<K1, V1, K2, V2> mapper,
       final Reducer<K2, V2, K3, V3> reducer,
       final Reducer<K2, V2, K2, V2> combiner) {

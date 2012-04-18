@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.mockito.invocation.InvocationOnMock;
@@ -50,12 +51,14 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
   protected final List<Pair<KEYIN, VALUEIN>> inputs;
   protected Pair<KEYIN, VALUEIN> currentKeyValue;
   protected final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;
-
+  protected InputSplit inputSplit;
+  
   public MockMapContextWrapper(final List<Pair<KEYIN, VALUEIN>> inputs,
-      final Counters counters, final Configuration conf) throws IOException,
-      InterruptedException {
+      final Counters counters, final Configuration conf, final InputSplit inputSplit) 
+      throws IOException, InterruptedException {
     super(counters, conf);
     this.inputs = inputs;
+    this.inputSplit = inputSplit;
     context = create();
   }
 
@@ -92,6 +95,12 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
       @Override
       public VALUEIN answer(final InvocationOnMock invocation) {
         return currentKeyValue.getSecond();
+      }
+    });
+    when(context.getInputSplit()).thenAnswer(new Answer<InputSplit>() {
+      @Override
+      public InputSplit answer(InvocationOnMock invocation) throws Throwable {
+        return inputSplit;
       }
     });
     return context;
