@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mrunit.internal.io.Serialization;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**

@@ -15,12 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.mock;
+package org.apache.hadoop.mrunit.internal.mapred;
 
 import static org.junit.Assert.assertTrue;
 
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
+import org.apache.hadoop.mrunit.internal.mapred.MockReporter;
 import org.junit.Rule;
 import org.junit.Test;
 

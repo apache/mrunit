@@ -16,37 +16,31 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.mrunit.mapreduce.mock;
+package org.apache.hadoop.mrunit.internal.mapreduce;
 
-import org.apache.hadoop.io.DataInputBuffer;
-import org.apache.hadoop.mapred.RawKeyValueIterator;
-import org.apache.hadoop.util.Progress;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 /**
- * Mock implementation of RawKeyValueIterator that does nothing.
+ * Mock implementation of InputSplit that does nothing.
  */
-public class MockRawKeyValueIterator implements RawKeyValueIterator {
-  @Override
-  public DataInputBuffer getKey() {
-    return null;
+public class MockInputSplit extends FileSplit {
+
+  private static final Path MOCK_PATH = new Path("somefile");
+
+  public MockInputSplit() {
+    super(MOCK_PATH, 0, 0, (String[]) null);
   }
 
   @Override
-  public DataInputBuffer getValue() {
-    return null;
+  public String toString() {
+    return "MockInputSplit";
   }
 
-  @Override
-  public boolean next() {
-    return false;
-  }
-
-  @Override
-  public void close() {
-  }
-
-  @Override
-  public Progress getProgress() {
-    return null;
+  /**
+   * Return the path object represented by this as a FileSplit.
+   */
+  public static Path getMockPath() {
+    return MOCK_PATH;
   }
 }

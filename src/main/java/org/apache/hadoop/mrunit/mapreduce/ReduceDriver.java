@@ -30,8 +30,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.ReduceDriverBase;
-import org.apache.hadoop.mrunit.counters.CounterWrapper;
-import org.apache.hadoop.mrunit.mapreduce.mock.MockReduceContextWrapper;
+import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
+import org.apache.hadoop.mrunit.internal.mapreduce.MockReduceContextWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**

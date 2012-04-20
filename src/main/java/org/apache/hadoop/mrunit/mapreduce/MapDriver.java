@@ -31,9 +31,9 @@ import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.MapDriverBase;
-import org.apache.hadoop.mrunit.counters.CounterWrapper;
-import org.apache.hadoop.mrunit.mapreduce.mock.MockInputSplit;
-import org.apache.hadoop.mrunit.mapreduce.mock.MockMapContextWrapper;
+import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
+import org.apache.hadoop.mrunit.internal.mapreduce.MockInputSplit;
+import org.apache.hadoop.mrunit.internal.mapreduce.MockMapContextWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**

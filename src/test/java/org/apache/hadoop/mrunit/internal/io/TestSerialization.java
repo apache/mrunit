@@ -15,12 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit;
+package org.apache.hadoop.mrunit.internal.io;
 
 import static org.junit.Assert.assertEquals;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mrunit.internal.io.Serialization;
 import org.junit.Test;
 
 public class TestSerialization {

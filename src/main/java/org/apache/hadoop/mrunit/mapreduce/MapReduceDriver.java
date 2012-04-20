@@ -31,7 +31,7 @@ import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.MapReduceDriverBase;
-import org.apache.hadoop.mrunit.counters.CounterWrapper;
+import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**

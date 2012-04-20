@@ -16,39 +16,37 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.mrunit.mapreduce.mock;
+package org.apache.hadoop.mrunit.internal.mapreduce;
 
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.io.DataInputBuffer;
+import org.apache.hadoop.mapred.RawKeyValueIterator;
+import org.apache.hadoop.util.Progress;
 
 /**
- * Mock implementation of OutputCommitter that does nothing.
+ * Mock implementation of RawKeyValueIterator that does nothing.
  */
-public class MockOutputCommitter extends OutputCommitter {
-
+public class MockRawKeyValueIterator implements RawKeyValueIterator {
   @Override
-  public void setupJob(final JobContext jobContext) {
+  public DataInputBuffer getKey() {
+    return null;
   }
 
   @Override
-  public void cleanupJob(final JobContext jobContext) {
+  public DataInputBuffer getValue() {
+    return null;
   }
 
   @Override
-  public void setupTask(final TaskAttemptContext taskContext) {
-  }
-
-  @Override
-  public boolean needsTaskCommit(final TaskAttemptContext taskContext) {
+  public boolean next() {
     return false;
   }
 
   @Override
-  public void commitTask(final TaskAttemptContext taskContext) {
+  public void close() {
   }
 
   @Override
-  public void abortTask(final TaskAttemptContext taskContext) {
+  public Progress getProgress() {
+    return null;
   }
 }

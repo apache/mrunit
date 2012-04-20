@@ -16,31 +16,39 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.mrunit.mapreduce.mock;
+package org.apache.hadoop.mrunit.internal.mapreduce;
 
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 /**
- * Mock implementation of InputSplit that does nothing.
+ * Mock implementation of OutputCommitter that does nothing.
  */
-public class MockInputSplit extends FileSplit {
+public class MockOutputCommitter extends OutputCommitter {
 
-  private static final Path MOCK_PATH = new Path("somefile");
-
-  public MockInputSplit() {
-    super(MOCK_PATH, 0, 0, (String[]) null);
+  @Override
+  public void setupJob(final JobContext jobContext) {
   }
 
   @Override
-  public String toString() {
-    return "MockInputSplit";
+  public void cleanupJob(final JobContext jobContext) {
   }
 
-  /**
-   * Return the path object represented by this as a FileSplit.
-   */
-  public static Path getMockPath() {
-    return MOCK_PATH;
+  @Override
+  public void setupTask(final TaskAttemptContext taskContext) {
+  }
+
+  @Override
+  public boolean needsTaskCommit(final TaskAttemptContext taskContext) {
+    return false;
+  }
+
+  @Override
+  public void commitTask(final TaskAttemptContext taskContext) {
+  }
+
+  @Override
+  public void abortTask(final TaskAttemptContext taskContext) {
   }
 }

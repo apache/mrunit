@@ -16,64 +16,61 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.mrunit.mapreduce.mock;
+package org.apache.hadoop.mrunit.internal.mapreduce;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 /**
- * o.a.h.mapreduce.Mapper.map() expects to use a Mapper.Context object as a
+ * o.a.h.mapreduce.Reducer.reduce() expects to use a Reducer.Context object as a
  * parameter. We want to override the functionality of a lot of Context to have
- * it send the results back to us, etc. But since Mapper.Context is an inner
- * class of Mapper, we need to put any subclasses of Mapper.Context in a
- * subclass of Mapper.
+ * it send the results back to us, etc. But since Reducer.Context is an inner
+ * class of Reducer, we need to put any subclasses of Reducer.Context in a
+ * subclass of Reducer.
  * 
  * This wrapper class exists for that purpose.
  */
-public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
+public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
   protected static final Log LOG = LogFactory
-      .getLog(MockMapContextWrapper.class);
-  protected final List<Pair<KEYIN, VALUEIN>> inputs;
-  protected Pair<KEYIN, VALUEIN> currentKeyValue;
-  protected final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;
-  protected InputSplit inputSplit;
-  
-  public MockMapContextWrapper(final List<Pair<KEYIN, VALUEIN>> inputs,
-      final Counters counters, final Configuration conf, final InputSplit inputSplit) 
-      throws IOException, InterruptedException {
+      .getLog(MockReduceContextWrapper.class);
+  protected final List<Pair<KEYIN, List<VALUEIN>>> inputs;
+  protected Pair<KEYIN, List<VALUEIN>> currentKeyValue;
+  protected final Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;
+
+  public MockReduceContextWrapper(
+      final List<Pair<KEYIN, List<VALUEIN>>> inputs, final Counters counters,
+      final Configuration conf) throws IOException, InterruptedException {
     super(counters, conf);
     this.inputs = inputs;
-    this.inputSplit = inputSplit;
     context = create();
   }
 
   @SuppressWarnings({ "unchecked" })
-  private Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create()
+  private Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create()
       throws IOException, InterruptedException {
-    final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Mapper.Context.class);
 
+    final Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Reducer.Context.class);
     createCommon(context);
-
     /*
      * In actual context code nextKeyValue() modifies the current state so we
      * can here as well.
      */
-    when(context.nextKeyValue()).thenAnswer(new Answer<Boolean>() {
+    when(context.nextKey()).thenAnswer(new Answer<Boolean>() {
       @Override
       public Boolean answer(final InvocationOnMock invocation) {
         if (inputs.size() > 0) {
@@ -91,16 +88,10 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
         return currentKeyValue.getFirst();
       }
     });
-    when(context.getCurrentValue()).thenAnswer(new Answer<VALUEIN>() {
+    when(context.getValues()).thenAnswer(new Answer<Iterable<VALUEIN>>() {
       @Override
-      public VALUEIN answer(final InvocationOnMock invocation) {
-        return currentKeyValue.getSecond();
-      }
-    });
-    when(context.getInputSplit()).thenAnswer(new Answer<InputSplit>() {
-      @Override
-      public InputSplit answer(InvocationOnMock invocation) throws Throwable {
-        return inputSplit;
+      public Iterable<VALUEIN> answer(final InvocationOnMock invocation) {
+        return makeOneUseIterator(currentKeyValue.getSecond().iterator());
       }
     });
     return context;
@@ -113,7 +104,41 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     return outputs;
   }
 
-  public Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context getMockContext() {
+  protected static <V> Iterable<V> makeOneUseIterator(final Iterator<V> parent) {
+    return new Iterable<V>() {
+      private final Iterator<V> iter = new Iterator<V>() {
+        private boolean used;
+
+        @Override
+        public boolean hasNext() {
+          if (used) {
+            return false;
+          }
+          return parent.hasNext();
+        }
+
+        @Override
+        public V next() {
+          if (used) {
+            throw new IllegalStateException();
+          }
+          return parent.next();
+        }
+
+        @Override
+        public void remove() {
+          throw new IllegalStateException();
+        }
+      };
+
+      @Override
+      public Iterator<V> iterator() {
+        return iter;
+      }
+    };
+  }
+
+  public Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context getMockContext() {
     return context;
   }
 }

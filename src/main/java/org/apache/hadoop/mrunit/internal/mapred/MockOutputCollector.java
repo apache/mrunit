@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.mock;
+package org.apache.hadoop.mrunit.internal.mapred;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mrunit.Serialization;
+import org.apache.hadoop.mrunit.internal.io.Serialization;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**

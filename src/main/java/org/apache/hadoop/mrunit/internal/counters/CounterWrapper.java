@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.counters;
+package org.apache.hadoop.mrunit.internal.counters;
 
 import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 

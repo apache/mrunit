@@ -15,18 +15,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.mapreduce.mock;
+package org.apache.hadoop.mrunit.internal.mapred;
 
-import org.apache.hadoop.mapreduce.Counter;
-import org.apache.hadoop.mapreduce.Counters;
-import org.apache.hadoop.mapreduce.StatusReporter;
+import org.apache.hadoop.mapred.Counters;
+import org.apache.hadoop.mapred.Counters.Counter;
+import org.apache.hadoop.mapred.InputSplit;
+import org.apache.hadoop.mapred.Reporter;
 
-public class MockReporter extends StatusReporter {
+@SuppressWarnings("deprecation")
+public class MockReporter implements Reporter {
 
+  private final MockInputSplit inputSplit = new MockInputSplit();
   private final Counters counters;
 
-  public MockReporter(final Counters ctrs) {
+  public enum ReporterType {
+    Mapper, Reducer
+  }
+
+  private final ReporterType typ;
+
+  public MockReporter(final ReporterType kind, final Counters ctrs) {
+    typ = kind;
     counters = ctrs;
+  }
+
+  @Override
+  public InputSplit getInputSplit() {
+    if (typ == ReporterType.Reducer) {
+      throw new UnsupportedOperationException(
+          "Reducer cannot call getInputSplit()");
+    } else {
+      return inputSplit;
+    }
+  }
+
+  @Override
+  public void incrCounter(final Enum<?> key, final long amount) {
+    counters.incrCounter(key, amount);
+  }
+
+  @Override
+  public void incrCounter(final String group, final String counter,
+      final long amount) {
+    counters.incrCounter(group, counter, amount);
   }
 
   @Override
