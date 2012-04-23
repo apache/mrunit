@@ -403,7 +403,10 @@ public class TestMapReduceDriver {
     final MapReduceDriver<IntWritable, Integer, Integer, IntWritable, Integer, IntWritable> driver = MapReduceDriver
         .newMapReduceDriver(new InverseMapper<IntWritable, Integer>(),
             new IntSumReducer<Integer>()).withConfiguration(conf);
-    driver.withInput(new IntWritable(1), 2).withOutput(2, new IntWritable(1))
+    driver
+        .setKeyGroupingComparator(org.apache.hadoop.mrunit.TestMapReduceDriver.INTEGER_COMPARATOR);
+    driver.withInput(new IntWritable(1), 2).withInput(new IntWritable(2), 3);
+    driver.withOutput(2, new IntWritable(1)).withOutput(3, new IntWritable(2))
         .runTest();
   }
 }

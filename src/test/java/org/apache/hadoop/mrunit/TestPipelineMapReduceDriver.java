@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
@@ -191,9 +191,11 @@ public class TestPipelineMapReduceDriver {
 
   @Test
   public void testJavaSerialization() {
-    final Configuration conf = new Configuration();
+    final JobConf conf = new JobConf();
     conf.setStrings("io.serializations", conf.get("io.serializations"),
         "org.apache.hadoop.io.serializer.JavaSerialization");
+    conf.setOutputValueGroupingComparator(TestMapReduceDriver.INTEGER_COMPARATOR
+        .getClass());
     final PipelineMapReduceDriver<Integer, IntWritable, Integer, IntWritable> driver = PipelineMapReduceDriver
         .newPipelineMapReduceDriver();
     driver.addMapReduce(new IdentityMapper<Integer, IntWritable>(),
@@ -202,8 +204,8 @@ public class TestPipelineMapReduceDriver {
         new IdentityReducer<Integer, IntWritable>());
     driver.withConfiguration(conf);
 
-    driver.addInput(1, new IntWritable(2));
-    driver.addOutput(1, new IntWritable(2));
+    driver.withInput(1, new IntWritable(2)).withInput(2, new IntWritable(3));
+    driver.withOutput(1, new IntWritable(2)).withOutput(2, new IntWritable(3));
     driver.runTest();
   }
 

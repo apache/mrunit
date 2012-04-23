@@ -395,6 +395,20 @@ public class TestMapReduceDriver {
       .runTest();
   }
 
+  public static final RawComparator<Integer> INTEGER_COMPARATOR = new RawComparator<Integer>() {
+
+    @Override
+    public int compare(Integer o1, Integer o2) {
+      return o1.compareTo(o2);
+    }
+
+    @Override
+    public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
+      throw new UnsupportedOperationException();
+    }
+
+  };
+
   @Test
   public void testJavaSerialization() {
     final Configuration conf = new Configuration();
@@ -404,8 +418,9 @@ public class TestMapReduceDriver {
         .newMapReduceDriver(new IdentityMapper<Integer, IntWritable>(),
             new IdentityReducer<Integer, IntWritable>())
         .withConfiguration(conf);
-    driver.addInput(1, new IntWritable(2));
-    driver.addOutput(1, new IntWritable(2));
+    driver.withKeyGroupingComparator(INTEGER_COMPARATOR);
+    driver.withInput(1, new IntWritable(2)).withInput(2, new IntWritable(3));
+    driver.withOutput(1, new IntWritable(2)).withOutput(2, new IntWritable(3));
     driver.runTest();
   }
 
