@@ -115,6 +115,11 @@
       <email>jarcec@apache.org</email>
       <name>Jarek Jarcec Cecho</name>
     </developer>
+    <developer>
+      <id>dbeech.apache.org</id>
+      <email>dbeech@apache.org</email>
+      <name>Dave Beech</name>
+    </developer>
   </developers>
 
   <build>
