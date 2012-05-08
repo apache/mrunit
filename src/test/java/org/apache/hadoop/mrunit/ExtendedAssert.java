@@ -15,17 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.testutil;
+package org.apache.hadoop.mrunit;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.List;
 
-/**
- * @deprecated No replacement due to automatic comparisons using runTest()
- */
-@Deprecated
 public final class ExtendedAssert {
 
   private ExtendedAssert() {
@@ -38,9 +33,7 @@ public final class ExtendedAssert {
    *          a list full of expected values
    * @param actual
    *          a list full of actual test values
-   * @deprecated No replacement due to automatic list comparison using runTest()
    */
-  @Deprecated
   public static void assertListEquals(final List<?> expected,
       final List<?> actual) {
     if (expected.size() != actual.size()) {
@@ -61,49 +54,5 @@ public final class ExtendedAssert {
             + ((t2 == null) ? "unknown type" : t2.getClass().getName()) + ")");
       }
     }
-  }
-
-  /**
-   * asserts x &gt; y
-   * 
-   * @deprecated No replacement since extension methods to JUnit assert methods
-   *             dont fit well with MRUnit's goals
-   */
-  @Deprecated
-  public static void assertGreater(final int x, final int y) {
-    assertTrue("Expected " + x + " > " + y, x > y);
-  }
-
-  /**
-   * asserts x &gt;= y)
-   * 
-   * @deprecated No replacement since extension methods to JUnit assert methods
-   *             dont fit well with MRUnit's goals
-   */
-  @Deprecated
-  public static void assertGreaterOrEqual(final int x, final int y) {
-    assertTrue("Expected " + x + " >= " + y, x >= y);
-  }
-
-  /**
-   * asserts x &lt; y
-   * 
-   * @deprecated No replacement since extension methods to JUnit assert methods
-   *             dont fit well with MRUnit's goals
-   */
-  @Deprecated
-  public static void assertLess(final int x, final int y) {
-    assertTrue("Expected " + x + " < " + y, x < y);
-  }
-
-  /**
-   * asserts x &gt;= y)
-   * 
-   * @deprecated No replacement since extension methods to JUnit assert methods
-   *             dont fit well with MRUnit's goals
-   * */
-  @Deprecated
-  public static void assertLessOrEqual(final int x, final int y) {
-    assertTrue("Expected " + x + " <= " + y, x <= y);
   }
 }

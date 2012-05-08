@@ -17,7 +17,7 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
+import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
