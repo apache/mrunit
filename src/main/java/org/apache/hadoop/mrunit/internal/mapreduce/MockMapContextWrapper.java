@@ -30,6 +30,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -43,27 +44,27 @@ import org.mockito.stubbing.Answer;
  * 
  * This wrapper class exists for that purpose.
  */
-public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
-    MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
+    extends
+    AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context> {
 
   protected static final Log LOG = LogFactory
       .getLog(MockMapContextWrapper.class);
+
   protected final List<Pair<KEYIN, VALUEIN>> inputs;
   protected Pair<KEYIN, VALUEIN> currentKeyValue;
-  protected final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;
-  protected InputSplit inputSplit;
-  
+  protected InputSplit inputSplit = new MockInputSplit();
+
   public MockMapContextWrapper(final List<Pair<KEYIN, VALUEIN>> inputs,
-      final Counters counters, final Configuration conf, final InputSplit inputSplit) 
+      final Counters counters, final Configuration conf,
+      final OutputCollectable<KEYOUT, VALUEOUT> outputCollectable)
       throws IOException, InterruptedException {
-    super(counters, conf);
+    super(counters, conf, outputCollectable);
     this.inputs = inputs;
-    this.inputSplit = inputSplit;
-    context = create();
   }
 
   @SuppressWarnings({ "unchecked" })
-  private Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create()
+  protected Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create()
       throws IOException, InterruptedException {
     final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Mapper.Context.class);
 
@@ -103,17 +104,6 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
         return inputSplit;
       }
     });
-    return context;
-  }
-
-  /**
-   * @return the outputs from the MockOutputCollector back to the test harness.
-   */
-  public List<Pair<KEYOUT, VALUEOUT>> getOutputs() {
-    return outputs;
-  }
-
-  public Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context getMockContext() {
     return context;
   }
 }

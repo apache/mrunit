@@ -28,12 +28,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
-import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mrunit.MapDriverBase;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
-import org.apache.hadoop.mrunit.internal.mapreduce.MockInputSplit;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockMapContextWrapper;
+import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
+import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -51,6 +53,8 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   private Mapper<K1, V1, K2, V2> myMapper;
   private Counters counters;
+
+  private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
 
   public MapDriver(final Mapper<K1, V1, K2, V2> m) {
     this();
@@ -199,6 +203,13 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     return this;
   }
 
+  public MapDriver<K1, V1, K2, V2> withOutputFormat(
+      final Class<? extends OutputFormat> outputFormatClass,
+      final Class<? extends InputFormat> inputFormatClass) {
+    mockOutputCreator.setMapreduceFormats(outputFormatClass, inputFormatClass);
+    return this;
+  }
+
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
     if (inputKey == null || inputVal == null) {
@@ -211,15 +222,13 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     final List<Pair<K1, V1>> inputs = new ArrayList<Pair<K1, V1>>();
     inputs.add(new Pair<K1, V1>(inputKey, inputVal));
 
-    final InputSplit inputSplit = new MockInputSplit();
-    
     try {
+      final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
+          .createOutputCollectable(getConfiguration());
       final MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(
-          inputs, getCounters(), getConfiguration(), inputSplit);
-
-      final Mapper<K1, V1, K2, V2>.Context context = wrapper.getMockContext();
-      myMapper.run(context);
-      return wrapper.getOutputs();
+          inputs, getCounters(), getConfiguration(), outputCollectable);
+      myMapper.run(wrapper.getMockContext());
+      return outputCollectable.getOutputs();
     } catch (final InterruptedException ie) {
       throw new IOException(ie);
     }

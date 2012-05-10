@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.mrunit.internal.mapreduce;
 
 import static org.mockito.Matchers.any;
@@ -24,28 +23,31 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.apache.hadoop.mrunit.internal.io.Serialization;
-import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-public abstract class MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+abstract class AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, CONTEXT extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
+
   protected final Counters counters;
   protected final Configuration conf;
-  protected final Serialization serialization;
-  protected final List<Pair<KEYOUT, VALUEOUT>> outputs = new ArrayList<Pair<KEYOUT, VALUEOUT>>();
 
-  public MockContextWrapper(final Counters counters, final Configuration conf) {
+  protected final CONTEXT context;
+  private final OutputCollectable<KEYOUT, VALUEOUT> outputCollectable;
+
+  public AbstractMockContextWrapper(final Counters counters,
+      final Configuration conf,
+      final OutputCollectable<KEYOUT, VALUEOUT> outputCollectable)
+      throws IOException, InterruptedException {
     this.conf = conf;
-    serialization = new Serialization(conf);
     this.counters = counters;
+    this.outputCollectable = outputCollectable;
+    context = create();
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -77,11 +79,19 @@ public abstract class MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
       @Override
       public Object answer(final InvocationOnMock invocation) {
         final Object[] args = invocation.getArguments();
-        outputs.add(new Pair(serialization.copy(args[0]), serialization
-            .copy(args[1])));
+        try {
+          outputCollectable.collect((KEYOUT) args[0], (VALUEOUT) args[1]);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
         return null;
       }
     }).when(context).write((KEYOUT) any(), (VALUEOUT) any());
+  }
 
+  protected abstract CONTEXT create() throws IOException, InterruptedException;
+
+  public CONTEXT getMockContext() {
+    return context;
   }
 }

@@ -15,32 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.hadoop.mrunit.internal.output;
 
-package org.apache.hadoop.mrunit.internal.mapreduce;
+import java.io.IOException;
+import java.util.List;
 
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mrunit.types.Pair;
 
-/**
- * Mock implementation of InputSplit that does nothing.
- */
-class MockInputSplit extends FileSplit {
+public interface OutputCollectable<K, V> extends OutputCollector<K, V> {
 
-  private static final Path MOCK_PATH = new Path("somefile");
+  List<Pair<K, V>> getOutputs() throws IOException;
 
-  public MockInputSplit() {
-    super(MOCK_PATH, 0, 0, (String[]) null);
-  }
-
-  @Override
-  public String toString() {
-    return "MockInputSplit";
-  }
-
-  /**
-   * Return the path object represented by this as a FileSplit.
-   */
-  public static Path getMockPath() {
-    return MOCK_PATH;
-  }
 }

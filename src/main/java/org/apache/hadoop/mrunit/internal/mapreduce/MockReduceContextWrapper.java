@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -43,25 +44,26 @@ import org.mockito.stubbing.Answer;
  * 
  * This wrapper class exists for that purpose.
  */
-public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
-    MockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
+    extends
+    AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context> {
 
   protected static final Log LOG = LogFactory
       .getLog(MockReduceContextWrapper.class);
   protected final List<Pair<KEYIN, List<VALUEIN>>> inputs;
   protected Pair<KEYIN, List<VALUEIN>> currentKeyValue;
-  protected final Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context;
 
   public MockReduceContextWrapper(
       final List<Pair<KEYIN, List<VALUEIN>>> inputs, final Counters counters,
-      final Configuration conf) throws IOException, InterruptedException {
-    super(counters, conf);
+      final Configuration conf,
+      OutputCollectable<KEYOUT, VALUEOUT> outputCollectable)
+      throws IOException, InterruptedException {
+    super(counters, conf, outputCollectable);
     this.inputs = inputs;
-    context = create();
   }
 
   @SuppressWarnings({ "unchecked" })
-  private Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create()
+  protected Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create()
       throws IOException, InterruptedException {
 
     final Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Reducer.Context.class);
@@ -97,13 +99,6 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     return context;
   }
 
-  /**
-   * @return the outputs from the MockOutputCollector back to the test harness.
-   */
-  public List<Pair<KEYOUT, VALUEOUT>> getOutputs() {
-    return outputs;
-  }
-
   protected static <V> Iterable<V> makeOneUseIterator(final Iterator<V> parent) {
     return new Iterable<V>() {
       private final Iterator<V> iter = new Iterator<V>() {
@@ -136,9 +131,5 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
         return iter;
       }
     };
-  }
-
-  public Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context getMockContext() {
-    return context;
   }
 }

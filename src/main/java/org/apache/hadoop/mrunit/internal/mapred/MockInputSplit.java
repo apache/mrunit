@@ -30,7 +30,7 @@ import org.apache.hadoop.mapred.InputSplit;
  * class.
  */
 @SuppressWarnings("deprecation")
-public class MockInputSplit extends FileSplit implements InputSplit {
+class MockInputSplit extends FileSplit implements InputSplit {
 
   private static final Path MOCK_PATH = new Path("somefile");
 

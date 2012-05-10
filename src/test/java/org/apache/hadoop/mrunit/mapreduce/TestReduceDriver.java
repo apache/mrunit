@@ -32,7 +32,12 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
@@ -370,5 +375,27 @@ public class TestReduceDriver {
         .newReduceDriver(new IntSumReducer<Integer>()).withConfiguration(conf);
     driver.withInputKey(1).withInputValue(new IntWritable(2))
         .withOutput(1, new IntWritable(2)).runTest();
+  }
+  
+  @Test
+  public void testOutputFormat() {
+    driver.withOutputFormat(SequenceFileOutputFormat.class,
+        SequenceFileInputFormat.class);
+    driver.withInputKey(new Text("a"));
+    driver.withInputValue(new LongWritable(1)).withInputValue(
+        new LongWritable(2));
+    driver.withOutput(new Text("a"), new LongWritable(3));
+    driver.runTest();
+  }
+
+  @Test
+  public void testOutputFormatWithMismatchInOutputClasses() {
+    final ReduceDriver driver = ReduceDriver.newReduceDriver(reducer);
+    driver.withOutputFormat(TextOutputFormat.class, TextInputFormat.class);
+    driver.withInputKey(new Text("a"));
+    driver.withInputValue(new LongWritable(1)).withInputValue(
+        new LongWritable(2));
+    driver.withOutput(new LongWritable(), new Text("a\t3"));
+    driver.runTest();
   }
 }

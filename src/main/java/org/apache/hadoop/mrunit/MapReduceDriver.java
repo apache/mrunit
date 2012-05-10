@@ -28,7 +28,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.Counters;
+import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -56,6 +58,9 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   private Reducer<K2, V2, K3, V3> myReducer;
   private Reducer<K2, V2, K2, V2> myCombiner;
   private Counters counters;
+
+  private Class<? extends OutputFormat> outputFormatClass;
+  private Class<? extends InputFormat> inputFormatClass;
 
   public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
       final Reducer<K2, V2, K3, V3> r) {
@@ -264,6 +269,14 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     return this;
   }
 
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputFormat(
+      final Class<? extends OutputFormat> outputFormatClass,
+      final Class<? extends InputFormat> inputFormatClass) {
+    this.outputFormatClass = returnNonNull(outputFormatClass);
+    this.inputFormatClass = returnNonNull(inputFormatClass);
+    return this;
+  }
+
   /**
    * The private class to manage starting the reduce phase is used for type
    * genericity reasons. This class is used in the run() method.
@@ -283,11 +296,15 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
         LOG.debug("Reducing input (" + inputKey.toString() + ", "
             + sb.toString() + ")");
 
-        reduceOutputs.addAll(ReduceDriver.newReduceDriver(reducer)
-            .withCounters(getCounters()).withConfiguration(configuration)
-            .withInputKey(inputKey).withInputValues(inputValues).run());
+        final ReduceDriver<K2, V2, OUTKEY, OUTVAL> reduceDriver = ReduceDriver
+            .newReduceDriver(reducer).withCounters(getCounters())
+            .withConfiguration(configuration).withInputKey(inputKey)
+            .withInputValues(inputValues);
+        if (outputFormatClass != null) {
+          reduceDriver.withOutputFormat(outputFormatClass, inputFormatClass);
+        }
+        reduceOutputs.addAll(reduceDriver.run());
       }
-
       return reduceOutputs;
     }
   }

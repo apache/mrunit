@@ -28,10 +28,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.ReduceDriverBase;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockReduceContextWrapper;
+import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
+import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -51,6 +55,8 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   private Reducer<K1, V1, K2, V2> myReducer;
   private Counters counters;
+
+  private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
 
   public ReduceDriver(final Reducer<K1, V1, K2, V2> r) {
     this();
@@ -211,6 +217,13 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
+  public ReduceDriver<K1, V1, K2, V2> withOutputFormat(
+      final Class<? extends OutputFormat> outputFormatClass,
+      final Class<? extends InputFormat> inputFormatClass) {
+    mockOutputCreator.setMapreduceFormats(outputFormatClass, inputFormatClass);
+    return this;
+  }
+
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
     if (inputKey == null || getInputValues().isEmpty()) {
@@ -224,11 +237,12 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     inputs.add(new Pair<K1, List<V1>>(inputKey, getInputValues()));
 
     try {
+      final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
+          .createOutputCollectable(getConfiguration());
       final MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>(
-          inputs, getCounters(), getConfiguration());
-      final Reducer<K1, V1, K2, V2>.Context context = wrapper.getMockContext();
-      myReducer.run(context);
-      return wrapper.getOutputs();
+          inputs, getCounters(), getConfiguration(), outputCollectable);
+      myReducer.run(wrapper.getMockContext());
+      return outputCollectable.getOutputs();
     } catch (final InterruptedException ie) {
       throw new IOException(ie);
     }

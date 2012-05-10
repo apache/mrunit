@@ -26,11 +26,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.Counters;
+import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
-import org.apache.hadoop.mrunit.internal.mapred.MockOutputCollector;
 import org.apache.hadoop.mrunit.internal.mapred.MockReporter;
+import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
+import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -51,6 +54,8 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   private Reducer<K1, V1, K2, V2> myReducer;
   private Counters counters;
+
+  private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
 
   public ReduceDriver(final Reducer<K1, V1, K2, V2> r) {
     this();
@@ -222,6 +227,13 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
+  public ReduceDriver<K1, V1, K2, V2> withOutputFormat(
+      final Class<? extends OutputFormat> outputFormatClass,
+      final Class<? extends InputFormat> inputFormatClass) {
+    mockOutputCreator.setMapredFormats(outputFormatClass, inputFormatClass);
+    return this;
+  }
+
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
     if (inputKey == null || getInputValues().isEmpty()) {
@@ -231,18 +243,16 @@ public class ReduceDriver<K1, V1, K2, V2> extends
       throw new IllegalStateException("No Reducer class was provided");
     }
 
-    final MockOutputCollector<K2, V2> outputCollector = new MockOutputCollector<K2, V2>(
-        getConfiguration());
+    final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
+        .createOutputCollectable(getConfiguration());
     final MockReporter reporter = new MockReporter(
         MockReporter.ReporterType.Reducer, getCounters());
 
     myReducer.configure(new JobConf(getConfiguration()));
-    myReducer.reduce(inputKey, getInputValues().iterator(), outputCollector,
+    myReducer.reduce(inputKey, getInputValues().iterator(), outputCollectable,
         reporter);
     myReducer.close();
-
-    final List<Pair<K2, V2>> outputs = outputCollector.getOutputs();
-    return outputs;
+    return outputCollectable.getOutputs();
   }
 
   @Override

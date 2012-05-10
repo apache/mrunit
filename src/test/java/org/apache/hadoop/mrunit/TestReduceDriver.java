@@ -33,6 +33,11 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.SequenceFileInputFormat;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -358,6 +363,28 @@ public class TestReduceDriver {
     driver.withOutput(output, new Text("b"));
     output.set("c");
     driver.withOutput(new Text("a"), output);
+    driver.runTest();
+  }
+
+  @Test
+  public void testOutputFormat() {
+    driver.withOutputFormat(SequenceFileOutputFormat.class,
+        SequenceFileInputFormat.class);
+    driver.withInputKey(new Text("a"));
+    driver.withInputValue(new LongWritable(1)).withInputValue(
+        new LongWritable(2));
+    driver.withOutput(new Text("a"), new LongWritable(3));
+    driver.runTest();
+  }
+
+  @Test
+  public void testOutputFormatWithMismatchInOutputClasses() {
+    final ReduceDriver driver = ReduceDriver.newReduceDriver(reducer);
+    driver.withOutputFormat(TextOutputFormat.class, TextInputFormat.class);
+    driver.withInputKey(new Text("a"));
+    driver.withInputValue(new LongWritable(1)).withInputValue(
+        new LongWritable(2));
+    driver.withOutput(new LongWritable(), new Text("a\t3"));
     driver.runTest();
   }
 

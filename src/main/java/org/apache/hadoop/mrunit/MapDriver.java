@@ -27,11 +27,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.Counters;
+import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
-import org.apache.hadoop.mrunit.internal.mapred.MockOutputCollector;
 import org.apache.hadoop.mrunit.internal.mapred.MockReporter;
+import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
+import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -50,6 +53,8 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   private Mapper<K1, V1, K2, V2> myMapper;
   private Counters counters;
+
+  private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
 
   public MapDriver(final Mapper<K1, V1, K2, V2> m) {
     this();
@@ -212,6 +217,13 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     return this;
   }
 
+  public MapDriver<K1, V1, K2, V2> withOutputFormat(
+      final Class<? extends OutputFormat> outputFormatClass,
+      final Class<? extends InputFormat> inputFormatClass) {
+    mockOutputCreator.setMapredFormats(outputFormatClass, inputFormatClass);
+    return this;
+  }
+
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
     if (inputKey == null || inputVal == null) {
@@ -221,8 +233,8 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
       throw new IllegalStateException("No Mapper class was provided");
     }
 
-    final MockOutputCollector<K2, V2> outputCollector = new MockOutputCollector<K2, V2>(
-        getConfiguration());
+    final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
+        .createOutputCollectable(getConfiguration());
     final MockReporter reporter = new MockReporter(
         MockReporter.ReporterType.Mapper, getCounters());
 
@@ -230,9 +242,9 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
       ((Configurable) myMapper).setConf(getConfiguration());
     }
     myMapper.configure(new JobConf(getConfiguration()));
-    myMapper.map(inputKey, inputVal, outputCollector, reporter);
+    myMapper.map(inputKey, inputVal, outputCollectable, reporter);
     myMapper.close();
-    return outputCollector.getOutputs();
+    return outputCollectable.getOutputs();
   }
 
   @Override
