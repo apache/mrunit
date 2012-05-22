@@ -29,10 +29,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.mrunit</groupId>
   <artifactId>mrunit</artifactId>
-  <version>1.0.0-incubating-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
 
   <name>MRUnit</name>
-  <url>http://incubator.apache.org/mrunit/</url>
+  <url>http://mrunit.apache.org</url>
 
   <description>
     MRUnit is a Java library that helps developers unit test Apache Hadoop map
@@ -50,32 +50,32 @@
   </ciManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/mrunit/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/mrunit/trunk/</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/mrunit/trunk/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/mrunit/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mrunit/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewvc/mrunit/trunk/</url>
   </scm>
 
   <mailingLists>
     <mailingList>
-      <name>mrunit user</name>
-      <post>mrunit-user@incubator.apache.org</post>
-      <subscribe>mrunit-user-subscribe@incubator.apache.org</subscribe>
-      <unsubscribe>mrunit-user-unsubscribe@incubator.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-mrunit-user</archive>
+      <name>user</name>
+      <post>user@mrunit.apache.org</post>
+      <subscribe>user-subscribe@mrunit.apache.org</subscribe>
+      <unsubscribe>user-unsubscribe@mrunit.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/mrunit-user</archive>
     </mailingList>
     <mailingList>
-      <name>mrunit dev</name>
-      <post>mrunit-dev@incubator.apache.org</post>
-      <subscribe>mrunit-dev-subscribe@incubator.apache.org</subscribe>
-      <unsubscribe>mrunit-dev-unsubscribe@incubator.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-mrunit-dev</archive>
+      <name>dev</name>
+      <post>dev@mrunit.apache.org</post>
+      <subscribe>dev-subscribe@mrunit.apache.org</subscribe>
+      <unsubscribe>dev-unsubscribe@mrunit.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/mrunit-dev</archive>
     </mailingList>
     <mailingList>
-      <name>mrunit commits</name>
-      <post>mrunit-commits@incubator.apache.org</post>
-      <subscribe>mrunit-commits-subscribe@incubator.apache.org</subscribe>
-      <unsubscribe>mrunit-commits-unsubscribe@incubator.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-mrunit-commits</archive>
+      <name>commits</name>
+      <post>commits@mrunit.apache.org</post>
+      <subscribe>commits-subscribe@mrunit.apache.org</subscribe>
+      <unsubscribe>commits-unsubscribe@mrunit.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/mrunit-commits</archive>
     </mailingList>
   </mailingLists>
 
