@@ -33,6 +33,7 @@ import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.util.ReflectionUtils;
 
 /**
  * Harness that allows you to test a Mapper and a Reducer instance together You
@@ -221,7 +222,8 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
    */
   public void setKeyGroupingComparator(
       final RawComparator<K2> groupingComparator) {
-    keyGroupComparator = returnNonNull(groupingComparator);
+    keyGroupComparator = ReflectionUtils.newInstance(
+        groupingComparator.getClass(), getConfiguration());
   }
 
   /**
@@ -235,6 +237,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
    * @param orderComparator
    */
   public void setKeyOrderComparator(final RawComparator<K2> orderComparator) {
-    keyValueOrderComparator = returnNonNull(orderComparator);
+    keyValueOrderComparator = ReflectionUtils.newInstance(
+        orderComparator.getClass(), getConfiguration());
   }
 }

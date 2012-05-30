@@ -129,15 +129,15 @@ public class TestMapReduceDriver {
         .withOutput(new Text("bar"), new LongWritable(BAR_IN)).runTest(false);
   }
 
-  @Test 
-  public void testDuplicateOutputOrderInsensitive() { 
-    thrown 
-        .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar))"); 
-    driver2.withMapper(new IdentityMapper<Text, Text>()).withReducer( 
-        new IdentityReducer<Text, Text>()); 
-    driver2.withInput(new Text("foo"), new Text("bar")) 
-        .withInput(new Text("foo"), new Text("bar")) 
-        .withOutput(new Text("foo"), new Text("bar")).runTest(false); 
+  @Test
+  public void testDuplicateOutputOrderInsensitive() {
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar))");
+    driver2.withMapper(new IdentityMapper<Text, Text>()).withReducer(
+        new IdentityReducer<Text, Text>());
+    driver2.withInput(new Text("foo"), new Text("bar"))
+        .withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("bar")).runTest(false);
   }
 
   @Test
@@ -273,39 +273,45 @@ public class TestMapReduceDriver {
         .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
   }
 
+  /**
+   * group comparator - group by first character
+   */
+  public static class GroupComparator implements RawComparator<Text> {
+
+    @Override
+    public int compare(final Text o1, final Text o2) {
+      return o1.toString().substring(0, 1)
+          .compareTo(o2.toString().substring(0, 1));
+    }
+
+    @Override
+    public int compare(final byte[] arg0, final int arg1, final int arg2,
+        final byte[] arg3, final int arg4, final int arg5) {
+      throw new RuntimeException("Not implemented");
+    }
+
+  }
+
+  /**
+   * value order comparator - order by second character
+   */
+  public static class OrderComparator implements RawComparator<Text> {
+    @Override
+    public int compare(final Text o1, final Text o2) {
+      return o1.toString().substring(1, 2)
+          .compareTo(o2.toString().substring(1, 2));
+    }
+
+    @Override
+    public int compare(final byte[] arg0, final int arg1, final int arg2,
+        final byte[] arg3, final int arg4, final int arg5) {
+      throw new RuntimeException("Not implemented");
+    }
+  }
+
   // Test the key grouping and value ordering comparators
   @Test
   public void testComparators() {
-    // group comparator - group by first character
-    final RawComparator<Text> groupComparator = new RawComparator<Text>() {
-      @Override
-      public int compare(final Text o1, final Text o2) {
-        return o1.toString().substring(0, 1)
-            .compareTo(o2.toString().substring(0, 1));
-      }
-
-      @Override
-      public int compare(final byte[] arg0, final int arg1, final int arg2,
-          final byte[] arg3, final int arg4, final int arg5) {
-        throw new RuntimeException("Not implemented");
-      }
-    };
-
-    // value order comparator - order by second character
-    final RawComparator<Text> orderComparator = new RawComparator<Text>() {
-      @Override
-      public int compare(final Text o1, final Text o2) {
-        return o1.toString().substring(1, 2)
-            .compareTo(o2.toString().substring(1, 2));
-      }
-
-      @Override
-      public int compare(final byte[] arg0, final int arg1, final int arg2,
-          final byte[] arg3, final int arg4, final int arg5) {
-        throw new RuntimeException("Not implemented");
-      }
-    };
-
     // reducer to track the order of the input values using bit shifting
     driver.withReducer(new Reducer<Text, LongWritable, Text, LongWritable>() {
       @Override
@@ -330,8 +336,8 @@ public class TestMapReduceDriver {
       }
     });
 
-    driver.withKeyGroupingComparator(groupComparator);
-    driver.withKeyOrderComparator(orderComparator);
+    driver.withKeyGroupingComparator(new GroupComparator());
+    driver.withKeyOrderComparator(new OrderComparator());
 
     driver.addInput(new Text("a1"), new LongWritable(1));
     driver.addInput(new Text("b1"), new LongWritable(1));
@@ -365,38 +371,43 @@ public class TestMapReduceDriver {
 
   @Test
   public void testWithCounter() {
-    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver.newMapReduceDriver();
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
+        .newMapReduceDriver();
 
     driver
-      .withMapper(new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
-      .withInput(new Text("hie"), new Text("Hi"))
-      .withOutput(new Text("hie"), new Text("Hi"))
-      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 1)
-      .withCounter("category", "name", 1)
-      .withReducer(new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
-      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 1)
-      .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 1)
-      .withCounter("category", "count", 1)
-      .withCounter("category", "sum", 1)
-      .runTest();
+        .withMapper(
+            new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 1)
+        .withCounter("category", "name", 1)
+        .withReducer(
+            new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 1)
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 1)
+        .withCounter("category", "count", 1).withCounter("category", "sum", 1)
+        .runTest();
   }
 
   @Test
   public void testWithFailedCounter() {
-    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver.newMapReduceDriver();
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
+        .newMapReduceDriver();
 
-    thrown.expectAssertionErrorMessage("2 Error(s): (" +
-      "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 20, " +
-      "Counter with category category and name name have value 1 instead of expected 20)");
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): ("
+            + "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 20, "
+            + "Counter with category category and name name have value 1 instead of expected 20)");
 
     driver
-      .withMapper(new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
-      .withInput(new Text("hie"), new Text("Hi"))
-      .withOutput(new Text("hie"), new Text("Hi"))
-      .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 20)
-      .withReducer(new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
-      .withCounter("category", "name", 20)
-      .runTest();
+        .withMapper(
+            new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 20)
+        .withReducer(
+            new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
+        .withCounter("category", "name", 20).runTest();
   }
 
   public static final RawComparator<Integer> INTEGER_COMPARATOR = new RawComparator<Integer>() {

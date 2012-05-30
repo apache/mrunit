@@ -28,7 +28,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -40,6 +39,8 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
+import org.apache.hadoop.mrunit.TestMapReduceDriver.GroupComparator;
+import org.apache.hadoop.mrunit.TestMapReduceDriver.OrderComparator;
 import org.apache.hadoop.mrunit.mapreduce.TestMapDriver.ConfigurationMapper;
 import org.apache.hadoop.mrunit.mapreduce.TestReduceDriver.ConfigurationReducer;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -249,36 +250,6 @@ public class TestMapReduceDriver {
   // Test the key grouping and value ordering comparators
   @Test
   public void testComparators() {
-    // group comparator - group by first character
-    final RawComparator<Text> groupComparator = new RawComparator<Text>() {
-      @Override
-      public int compare(final Text o1, final Text o2) {
-        return o1.toString().substring(0, 1)
-            .compareTo(o2.toString().substring(0, 1));
-      }
-
-      @Override
-      public int compare(final byte[] arg0, final int arg1, final int arg2,
-          final byte[] arg3, final int arg4, final int arg5) {
-        throw new RuntimeException("Not implemented");
-      }
-    };
-
-    // value order comparator - order by second character
-    final RawComparator<Text> orderComparator = new RawComparator<Text>() {
-      @Override
-      public int compare(final Text o1, final Text o2) {
-        return o1.toString().substring(1, 2)
-            .compareTo(o2.toString().substring(1, 2));
-      }
-
-      @Override
-      public int compare(final byte[] arg0, final int arg1, final int arg2,
-          final byte[] arg3, final int arg4, final int arg5) {
-        throw new RuntimeException("Not implemented");
-      }
-    };
-
     // reducer to track the order of the input values using bit shifting
     driver.withReducer(new Reducer<Text, LongWritable, Text, LongWritable>() {
       @Override
@@ -295,8 +266,8 @@ public class TestMapReduceDriver {
       }
     });
 
-    driver.withKeyGroupingComparator(groupComparator);
-    driver.withKeyOrderComparator(orderComparator);
+    driver.withKeyGroupingComparator(new GroupComparator());
+    driver.withKeyOrderComparator(new OrderComparator());
 
     driver.addInput(new Text("a1"), new LongWritable(1));
     driver.addInput(new Text("b1"), new LongWritable(1));
@@ -365,7 +336,8 @@ public class TestMapReduceDriver {
 
   @Test
   public void testWithCounter() {
-    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver.newMapReduceDriver();
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
+        .newMapReduceDriver();
 
     driver
         .withMapper(
@@ -383,11 +355,13 @@ public class TestMapReduceDriver {
 
   @Test
   public void testWithFailedCounter() {
-    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver.newMapReduceDriver();
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
+        .newMapReduceDriver();
 
-    thrown.expectAssertionErrorMessage("2 Error(s): (" +
-      "Counter org.apache.hadoop.mrunit.mapreduce.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 20, " +
-      "Counter with category category and name name have value 1 instead of expected 20)");
+    thrown
+        .expectAssertionErrorMessage("2 Error(s): ("
+            + "Counter org.apache.hadoop.mrunit.mapreduce.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 20, "
+            + "Counter with category category and name name have value 1 instead of expected 20)");
 
     driver
         .withMapper(
