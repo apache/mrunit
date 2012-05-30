@@ -272,7 +272,7 @@
 
       <properties>
         <envClassifier>hadoop2</envClassifier>
-        <specificHadoopVersion>0.23.1</specificHadoopVersion>
+        <specificHadoopVersion>2.0.0-alpha</specificHadoopVersion>
       </properties>
 
       <dependencies>
