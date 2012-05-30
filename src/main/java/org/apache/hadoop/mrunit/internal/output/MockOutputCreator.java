@@ -50,16 +50,22 @@ public class MockOutputCreator<K, V> {
     mapreduceInputFormatClass = returnNonNull(inputFormatClass);
   }
 
-  public OutputCollectable<K, V> createOutputCollectable(Configuration conf)
-      throws IOException {
+  public OutputCollectable<K, V> createOutputCollectable(
+      Configuration configuration,
+      Configuration outputCopyingOrInputFormatConfiguration) throws IOException {
+    outputCopyingOrInputFormatConfiguration = outputCopyingOrInputFormatConfiguration == null ? configuration
+        : outputCopyingOrInputFormatConfiguration;
     if (mapredOutputFormatClass != null) {
-      return new MockMapredOutputFormat<K, V>(new JobConf(conf),
-          mapredOutputFormatClass, mapredInputFormatClass);
+      return new MockMapredOutputFormat<K, V>(new JobConf(configuration),
+          mapredOutputFormatClass, mapredInputFormatClass, new JobConf(
+              outputCopyingOrInputFormatConfiguration));
     }
     if (mapreduceOutputFormatClass != null) {
-      return new MockMapreduceOutputFormat<K, V>(new Job(conf),
-          mapreduceOutputFormatClass, mapreduceInputFormatClass);
+      return new MockMapreduceOutputFormat<K, V>(new Job(configuration),
+          mapreduceOutputFormatClass, mapreduceInputFormatClass, new Job(
+              outputCopyingOrInputFormatConfiguration));
     }
-    return new MockOutputCollector<K, V>(conf);
+    return new MockOutputCollector<K, V>(
+        outputCopyingOrInputFormatConfiguration);
   }
 }

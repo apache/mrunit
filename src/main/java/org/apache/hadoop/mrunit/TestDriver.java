@@ -44,6 +44,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   protected List<Pair<Pair<String, String>, Long>> expectedStringCounters;
 
   protected Configuration configuration;
+  private Configuration outputCopyingOrInputFormatConf;
 
   protected CounterWrapper counterWrapper;
 
@@ -141,6 +142,15 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    */
   public void setConfiguration(final Configuration configuration) {
     this.configuration = returnNonNull(configuration);
+  }
+
+  public Configuration getOutputCopyingOrInputFormatConfiguration() {
+    return outputCopyingOrInputFormatConf;
+  }
+
+  public void setOutputCopyingOrInputFormatConfiguration(
+      final Configuration configuration) {
+    this.outputCopyingOrInputFormatConf = returnNonNull(configuration);
   }
 
   /**

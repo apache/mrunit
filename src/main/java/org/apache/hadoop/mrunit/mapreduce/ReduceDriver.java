@@ -217,6 +217,12 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
+  public ReduceDriver<K1, V1, K2, V2> withOutputCopyingOrInputFormatConfiguration(
+      Configuration configuration) {
+    setOutputCopyingOrInputFormatConfiguration(configuration);
+    return this;
+  }
+
   public ReduceDriver<K1, V1, K2, V2> withOutputFormat(
       final Class<? extends OutputFormat> outputFormatClass,
       final Class<? extends InputFormat> inputFormatClass) {
@@ -238,7 +244,8 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
     try {
       final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
-          .createOutputCollectable(getConfiguration());
+          .createOutputCollectable(getConfiguration(),
+              getOutputCopyingOrInputFormatConfiguration());
       final MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>(
           inputs, getCounters(), getConfiguration(), outputCollectable);
       myReducer.run(wrapper.getMockContext());

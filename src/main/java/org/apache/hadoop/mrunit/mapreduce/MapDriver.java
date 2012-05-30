@@ -203,6 +203,12 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     return this;
   }
 
+  public MapDriver<K1, V1, K2, V2> withOutputCopyingOrInputFormatConfiguration(
+      Configuration configuration) {
+    setOutputCopyingOrInputFormatConfiguration(configuration);
+    return this;
+  }
+
   public MapDriver<K1, V1, K2, V2> withOutputFormat(
       final Class<? extends OutputFormat> outputFormatClass,
       final Class<? extends InputFormat> inputFormatClass) {
@@ -224,7 +230,8 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
     try {
       final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
-          .createOutputCollectable(getConfiguration());
+          .createOutputCollectable(getConfiguration(),
+              getOutputCopyingOrInputFormatConfiguration());
       final MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(
           inputs, getCounters(), getConfiguration(), outputCollectable);
       myMapper.run(wrapper.getMockContext());

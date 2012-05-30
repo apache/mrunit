@@ -269,6 +269,12 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     return this;
   }
 
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputCopyingOrInputFormatConfiguration(
+      Configuration configuration) {
+    setOutputCopyingOrInputFormatConfiguration(configuration);
+    return this;
+  }
+
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputFormat(
       final Class<? extends OutputFormat> outputFormatClass,
       final Class<? extends InputFormat> inputFormatClass) {
@@ -300,6 +306,10 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
             .newReduceDriver(reducer).withCounters(getCounters())
             .withConfiguration(configuration).withInputKey(inputKey)
             .withInputValues(inputValues);
+        if (getOutputCopyingOrInputFormatConfiguration() != null) {
+          reduceDriver
+              .withOutputCopyingOrInputFormatConfiguration(getOutputCopyingOrInputFormatConfiguration());
+        }
         if (outputFormatClass != null) {
           reduceDriver.withOutputFormat(outputFormatClass, inputFormatClass);
         }

@@ -53,26 +53,27 @@ public class MockMapreduceOutputFormat<K, V> implements OutputCollectable<K, V> 
   private static final Class<?>[] JOB_CONTEXT_CLASSES = new Class<?>[] {
       Configuration.class, JobID.class };
 
-  private final Job job;
+  private final Job outputFormatJob;
+  private final Job inputFormatJob;
   private final File outputPath = new File(
       System.getProperty("java.io.tmpdir"), "mrunit-" + Math.random());
   private TaskAttemptContext taskAttemptContext;
   private RecordWriter recordWriter;
   private final InputFormat inputFormat;
   private final OutputFormat outputFormat;
-  private final Serialization serialization;
   private final List<Pair<K, V>> outputs = new ArrayList<Pair<K, V>>();
 
-  public MockMapreduceOutputFormat(Job job,
+  public MockMapreduceOutputFormat(Job outputFormatJob,
       Class<? extends OutputFormat> outputFormatClass,
-      Class<? extends InputFormat> inputFormatClass) throws IOException {
-    this.job = job;
+      Class<? extends InputFormat> inputFormatClass, Job inputFormatJob)
+      throws IOException {
+    this.outputFormatJob = outputFormatJob;
+    this.inputFormatJob = inputFormatJob;
 
     outputFormat = ReflectionUtils.newInstance(outputFormatClass,
-        job.getConfiguration());
+        outputFormatJob.getConfiguration());
     inputFormat = ReflectionUtils.newInstance(inputFormatClass,
-        job.getConfiguration());
-    serialization = new Serialization((job.getConfiguration()));
+        inputFormatJob.getConfiguration());
 
     if (outputPath.exists()) {
       throw new IllegalStateException(
@@ -81,11 +82,12 @@ public class MockMapreduceOutputFormat<K, V> implements OutputCollectable<K, V> 
     if (!outputPath.mkdir()) {
       throw new IOException("Failed to create output dir " + outputPath);
     }
-    FileOutputFormat.setOutputPath(job, new Path(outputPath.toString()));
+    FileOutputFormat.setOutputPath(outputFormatJob,
+        new Path(outputPath.toString()));
   }
 
   private void setClassIfUnset(String name, Class<?> classType) {
-    job.getConfiguration().setIfUnset(name, classType.getName());
+    outputFormatJob.getConfiguration().setIfUnset(name, classType.getName());
   }
 
   private Object createObject(String primaryClassName,
@@ -129,7 +131,8 @@ public class MockMapreduceOutputFormat<K, V> implements OutputCollectable<K, V> 
         taskAttemptContext = (TaskAttemptContext) createObject(
             "org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl",
             "org.apache.hadoop.mapreduce.TaskAttemptContext",
-            TASK_ATTEMPT_CONTEXT_CLASSES, job.getConfiguration(), TASK_ID);
+            TASK_ATTEMPT_CONTEXT_CLASSES, outputFormatJob.getConfiguration(),
+            TASK_ID);
         recordWriter = outputFormat.getRecordWriter(taskAttemptContext);
       }
 
@@ -147,13 +150,15 @@ public class MockMapreduceOutputFormat<K, V> implements OutputCollectable<K, V> 
       throw new IOException(e);
     }
 
-    FileInputFormat.setInputPaths(job, outputPath + "/*/*/*/*");
+    final Serialization serialization = new Serialization(
+        inputFormatJob.getConfiguration());
+    FileInputFormat.setInputPaths(inputFormatJob, outputPath + "/*/*/*/*");
     try {
       List<InputSplit> inputSplits = inputFormat
           .getSplits((JobContext) createObject(
               "org.apache.hadoop.mapreduce.task.JobContextImpl",
               "org.apache.hadoop.mapreduce.JobContext", JOB_CONTEXT_CLASSES,
-              job.getConfiguration(), new JobID()));
+              inputFormatJob.getConfiguration(), new JobID()));
       for (InputSplit inputSplit : inputSplits) {
         RecordReader<K, V> recordReader = inputFormat.createRecordReader(
             inputSplit, taskAttemptContext);

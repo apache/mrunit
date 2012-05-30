@@ -45,7 +45,8 @@ public class MockMapredOutputFormat<K, V> implements OutputCollectable<K, V> {
   private static final String ATTEMPT = "attempt_000000000000_0000_m_000000_0";
   private static final TaskAttemptID TASK_ID = TaskAttemptID.forName(ATTEMPT);
 
-  private final JobConf conf;
+  private final JobConf outputFormatConf;
+  private final JobConf inputFormatConf;
   private final File outputPath = new File(
       System.getProperty("java.io.tmpdir"), "mrunit-" + Math.random());
   private final File outputFile = new File(outputPath, "part-00000");
@@ -54,13 +55,17 @@ public class MockMapredOutputFormat<K, V> implements OutputCollectable<K, V> {
   private final OutputFormat outputFormat;
   private final List<Pair<K, V>> outputs = new ArrayList<Pair<K, V>>();
 
-  public MockMapredOutputFormat(JobConf conf,
+  public MockMapredOutputFormat(JobConf outputFormatConf,
       Class<? extends OutputFormat> outputFormatClass,
-      Class<? extends InputFormat> inputFormatClass) throws IOException {
-    this.conf = conf;
+      Class<? extends InputFormat> inputFormatClass, JobConf inputFormatConf)
+      throws IOException {
+    this.outputFormatConf = outputFormatConf;
+    this.inputFormatConf = inputFormatConf;
 
-    outputFormat = ReflectionUtils.newInstance(outputFormatClass, conf);
-    inputFormat = ReflectionUtils.newInstance(inputFormatClass, conf);
+    outputFormat = ReflectionUtils.newInstance(outputFormatClass,
+        outputFormatConf);
+    inputFormat = ReflectionUtils
+        .newInstance(inputFormatClass, inputFormatConf);
 
     if (outputPath.exists()) {
       throw new IllegalStateException(
@@ -69,14 +74,15 @@ public class MockMapredOutputFormat<K, V> implements OutputCollectable<K, V> {
     if (!outputPath.mkdir()) {
       throw new IOException("Failed to create output dir " + outputPath);
     }
-    FileOutputFormat.setOutputPath(conf, new Path(outputPath.toString()));
-    conf.set("mapred.task.id", TASK_ID.toString());
-    FileSystem.getLocal(conf).mkdirs(
+    FileOutputFormat.setOutputPath(outputFormatConf,
+        new Path(outputPath.toString()));
+    outputFormatConf.set("mapred.task.id", TASK_ID.toString());
+    FileSystem.getLocal(outputFormatConf).mkdirs(
         new Path(outputPath.toString(), FileOutputCommitter.TEMP_DIR_NAME));
   }
 
   private void setClassIfUnset(String name, Class<?> classType) {
-    conf.setIfUnset(name, classType.getName());
+    outputFormatConf.setIfUnset(name, classType.getName());
   }
 
   @Override
@@ -87,8 +93,9 @@ public class MockMapredOutputFormat<K, V> implements OutputCollectable<K, V> {
       setClassIfUnset("mapred.output.key.class", key.getClass());
       setClassIfUnset("mapred.output.value.class", value.getClass());
 
-      recordWriter = outputFormat.getRecordWriter(FileSystem.getLocal(conf),
-          conf, outputFile.getName(), Reporter.NULL);
+      recordWriter = outputFormat.getRecordWriter(
+          FileSystem.getLocal(outputFormatConf), outputFormatConf,
+          outputFile.getName(), Reporter.NULL);
     }
 
     recordWriter.write(key, value);
@@ -98,10 +105,10 @@ public class MockMapredOutputFormat<K, V> implements OutputCollectable<K, V> {
   public List<Pair<K, V>> getOutputs() throws IOException {
     recordWriter.close(Reporter.NULL);
 
-    FileInputFormat.setInputPaths(conf, outputPath + "/*/*/*/*");
-    for (InputSplit inputSplit : inputFormat.getSplits(conf, 1)) {
+    FileInputFormat.setInputPaths(inputFormatConf, outputPath + "/*/*/*/*");
+    for (InputSplit inputSplit : inputFormat.getSplits(inputFormatConf, 1)) {
       final RecordReader<K, V> recordReader = inputFormat.getRecordReader(
-          inputSplit, conf, Reporter.NULL);
+          inputSplit, inputFormatConf, Reporter.NULL);
       K key = recordReader.createKey();
       V value = recordReader.createValue();
       while (recordReader.next(key, value)) {
