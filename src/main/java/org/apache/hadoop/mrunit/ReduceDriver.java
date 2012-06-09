@@ -35,6 +35,7 @@ import org.apache.hadoop.mrunit.internal.mapred.MockReporter;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.util.ReflectionUtils;
 
 /**
  * Harness that allows you to test a Reducer instance. You provide a key and a
@@ -255,7 +256,8 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     final MockReporter reporter = new MockReporter(
         MockReporter.ReporterType.Reducer, getCounters());
 
-    myReducer.configure(new JobConf(getConfiguration()));
+    ReflectionUtils.setConf(myReducer, new JobConf(getConfiguration()));
+
     myReducer.reduce(inputKey, getInputValues().iterator(), outputCollectable,
         reporter);
     myReducer.close();

@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.InputFormat;
@@ -36,6 +35,7 @@ import org.apache.hadoop.mrunit.internal.mapred.MockReporter;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.util.ReflectionUtils;
 
 /**
  * Harness that allows you to test a Mapper instance. You provide the input key
@@ -245,10 +245,8 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     final MockReporter reporter = new MockReporter(
         MockReporter.ReporterType.Mapper, getCounters());
 
-    if (myMapper instanceof Configurable) {
-      ((Configurable) myMapper).setConf(getConfiguration());
-    }
-    myMapper.configure(new JobConf(getConfiguration()));
+    ReflectionUtils.setConf(myMapper, new JobConf(getConfiguration()));
+
     myMapper.map(inputKey, inputVal, outputCollectable, reporter);
     myMapper.close();
     return outputCollectable.getOutputs();
