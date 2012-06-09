@@ -17,8 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +43,7 @@ import org.apache.hadoop.util.ReflectionUtils;
  * designed to handle a single (k, v)* -> (k, v)* case from the Mapper/Reducer
  * pair, representing a single unit test.
  */
-@SuppressWarnings("rawtypes")
+
 public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
     TestDriver<K1, V1, K3, V3> {
 

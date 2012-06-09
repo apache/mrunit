@@ -32,7 +32,6 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -359,7 +358,7 @@ public class TestReduceDriver {
         final Context context) throws IOException, InterruptedException {
       context.getCounter(Counters.COUNT).increment(1);
       context.getCounter("category", "count").increment(1);
-      for (final VI vi : values) {
+      for (@SuppressWarnings("unused") final VI vi : values) {
         context.getCounter(Counters.SUM).increment(1);
         context.getCounter("category", "sum").increment(1);
       }
@@ -388,6 +387,7 @@ public class TestReduceDriver {
     driver.runTest();
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
   public void testOutputFormatWithMismatchInOutputClasses() {
     final ReduceDriver driver = ReduceDriver.newReduceDriver(reducer);

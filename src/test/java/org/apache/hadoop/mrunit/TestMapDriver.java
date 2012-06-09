@@ -442,6 +442,7 @@ public class TestMapDriver {
 
   @Test
   public void testOutputFormatWithMismatchInOutputClasses() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     final MapDriver<Text, Text, LongWritable, Text> driver = MapDriver
         .newMapDriver(new IdentityMapper());
     driver.withOutputFormat(TextOutputFormat.class, TextInputFormat.class);

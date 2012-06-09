@@ -279,7 +279,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   }
 
   @Override
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(final Enum e,
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(final Enum<?> e,
       final long expectedValue) {
     super.withCounter(e, expectedValue);
     return this;
@@ -325,7 +325,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   }
 
   @Override
-  @SuppressWarnings({ "unchecked" })
+  @SuppressWarnings("unchecked")
   public List<Pair<K2, V2>> run() throws IOException {
     // inputs starts with the user-provided inputs.
     List<Pair<K1, V1>> inputs = inputList;

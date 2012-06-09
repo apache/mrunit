@@ -40,7 +40,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   protected List<Pair<K2, V2>> expectedOutputs;
 
-  protected List<Pair<Enum, Long>> expectedEnumCounters;
+  protected List<Pair<Enum<?>, Long>> expectedEnumCounters;
   protected List<Pair<Pair<String, String>, Long>> expectedStringCounters;
 
   protected Configuration configuration;
@@ -52,7 +52,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   public TestDriver() {
     expectedOutputs = new ArrayList<Pair<K2, V2>>();
-    expectedEnumCounters = new ArrayList<Pair<Enum, Long>>();
+    expectedEnumCounters = new ArrayList<Pair<Enum<?>, Long>>();
     expectedStringCounters = new ArrayList<Pair<Pair<String, String>, Long>>();
     configuration = new Configuration();
     serialization = new Serialization(configuration);
@@ -75,7 +75,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   /**
    * @return expected counters from this driver
    */
-  public List<Pair<Enum, Long>> getExpectedEnumCounters() {
+  public List<Pair<Enum<?>, Long>> getExpectedEnumCounters() {
     return expectedEnumCounters;
   }
 
@@ -103,9 +103,9 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    *          Expected value
    * @return
    */
-  public TestDriver<K1, V1, K2, V2> withCounter(final Enum e,
+  public TestDriver<K1, V1, K2, V2> withCounter(final Enum<?> e,
       final long expectedValue) {
-    expectedEnumCounters.add(new Pair<Enum, Long>(e, expectedValue));
+    expectedEnumCounters.add(new Pair<Enum<?>, Long>(e, expectedValue));
     return this;
   }
 
@@ -403,7 +403,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     final List<String> errors = new ArrayList<String>();
 
     // Firstly check enumeration based counters
-    for (final Pair<Enum, Long> expected : expectedEnumCounters) {
+    for (final Pair<Enum<?>, Long> expected : expectedEnumCounters) {
       final long actualValue = counterWrapper.findCounterValue(expected
           .getFirst());
 

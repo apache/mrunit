@@ -188,7 +188,6 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
     private T value;
     private final Serialization serialization;
 
-    @SuppressWarnings("unchecked")
     public ValueClassInstanceReuseList(final List<T> list,
         final Configuration conf) {
       super(list);

@@ -209,6 +209,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     return this;
   }
 
+  @SuppressWarnings("rawtypes")
   public MapDriver<K1, V1, K2, V2> withOutputFormat(
       final Class<? extends OutputFormat> outputFormatClass,
       final Class<? extends InputFormat> inputFormatClass) {
@@ -259,7 +260,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   }
 
   @Override
-  public MapDriver<K1, V1, K2, V2> withCounter(final Enum e,
+  public MapDriver<K1, V1, K2, V2> withCounter(final Enum<?> e,
       final long expectedValue) {
     super.withCounter(e, expectedValue);
     return this;

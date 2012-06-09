@@ -48,7 +48,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * If a combiner is specified, then it will be run exactly once after the Mapper
  * and before the Reducer.
  */
-@SuppressWarnings({ "deprecation", "rawtypes" })
+@SuppressWarnings({ "deprecation" })
 public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     MapReduceDriverBase<K1, V1, K2, V2, K3, V3> {
 
@@ -59,7 +59,9 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   private Reducer<K2, V2, K2, V2> myCombiner;
   private Counters counters;
 
+  @SuppressWarnings("rawtypes")
   private Class<? extends OutputFormat> outputFormatClass;
+  @SuppressWarnings("rawtypes")
   private Class<? extends InputFormat> inputFormatClass;
 
   public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
@@ -275,6 +277,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     return this;
   }
 
+  @SuppressWarnings("rawtypes")
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputFormat(
       final Class<? extends OutputFormat> outputFormatClass,
       final Class<? extends InputFormat> inputFormatClass) {
@@ -402,7 +405,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   }
 
   @Override
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(final Enum e,
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(final Enum<?> e,
       final long expectedValue) {
     super.withCounter(e, expectedValue);
     return this;

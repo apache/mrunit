@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mrunit.internal.mapred.MockMapredOutputFormat;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockMapreduceOutputFormat;
 
+@SuppressWarnings("rawtypes")
 public class MockOutputCreator<K, V> {
 
   private Class<? extends OutputFormat> mapredOutputFormatClass;

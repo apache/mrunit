@@ -37,7 +37,6 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -377,6 +376,7 @@ public class TestReduceDriver {
     driver.runTest();
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
   public void testOutputFormatWithMismatchInOutputClasses() {
     final ReduceDriver driver = ReduceDriver.newReduceDriver(reducer);

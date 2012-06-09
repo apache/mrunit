@@ -467,6 +467,7 @@ public class TestMapReduceDriver {
     driver.runTest();
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
   public void testOutputFormatWithMismatchInOutputClasses() {
     final MapReduceDriver driver = this.driver;

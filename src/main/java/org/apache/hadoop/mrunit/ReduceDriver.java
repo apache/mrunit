@@ -215,7 +215,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   }
 
   @Override
-  public ReduceDriver<K1, V1, K2, V2> withCounter(final Enum e,
+  public ReduceDriver<K1, V1, K2, V2> withCounter(final Enum<?> e,
       final long expectedValue) {
     super.withCounter(e, expectedValue);
     return this;
@@ -234,6 +234,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
+  @SuppressWarnings("rawtypes")
   public ReduceDriver<K1, V1, K2, V2> withOutputFormat(
       final Class<? extends OutputFormat> outputFormatClass,
       final Class<? extends InputFormat> inputFormatClass) {

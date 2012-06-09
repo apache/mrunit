@@ -44,7 +44,6 @@ public class MockOutputCollector<K, V> implements OutputCollectable<K, V> {
    * Accepts another (key, value) pair as an output of this mapper/reducer.
    */
   @Override
-  @SuppressWarnings("unchecked")
   public void collect(final K key, final V value) throws IOException {
     collectedOutputs.add(new Pair<K, V>(serialization.copy(key), serialization
         .copy(value)));

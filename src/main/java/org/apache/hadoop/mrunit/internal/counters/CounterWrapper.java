@@ -59,7 +59,7 @@ public class CounterWrapper {
    * @param e
    * @return
    */
-  public long findCounterValue(final Enum e) {
+  public long findCounterValue(final Enum<?> e) {
     if (mapred != null) {
       return mapred.findCounter(e).getValue();
     } else {

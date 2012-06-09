@@ -58,11 +58,15 @@ public class MockMapreduceOutputFormat<K, V> implements OutputCollectable<K, V> 
   private final File outputPath = new File(
       System.getProperty("java.io.tmpdir"), "mrunit-" + Math.random());
   private TaskAttemptContext taskAttemptContext;
+  @SuppressWarnings("rawtypes")
   private RecordWriter recordWriter;
+  @SuppressWarnings("rawtypes")
   private final InputFormat inputFormat;
+  @SuppressWarnings("rawtypes")
   private final OutputFormat outputFormat;
   private final List<Pair<K, V>> outputs = new ArrayList<Pair<K, V>>();
 
+  @SuppressWarnings("rawtypes")
   public MockMapreduceOutputFormat(Job outputFormatJob,
       Class<? extends OutputFormat> outputFormatClass,
       Class<? extends InputFormat> inputFormatClass, Job inputFormatJob)
