@@ -32,10 +32,8 @@ import org.apache.hadoop.mapred.InputSplit;
 @SuppressWarnings("deprecation")
 class MockInputSplit extends FileSplit implements InputSplit {
 
-  private static final Path MOCK_PATH = new Path("somefile");
-
-  public MockInputSplit() {
-    super(MOCK_PATH, 0, 0, (String[]) null);
+  public MockInputSplit(Path mockPath) {
+    super(mockPath, 0, 0, (String[]) null);
   }
 
   @Override
@@ -59,12 +57,5 @@ class MockInputSplit extends FileSplit implements InputSplit {
   @Override
   public String toString() {
     return "MockInputSplit";
-  }
-
-  /**
-   * Return the path object represented by this as a FileSplit.
-   */
-  public static Path getMockPath() {
-    return MOCK_PATH;
   }
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -222,7 +223,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     setOutputCopyingOrInputFormatConfiguration(configuration);
     return this;
   }
-
+  
   @SuppressWarnings("rawtypes")
   public MapDriver<K1, V1, K2, V2> withOutputFormat(
       final Class<? extends OutputFormat> outputFormatClass,
@@ -244,7 +245,8 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
         .createOutputCollectable(getConfiguration(),
             getOutputCopyingOrInputFormatConfiguration());
     final MockReporter reporter = new MockReporter(
-        MockReporter.ReporterType.Mapper, getCounters());
+        MockReporter.ReporterType.Mapper, getCounters(),
+        getMapInputPath());
 
     ReflectionUtils.setConf(myMapper, new JobConf(getConfiguration()));
 
@@ -269,7 +271,15 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     setConfiguration(configuration);
     return this;
   }
-
+  /**
+   * @param mapInputPath
+   *       The Path object which will be given to the mapper
+   * @return
+   */
+  public MapDriver<K1, V1, K2, V2> withMapInputPath(Path mapInputPath) {
+    setMapInputPath(mapInputPath);
+    return this;
+  }
   /**
    * Returns a new MapDriver without having to specify the generic types on the
    * right hand side of the object create statement.

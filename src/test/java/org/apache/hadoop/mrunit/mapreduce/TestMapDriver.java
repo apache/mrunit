@@ -18,13 +18,14 @@
 package org.apache.hadoop.mrunit.mapreduce;
 
 import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -322,5 +323,35 @@ public class TestMapDriver {
     driver.withInput(new Text("a"), new Text("1"));
     driver.withOutput(new LongWritable(), new Text("a\t1"));
     driver.runTest();
+  }
+  
+
+
+  private static class InputPathStoringMapper extends
+      Mapper<Text, Text, Text, Text> {
+    private Path mapInputPath;
+
+    @Override
+    public void map(Text key, Text value, Context context) throws IOException {
+      if (context.getInputSplit() instanceof FileSplit) {
+        mapInputPath = ((FileSplit) context.getInputSplit()).getPath();
+      }
+    }
+
+    private Path getMapInputPath() {
+      return mapInputPath;
+    }
+  }
+  @Test
+  public void testMapInputFile() {
+    InputPathStoringMapper mapper = new InputPathStoringMapper();
+    Path mapInputPath = new Path("myfile");
+    driver = MapDriver.newMapDriver(mapper);
+    driver.setMapInputPath(mapInputPath);
+    assertEquals(mapInputPath.getName(), driver.getMapInputPath().getName());
+    driver.withInput(new Text("a"), new Text("1"));
+    driver.runTest();
+    assertNotNull(mapper.getMapInputPath());
+    assertEquals(mapInputPath.getName(), mapper.getMapInputPath().getName());
   }
 }

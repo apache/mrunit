@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -374,7 +375,17 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     setConfiguration(configuration);
     return this;
   }
-
+  
+  /**
+   * @param mapInputPath
+   *       The Path object which will be given to the mapper
+   * @return
+   */
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withMapInputPath(Path mapInputPath) {
+    setMapInputPath(mapInputPath);
+    return this;
+  }
+  
   /**
    * Identical to {@link #setKeyGroupingComparator(RawComparator)}, but with a
    * fluent programming style

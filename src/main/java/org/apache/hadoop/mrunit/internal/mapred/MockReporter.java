@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.mrunit.internal.mapred;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapred.InputSplit;
@@ -25,7 +26,7 @@ import org.apache.hadoop.mapred.Reporter;
 @SuppressWarnings("deprecation")
 public class MockReporter implements Reporter {
 
-  private final MockInputSplit inputSplit = new MockInputSplit();
+  private final MockInputSplit inputSplit;
   private final Counters counters;
 
   public enum ReporterType {
@@ -34,9 +35,11 @@ public class MockReporter implements Reporter {
 
   private final ReporterType typ;
 
-  public MockReporter(final ReporterType kind, final Counters ctrs) {
+  public MockReporter(final ReporterType kind, final Counters ctrs,
+      final Path mapInputPath) {
     typ = kind;
     counters = ctrs;
+    inputSplit = new MockInputSplit(mapInputPath);
   }
 
   @Override

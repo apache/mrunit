@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.io.Serialization;
@@ -49,6 +50,8 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   protected CounterWrapper counterWrapper;
 
   protected Serialization serialization;
+  
+  protected Path mapInputPath = new Path("somefile");
 
   public TestDriver() {
     expectedOutputs = new ArrayList<Pair<K2, V2>>();
@@ -152,6 +155,19 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       final Configuration configuration) {
     this.outputCopyingOrInputFormatConf = returnNonNull(configuration);
   }
+  
+  /**
+   * @return the path passed to the mapper InputSplit
+   */
+  public Path getMapInputPath() {
+    return mapInputPath;
+  }
+  /**
+   * @param mapInputPath Path which is to be passed to the mappers InputSplit
+   */
+  public void setMapInputPath(Path mapInputPath) {
+    this.mapInputPath = mapInputPath;
+  }  
 
   /**
    * Runs the test but returns the result set instead of validating it (ignores

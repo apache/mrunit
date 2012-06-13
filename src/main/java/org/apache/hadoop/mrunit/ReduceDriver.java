@@ -255,7 +255,8 @@ public class ReduceDriver<K1, V1, K2, V2> extends
         .createOutputCollectable(getConfiguration(),
             getOutputCopyingOrInputFormatConfiguration());
     final MockReporter reporter = new MockReporter(
-        MockReporter.ReporterType.Reducer, getCounters());
+        MockReporter.ReporterType.Reducer, getCounters(),
+        getMapInputPath());
 
     ReflectionUtils.setConf(myReducer, new JobConf(getConfiguration()));
 

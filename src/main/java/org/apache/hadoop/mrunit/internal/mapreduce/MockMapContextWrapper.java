@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -53,14 +54,16 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
 
   protected final List<Pair<KEYIN, VALUEIN>> inputs;
   protected Pair<KEYIN, VALUEIN> currentKeyValue;
-  protected InputSplit inputSplit = new MockInputSplit();
+  protected InputSplit inputSplit;
 
   public MockMapContextWrapper(final List<Pair<KEYIN, VALUEIN>> inputs,
       final Counters counters, final Configuration conf,
-      final OutputCollectable<KEYOUT, VALUEOUT> outputCollectable)
+      final OutputCollectable<KEYOUT, VALUEOUT> outputCollectable,
+      final Path mapInputPath)
       throws IOException, InterruptedException {
     super(counters, conf, outputCollectable);
     this.inputs = inputs;
+    this.inputSplit = new MockInputSplit(mapInputPath);
   }
 
   @SuppressWarnings({ "unchecked" })

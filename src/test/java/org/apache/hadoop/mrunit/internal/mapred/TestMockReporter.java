@@ -19,6 +19,7 @@ package org.apache.hadoop.mrunit.internal.mapred;
 
 import static org.junit.Assert.assertTrue;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
 import org.apache.hadoop.mrunit.internal.mapred.MockReporter;
@@ -35,7 +36,7 @@ public class TestMockReporter {
   @Test
   public void testGetInputSplitForMapper() {
     final InputSplit split = new MockReporter(MockReporter.ReporterType.Mapper,
-        null).getInputSplit();
+        null, new Path("/")).getInputSplit();
     assertTrue(null != split);
   }
 
@@ -45,6 +46,6 @@ public class TestMockReporter {
   public void testGetInputSplitForReducer() {
     thrown.expectMessage(UnsupportedOperationException.class,
         "Reducer cannot call getInputSplit()");
-    new MockReporter(MockReporter.ReporterType.Reducer, null).getInputSplit();
+    new MockReporter(MockReporter.ReporterType.Reducer, null, null).getInputSplit();
   }
 }

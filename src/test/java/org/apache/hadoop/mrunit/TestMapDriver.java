@@ -18,16 +18,18 @@
 package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -367,7 +369,7 @@ public class TestMapDriver {
     }
 
   }
-  
+
   /**
    * Similar to IdentityMapper, but outputs each key/value pair twice
    */
@@ -449,5 +451,35 @@ public class TestMapDriver {
     driver.withInput(new Text("a"), new Text("1"));
     driver.withOutput(new LongWritable(), new Text("a\t1"));
     driver.runTest();
+  }
+
+  private static class InputPathStoringMapper extends MapReduceBase implements
+      Mapper<Text, Text, Text, Text> {
+    private Path mapInputPath;
+
+    @Override
+    public void map(Text key, Text value, OutputCollector<Text, Text> output,
+        Reporter reporter) throws IOException {
+      if (reporter.getInputSplit() instanceof FileSplit) {
+        mapInputPath = ((FileSplit) reporter.getInputSplit()).getPath();
+      }
+    }
+
+    private Path getMapInputPath() {
+      return mapInputPath;
+    }
+  }
+
+  @Test
+  public void testMapInputFile() {
+    InputPathStoringMapper mapper = new InputPathStoringMapper();
+    Path mapInputPath = new Path("myfile");
+    driver = MapDriver.newMapDriver(mapper);
+    driver.setMapInputPath(mapInputPath);
+    assertEquals(mapInputPath.getName(), driver.getMapInputPath().getName());
+    driver.withInput(new Text("a"), new Text("1"));
+    driver.runTest();
+    assertNotNull(mapper.getMapInputPath());
+    assertEquals(mapInputPath.getName(), mapper.getMapInputPath().getName());
   }
 }

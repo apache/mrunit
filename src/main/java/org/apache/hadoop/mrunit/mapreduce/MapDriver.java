@@ -27,11 +27,13 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mrunit.MapDriverBase;
+import org.apache.hadoop.mrunit.MapReduceDriver;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockMapContextWrapper;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
@@ -234,7 +236,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
           .createOutputCollectable(getConfiguration(),
               getOutputCopyingOrInputFormatConfiguration());
       final MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(
-          inputs, getCounters(), getConfiguration(), outputCollectable);
+          inputs, getCounters(), getConfiguration(), outputCollectable, getMapInputPath());
       myMapper.run(wrapper.getMockContext());
       return outputCollectable.getOutputs();
     } catch (final InterruptedException ie) {
@@ -258,6 +260,17 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     setConfiguration(configuration);
     return this;
   }
+  
+  /**
+   * @param mapInputPath
+   *       The Path object which will be given to the mapper
+   * @return
+   */
+  public MapDriver<K1, V1, K2, V2> withMapInputPath(Path mapInputPath) {
+    setMapInputPath(mapInputPath);
+    return this;
+  }
+
 
   @Override
   public MapDriver<K1, V1, K2, V2> withCounter(final Enum<?> e,
