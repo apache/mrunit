@@ -342,7 +342,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
       mapOutputs.addAll(MapDriver.newMapDriver(myMapper)
           .withCounters(getCounters()).withConfiguration(configuration)
-          .withInput(input).run());
+          .withInput(input).withMapInputPath(getMapInputPath()).run());
     }
 
     if (myCombiner != null) {

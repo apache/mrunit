@@ -17,8 +17,8 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.assertEquals;
+import static org.apache.hadoop.mrunit.ExtendedAssert.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,11 +26,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
@@ -476,5 +479,36 @@ public class TestMapReduceDriver {
     driver.withInput(new Text("a"), new LongWritable(2));
     driver.withOutput(new LongWritable(), new Text("a\t3"));
     driver.runTest();
+  }
+
+  private static class InputPathStoringMapper extends MapReduceBase implements
+      Mapper<Text, LongWritable, Text, LongWritable> {
+    private Path mapInputPath;
+
+    @Override
+    public void map(Text key, LongWritable value,
+        OutputCollector<Text, LongWritable> output, Reporter reporter)
+        throws IOException {
+      if (reporter.getInputSplit() instanceof FileSplit) {
+        mapInputPath = ((FileSplit) reporter.getInputSplit()).getPath();
+      }
+    }
+
+    private Path getMapInputPath() {
+      return mapInputPath;
+    }
+  }
+
+  @Test
+  public void testMapInputFile() {
+    InputPathStoringMapper mapper = new InputPathStoringMapper();
+    Path mapInputPath = new Path("myfile");
+    driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
+    driver.setMapInputPath(mapInputPath);
+    assertEquals(mapInputPath.getName(), driver.getMapInputPath().getName());
+    driver.withInput(new Text("a"), new LongWritable(1));
+    driver.runTest();
+    assertNotNull(mapper.getMapInputPath());
+    assertEquals(mapInputPath.getName(), mapper.getMapInputPath().getName());
   }
 }

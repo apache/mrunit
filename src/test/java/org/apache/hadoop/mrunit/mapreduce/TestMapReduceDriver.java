@@ -18,19 +18,21 @@
 package org.apache.hadoop.mrunit.mapreduce;
 
 import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.map.InverseMapper;
@@ -407,5 +409,35 @@ public class TestMapReduceDriver {
     driver.withInput(new Text("a"), new LongWritable(2));
     driver.withOutput(new LongWritable(), new Text("a\t3"));
     driver.runTest();
+  }
+
+  private static class InputPathStoringMapper extends
+      Mapper<Text, LongWritable, Text, LongWritable> {
+    private Path mapInputPath;
+
+    @Override
+    public void map(Text key, LongWritable value, Context context)
+        throws IOException {
+      if (context.getInputSplit() instanceof FileSplit) {
+        mapInputPath = ((FileSplit) context.getInputSplit()).getPath();
+      }
+    }
+
+    private Path getMapInputPath() {
+      return mapInputPath;
+    }
+  }
+
+  @Test
+  public void testMapInputFile() {
+    InputPathStoringMapper mapper = new InputPathStoringMapper();
+    Path mapInputPath = new Path("myfile");
+    driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
+    driver.setMapInputPath(mapInputPath);
+    assertEquals(mapInputPath.getName(), driver.getMapInputPath().getName());
+    driver.withInput(new Text("a"), new LongWritable(1));
+    driver.runTest();
+    assertNotNull(mapper.getMapInputPath());
+    assertEquals(mapInputPath.getName(), mapper.getMapInputPath().getName());
   }
 }
