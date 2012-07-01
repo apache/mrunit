@@ -17,48 +17,44 @@
  */
 package org.apache.hadoop.mrunit.internal.mapreduce;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counter;
-import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
+import org.apache.hadoop.mrunit.types.Pair;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-abstract class AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, CONTEXT extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
+abstract class AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, CONTEXT 
+extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
 
-  protected final Counters counters;
-  protected final Configuration conf;
+  protected CONTEXT context;
+  protected final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator;
+  protected OutputCollectable<KEYOUT, VALUEOUT> outputCollectable;
 
-  protected final CONTEXT context;
-  private final OutputCollectable<KEYOUT, VALUEOUT> outputCollectable;
-
-  public AbstractMockContextWrapper(final Counters counters,
-      final Configuration conf,
-      final OutputCollectable<KEYOUT, VALUEOUT> outputCollectable)
-      throws IOException, InterruptedException {
-    this.conf = conf;
-    this.counters = counters;
-    this.outputCollectable = outputCollectable;
-    context = create();
+  public AbstractMockContextWrapper(final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator) {
+    this.mockOutputCreator = mockOutputCreator;
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   protected void createCommon(
-      final TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context)
-      throws IOException, InterruptedException {
+      final TaskInputOutputContext context,
+      final ContextDriver contextDriver,
+      final MockOutputCreator mockOutputCreator) {
+        
     when(context.getCounter((Enum) any())).thenAnswer(new Answer<Counter>() {
       @Override
       public Counter answer(final InvocationOnMock invocation) {
         final Object[] args = invocation.getArguments();
-        return counters.findCounter((Enum) args[0]);
+        return contextDriver.getCounters().findCounter((Enum) args[0]);
       }
     });
     when(context.getCounter(anyString(), anyString())).thenAnswer(
@@ -66,31 +62,48 @@ abstract class AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, CONT
           @Override
           public Counter answer(final InvocationOnMock invocation) {
             final Object[] args = invocation.getArguments();
-            return counters.findCounter((String) args[0], (String) args[1]);
+            return contextDriver.getCounters().findCounter((String) args[0], (String) args[1]);
           }
-        });
+    });
     when(context.getConfiguration()).thenAnswer(new Answer<Configuration>() {
       @Override
       public Configuration answer(final InvocationOnMock invocation) {
-        return conf;
+        return contextDriver.getConfiguration();
       }
     });
-    doAnswer(new Answer<Object>() {
-      @Override
-      public Object answer(final InvocationOnMock invocation) {
-        final Object[] args = invocation.getArguments();
-        try {
-          outputCollectable.collect((KEYOUT) args[0], (VALUEOUT) args[1]);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
+    try {
+      doAnswer(new Answer<Object>() {
+        @Override
+        public Object answer(final InvocationOnMock invocation) {
+          final Object[] args = invocation.getArguments();
+          try {
+            if(outputCollectable == null) {
+              outputCollectable = mockOutputCreator.createOutputCollectable(contextDriver.getConfiguration(), 
+                  contextDriver.getOutputCopyingOrInputFormatConfiguration());
+            }
+            outputCollectable.collect((KEYOUT)args[0], (VALUEOUT)args[1]);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+          return null;
         }
-        return null;
-      }
-    }).when(context).write((KEYOUT) any(), (VALUEOUT) any());
+      }).when(context).write(any(), any());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   protected abstract CONTEXT create() throws IOException, InterruptedException;
 
+  public List<Pair<KEYOUT, VALUEOUT>> getOutputs() throws IOException {
+    if(outputCollectable == null) {
+      return new ArrayList<Pair<KEYOUT, VALUEOUT>>();
+    }
+    return outputCollectable.getOutputs();
+  }
+  
   public CONTEXT getMockContext() {
     return context;
   }

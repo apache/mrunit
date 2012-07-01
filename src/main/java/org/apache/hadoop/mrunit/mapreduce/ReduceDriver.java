@@ -18,7 +18,7 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,9 +33,9 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.ReduceDriverBase;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
+import org.apache.hadoop.mrunit.internal.mapreduce.ContextDriver;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockReduceContextWrapper;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
-import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -49,7 +49,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * sets should go in separate unit tests.
  */
 public class ReduceDriver<K1, V1, K2, V2> extends
-    ReduceDriverBase<K1, V1, K2, V2> {
+    ReduceDriverBase<K1, V1, K2, V2> implements ContextDriver {
 
   public static final Log LOG = LogFactory.getLog(ReduceDriver.class);
 
@@ -57,6 +57,10 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   private Counters counters;
 
   private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
+  private final List<Pair<K1, List<V1>>> inputs = new ArrayList<Pair<K1, List<V1>>>();
+  private final MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>(
+      inputs, mockOutputCreator, this);
+
 
   public ReduceDriver(final Reducer<K1, V1, K2, V2> r) {
     this();
@@ -95,6 +99,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   }
 
   /** @return the counters used in this test */
+  @Override
   public Counters getCounters() {
     return counters;
   }
@@ -240,17 +245,12 @@ public class ReduceDriver<K1, V1, K2, V2> extends
       throw new IllegalStateException("No Reducer class was provided");
     }
 
-    final List<Pair<K1, List<V1>>> inputs = new ArrayList<Pair<K1, List<V1>>>();
+    inputs.clear();
     inputs.add(new Pair<K1, List<V1>>(inputKey, getInputValues()));
 
     try {
-      final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
-          .createOutputCollectable(getConfiguration(),
-              getOutputCopyingOrInputFormatConfiguration());
-      final MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>(
-          inputs, getCounters(), getConfiguration(), outputCollectable);
       myReducer.run(wrapper.getMockContext());
-      return outputCollectable.getOutputs();
+      return wrapper.getOutputs();
     } catch (final InterruptedException ie) {
       throw new IOException(ie);
     }
@@ -285,6 +285,34 @@ public class ReduceDriver<K1, V1, K2, V2> extends
       final String n, final long e) {
     super.withCounter(g, n, e);
     return this;
+  }
+  
+  /**
+   * <p>Obtain Context object for furthering mocking with Mockito.
+   * For example, causing write() to throw an exception:</p>
+   * 
+   * <pre>
+   * import static org.mockito.Matchers.*;
+   * import static org.mockito.Mockito.*;
+   * doThrow(new IOException()).when(context).write(any(), any());
+   * </pre>
+   * 
+   * <p>Or implement other logic:</p>
+   * 
+   * <pre>
+   * import static org.mockito.Matchers.*;
+   * import static org.mockito.Mockito.*;
+   * doAnswer(new Answer<Object>() {
+   *    public Object answer(final InvocationOnMock invocation) {
+   *    ...
+   *     return null;
+   *   }
+   * }).when(context).write(any(), any());
+   * </pre>
+   * @return the mocked context
+   */
+  public Reducer<K1, V1, K2, V2>.Context getContext() {
+    return wrapper.getMockContext();
   }
 
   /**

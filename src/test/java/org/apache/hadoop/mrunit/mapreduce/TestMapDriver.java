@@ -17,8 +17,11 @@
  */
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
+import static org.apache.hadoop.mrunit.ExtendedAssert.*;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -260,6 +263,7 @@ public class TestMapDriver {
   
   public static class InputSplitDetailMapper
     extends Mapper<NullWritable, NullWritable, Text, LongWritable> {
+    @Override
     protected void map(NullWritable key, NullWritable value, Context context) 
         throws IOException, InterruptedException {
       FileSplit split = (FileSplit)context.getInputSplit();
@@ -353,5 +357,17 @@ public class TestMapDriver {
     driver.runTest();
     assertNotNull(mapper.getMapInputPath());
     assertEquals(mapInputPath.getName(), mapper.getMapInputPath().getName());
+  }
+  
+  @Test
+  public void textMockContext() throws IOException, InterruptedException {
+    thrown.expectMessage(RuntimeException.class, "Injected!");
+    Mapper<Text, Text, Text, Text>.Context context = driver.getContext();
+    doThrow(new RuntimeException("Injected!"))
+      .when(context)
+        .write(any(Text.class), any(Text.class));
+    driver.withInput(new Text("a"), new Text("1"));
+    driver.withOutput(new Text("a"), new Text("1"));
+    driver.runTest();
   }
 }

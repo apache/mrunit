@@ -18,8 +18,10 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.assertEquals;
+import static org.apache.hadoop.mrunit.ExtendedAssert.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -396,6 +398,19 @@ public class TestReduceDriver {
     driver.withInputValue(new LongWritable(1)).withInputValue(
         new LongWritable(2));
     driver.withOutput(new LongWritable(), new Text("a\t3"));
+    driver.runTest();
+  }
+  
+  @Test
+  public void textMockContext() throws IOException, InterruptedException {
+    thrown.expectMessage(RuntimeException.class, "Injected!");
+    Reducer<Text, LongWritable, Text, LongWritable>.Context context = driver.getContext();
+    doThrow(new RuntimeException("Injected!"))
+      .when(context)
+        .write(any(Text.class), any(LongWritable.class));
+    driver.withInputKey(new Text("a"));
+    driver.withInputValue(new LongWritable(1)).withInputValue(
+        new LongWritable(2));
     driver.runTest();
   }
 }

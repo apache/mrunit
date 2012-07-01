@@ -18,8 +18,7 @@
 
 package org.apache.hadoop.mrunit.internal.mapreduce;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -27,10 +26,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
+import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
+import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -51,51 +49,61 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
   protected static final Log LOG = LogFactory
       .getLog(MockReduceContextWrapper.class);
   protected final List<Pair<KEYIN, List<VALUEIN>>> inputs;
+  protected final ReduceDriver<KEYIN, VALUEIN, KEYOUT, VALUEOUT> driver;
+  
   protected Pair<KEYIN, List<VALUEIN>> currentKeyValue;
-
+  
   public MockReduceContextWrapper(
-      final List<Pair<KEYIN, List<VALUEIN>>> inputs, final Counters counters,
-      final Configuration conf,
-      OutputCollectable<KEYOUT, VALUEOUT> outputCollectable)
-      throws IOException, InterruptedException {
-    super(counters, conf, outputCollectable);
+      final List<Pair<KEYIN, List<VALUEIN>>> inputs, 
+      final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator,
+      final ReduceDriver<KEYIN, VALUEIN, KEYOUT, VALUEOUT> driver) {
+    super(mockOutputCreator);
     this.inputs = inputs;
+    this.driver = driver;
+    context = create();
   }
 
+  @Override
   @SuppressWarnings({ "unchecked" })
-  protected Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create()
-      throws IOException, InterruptedException {
+  protected Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create() {
 
     final Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Reducer.Context.class);
-    createCommon(context);
-    /*
-     * In actual context code nextKeyValue() modifies the current state so we
-     * can here as well.
-     */
-    when(context.nextKey()).thenAnswer(new Answer<Boolean>() {
-      @Override
-      public Boolean answer(final InvocationOnMock invocation) {
-        if (inputs.size() > 0) {
-          currentKeyValue = inputs.remove(0);
-          return true;
-        } else {
-          currentKeyValue = null;
-          return false;
+    
+    createCommon(context, driver, mockOutputCreator);
+    try {
+      /*
+       * In actual context code nextKeyValue() modifies the current state so we
+       * can here as well.
+       */
+      when(context.nextKey()).thenAnswer(new Answer<Boolean>() {
+        @Override
+        public Boolean answer(final InvocationOnMock invocation) {
+          if (inputs.size() > 0) {
+            currentKeyValue = inputs.remove(0);
+            return true;
+          } else {
+            currentKeyValue = null;
+            return false;
+          }
         }
-      }
-    });
-    when(context.getCurrentKey()).thenAnswer(new Answer<KEYIN>() {
-      @Override
-      public KEYIN answer(final InvocationOnMock invocation) {
-        return currentKeyValue.getFirst();
-      }
-    });
-    when(context.getValues()).thenAnswer(new Answer<Iterable<VALUEIN>>() {
-      @Override
-      public Iterable<VALUEIN> answer(final InvocationOnMock invocation) {
-        return makeOneUseIterator(currentKeyValue.getSecond().iterator());
-      }
-    });
+      });
+      when(context.getCurrentKey()).thenAnswer(new Answer<KEYIN>() {
+        @Override
+        public KEYIN answer(final InvocationOnMock invocation) {
+          return currentKeyValue.getFirst();
+        }
+      });
+      when(context.getValues()).thenAnswer(new Answer<Iterable<VALUEIN>>() {
+        @Override
+        public Iterable<VALUEIN> answer(final InvocationOnMock invocation) {
+          return makeOneUseIterator(currentKeyValue.getSecond().iterator());
+        }
+      });
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
     return context;
   }
 

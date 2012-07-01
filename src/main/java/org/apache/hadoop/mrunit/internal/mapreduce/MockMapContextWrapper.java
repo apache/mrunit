@@ -18,20 +18,17 @@
 
 package org.apache.hadoop.mrunit.internal.mapreduce;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
+import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
+import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -46,65 +43,71 @@ import org.mockito.stubbing.Answer;
  * This wrapper class exists for that purpose.
  */
 public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
-    extends
-    AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context> {
+    extends AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context> {
 
   protected static final Log LOG = LogFactory
       .getLog(MockMapContextWrapper.class);
 
   protected final List<Pair<KEYIN, VALUEIN>> inputs;
+  protected final MapDriver<KEYIN, VALUEIN, KEYOUT, VALUEOUT> driver;
+  
   protected Pair<KEYIN, VALUEIN> currentKeyValue;
-  protected InputSplit inputSplit;
-
+  
   public MockMapContextWrapper(final List<Pair<KEYIN, VALUEIN>> inputs,
-      final Counters counters, final Configuration conf,
-      final OutputCollectable<KEYOUT, VALUEOUT> outputCollectable,
-      final Path mapInputPath)
-      throws IOException, InterruptedException {
-    super(counters, conf, outputCollectable);
+      final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator,
+      final MapDriver<KEYIN, VALUEIN, KEYOUT, VALUEOUT> driver) {
+    super(mockOutputCreator);
     this.inputs = inputs;
-    this.inputSplit = new MockInputSplit(mapInputPath);
+    this.driver = driver;
+    context = create();
+
   }
 
+  @Override
   @SuppressWarnings({ "unchecked" })
-  protected Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create()
-      throws IOException, InterruptedException {
+  protected Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create() {
     final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Mapper.Context.class);
 
-    createCommon(context);
+    createCommon(context, driver, mockOutputCreator);
 
-    /*
-     * In actual context code nextKeyValue() modifies the current state so we
-     * can here as well.
-     */
-    when(context.nextKeyValue()).thenAnswer(new Answer<Boolean>() {
-      @Override
-      public Boolean answer(final InvocationOnMock invocation) {
-        if (inputs.size() > 0) {
-          currentKeyValue = inputs.remove(0);
-          return true;
-        } else {
-          currentKeyValue = null;
-          return false;
+    try {
+      /*
+       * In actual context code nextKeyValue() modifies the current state so we
+       * can here as well.
+       */
+      when(context.nextKeyValue()).thenAnswer(new Answer<Boolean>() {
+        @Override
+        public Boolean answer(final InvocationOnMock invocation) {
+          if (inputs.size() > 0) {
+            currentKeyValue = inputs.remove(0);
+            return true;
+          } else {
+            currentKeyValue = null;
+            return false;
+          }
         }
-      }
-    });
-    when(context.getCurrentKey()).thenAnswer(new Answer<KEYIN>() {
-      @Override
-      public KEYIN answer(final InvocationOnMock invocation) {
-        return currentKeyValue.getFirst();
-      }
-    });
-    when(context.getCurrentValue()).thenAnswer(new Answer<VALUEIN>() {
-      @Override
-      public VALUEIN answer(final InvocationOnMock invocation) {
-        return currentKeyValue.getSecond();
-      }
-    });
+      });
+      when(context.getCurrentKey()).thenAnswer(new Answer<KEYIN>() {
+        @Override
+        public KEYIN answer(final InvocationOnMock invocation) {
+          return currentKeyValue.getFirst();
+        }
+      });
+      when(context.getCurrentValue()).thenAnswer(new Answer<VALUEIN>() {
+        @Override
+        public VALUEIN answer(final InvocationOnMock invocation) {
+          return currentKeyValue.getSecond();
+        }
+      });
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
     when(context.getInputSplit()).thenAnswer(new Answer<InputSplit>() {
       @Override
       public InputSplit answer(InvocationOnMock invocation) throws Throwable {
-        return inputSplit;
+        return new MockInputSplit(driver.getMapInputPath());
       }
     });
     return context;

@@ -18,10 +18,9 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -33,11 +32,10 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mrunit.MapDriverBase;
-import org.apache.hadoop.mrunit.MapReduceDriver;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
+import org.apache.hadoop.mrunit.internal.mapreduce.ContextDriver;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockMapContextWrapper;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
-import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -49,7 +47,8 @@ import org.apache.hadoop.mrunit.types.Pair;
  * (k, v)* case from the Mapper, representing a single unit test. Multiple input
  * (k, v) pairs should go in separate unit tests.
  */
-public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
+public class MapDriver<K1, V1, K2, V2> 
+extends MapDriverBase<K1, V1, K2, V2> implements ContextDriver {
 
   public static final Log LOG = LogFactory.getLog(MapDriver.class);
 
@@ -57,6 +56,9 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   private Counters counters;
 
   private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
+  private final MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(
+      inputs, mockOutputCreator,  this);
+
 
   public MapDriver(final Mapper<K1, V1, K2, V2> m) {
     this();
@@ -91,6 +93,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   }
 
   /** @return the counters used in this test */
+  @Override
   public Counters getCounters() {
     return counters;
   }
@@ -227,18 +230,13 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     if (myMapper == null) {
       throw new IllegalStateException("No Mapper class was provided");
     }
-
-    final List<Pair<K1, V1>> inputs = new ArrayList<Pair<K1, V1>>();
+    
+    inputs.clear();
     inputs.add(new Pair<K1, V1>(inputKey, inputVal));
 
     try {
-      final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
-          .createOutputCollectable(getConfiguration(),
-              getOutputCopyingOrInputFormatConfiguration());
-      final MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(
-          inputs, getCounters(), getConfiguration(), outputCollectable, getMapInputPath());
       myMapper.run(wrapper.getMockContext());
-      return outputCollectable.getOutputs();
+      return wrapper.getOutputs();
     } catch (final InterruptedException ie) {
       throw new IOException(ie);
     }
@@ -277,6 +275,34 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
       final long expectedValue) {
     super.withCounter(e, expectedValue);
     return this;
+  }
+  
+  /**
+   * <p>Obtain Context object for furthering mocking with Mockito.
+   * For example, causing write() to throw an exception:</p>
+   * 
+   * <pre>
+   * import static org.mockito.Matchers.*;
+   * import static org.mockito.Mockito.*;
+   * doThrow(new IOException()).when(context).write(any(), any());
+   * </pre>
+   * 
+   * <p>Or implement other logic:</p>
+   * 
+   * <pre>
+   * import static org.mockito.Matchers.*;
+   * import static org.mockito.Mockito.*;
+   * doAnswer(new Answer<Object>() {
+   *    public Object answer(final InvocationOnMock invocation) {
+   *    ...
+   *     return null;
+   *   }
+   * }).when(context).write(any(), any());
+   * </pre>
+   * @return the mocked context
+   */
+  public Mapper<K1, V1, K2, V2>.Context getContext() {
+    return wrapper.getMockContext();
   }
 
   @Override

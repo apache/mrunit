@@ -18,6 +18,7 @@
 package org.apache.hadoop.mrunit;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -39,6 +40,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
 
   public static final Log LOG = LogFactory.getLog(MapDriverBase.class);
 
+  protected List<Pair<K1, V1>> inputs = new ArrayList<Pair<K1, V1>>();
   protected K1 inputKey;
   protected V1 inputVal;
 
