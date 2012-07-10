@@ -17,6 +17,8 @@
  */
 package org.apache.hadoop.mrunit;
 
+import java.io.IOException;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
@@ -42,7 +44,7 @@ public class TestExample {
   }
 
   @Test
-  public void testIdentityMapper() {
+  public void testIdentityMapper() throws IOException {
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar")).runTest();
   }

@@ -35,7 +35,7 @@ import org.junit.Test;
 public class TestConfigureClose {
 
   @Test
-  public void testMapperConfigureClose() {
+  public void testMapperConfigureClose() throws IOException {
     final AtomicBoolean configureWasCalled = new AtomicBoolean(false);
     final AtomicBoolean closeWasCalled = new AtomicBoolean(false);
     final Mapper<Text, Text, Text, Text> mapper = new Mapper<Text, Text, Text, Text>() {
@@ -63,7 +63,7 @@ public class TestConfigureClose {
   }
 
   @Test
-  public void testReducerConfigureClose() {
+  public void testReducerConfigureClose() throws IOException {
     final AtomicBoolean configureWasCalled = new AtomicBoolean(false);
     final AtomicBoolean closeWasCalled = new AtomicBoolean(false);
     final Reducer<Text, Text, Text, Text> reducer = new Reducer<Text, Text, Text, Text>() {

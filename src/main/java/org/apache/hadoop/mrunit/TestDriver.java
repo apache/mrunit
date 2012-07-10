@@ -180,7 +180,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   /**
    * Runs the test and validates the results
    */
-  public void runTest() {
+  public void runTest() throws IOException {
     runTest(true);
   }
 
@@ -190,7 +190,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    * @param orderMatters
    *          Whether or not output ordering is important
    */
-  public abstract void runTest(boolean orderMatters);
+  public abstract void runTest(boolean orderMatters) throws IOException;
 
   /**
    * Split "key \t val" into Pair(Text(key), Text(val))

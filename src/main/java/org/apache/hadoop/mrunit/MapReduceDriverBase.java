@@ -131,15 +131,10 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
   public abstract List<Pair<K3, V3>> run() throws IOException;
 
   @Override
-  public void runTest(final boolean orderMatters) {
-    try {
-      final List<Pair<K3, V3>> reduceOutputs = run();
-      validate(reduceOutputs, orderMatters);
-      validate(counterWrapper);
-    } catch (final IOException ioe) {
-      LOG.error(ioe);
-      throw new RuntimeException(ioe);
-    }
+  public void runTest(final boolean orderMatters) throws IOException {
+    final List<Pair<K3, V3>> reduceOutputs = run();
+    validate(reduceOutputs, orderMatters);
+    validate(counterWrapper);
   }
 
   /**

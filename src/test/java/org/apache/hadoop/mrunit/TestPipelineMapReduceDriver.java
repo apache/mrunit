@@ -56,14 +56,14 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testNoInput() {
+  public void testNoInput() throws IOException {
     thrown.expectMessage(IllegalStateException.class, "No input was provided");
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver.runTest();
   }
 
   @Test
-  public void testSingleIdentity() {
+  public void testSingleIdentity() throws IOException {
     // Test that an identity mapper and identity reducer work
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver
@@ -74,7 +74,7 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testMultipleIdentities() {
+  public void testMultipleIdentities() throws IOException {
     // Test that a pipeline of identity mapper and reducers work
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver
@@ -89,7 +89,7 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testSumAtEnd() {
+  public void testSumAtEnd() throws IOException {
     final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver
         .withMapReduce(new IdentityMapper<Text, LongWritable>(),
@@ -106,7 +106,7 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testSumInMiddle() {
+  public void testSumInMiddle() throws IOException {
     final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver
         .withMapReduce(new IdentityMapper<Text, LongWritable>(),
@@ -123,7 +123,7 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testNoMapper() {
+  public void testNoMapper() throws IOException {
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     thrown.expect(NullPointerException.class);
     driver.addMapReduce(null, new IdentityReducer<Text, Text>());
@@ -132,7 +132,7 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testNoReducer() {
+  public void testNoReducer() throws IOException {
     final List<Pair<Mapper, Reducer>> pipeline = new ArrayList<Pair<Mapper, Reducer>>();
     pipeline.add(new Pair<Mapper, Reducer>(new IdentityMapper<Text, Text>(),
         new IdentityReducer<Text, Text>()));
@@ -147,7 +147,7 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testWithCounter() {
+  public void testWithCounter() throws IOException {
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
 
     driver.addMapReduce(
@@ -168,7 +168,7 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testWithFailedCounter() {
+  public void testWithFailedCounter() throws IOException {
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
 
     driver.addMapReduce(
@@ -190,7 +190,7 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testJavaSerialization() {
+  public void testJavaSerialization() throws IOException {
     final JobConf conf = new JobConf();
     conf.setStrings("io.serializations", conf.get("io.serializations"),
         "org.apache.hadoop.io.serializer.JavaSerialization");
@@ -210,7 +210,7 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
-  public void testCopy() {
+  public void testCopy() throws IOException {
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver
         .newPipelineMapReduceDriver();
     driver.withMapReduce(new IdentityMapper<Text, Text>(),

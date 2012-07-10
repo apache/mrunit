@@ -166,21 +166,16 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   @Override
-  public void runTest(final boolean orderMatters) {
+  public void runTest(final boolean orderMatters) throws IOException {
     final StringBuilder sb = new StringBuilder();
     formatValueList(inputValues, sb);
 
     LOG.debug("Reducing input (" + inputKey + ", " + sb + ")");
 
     List<Pair<K2, V2>> outputs = null;
-    try {
-      outputs = run();
-      validate(outputs, orderMatters);
-      validate(counterWrapper);
-    } catch (final IOException ioe) {
-      LOG.error("IOException in reducer", ioe);
-      throw new RuntimeException("IOException in reducer: ", ioe);
-    }
+    outputs = run();
+    validate(outputs, orderMatters);
+    validate(counterWrapper);
   }
 
   protected static class ValueClassInstanceReuseList<T> extends ArrayList<T> {

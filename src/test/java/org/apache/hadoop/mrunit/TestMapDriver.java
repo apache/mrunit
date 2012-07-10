@@ -72,13 +72,13 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun1() {
+  public void testTestRun1() throws IOException {
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar")).runTest();
   }
 
   @Test
-  public void testTestRun2() {
+  public void testTestRun2() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., "
             + "Received unexpected output (foo, bar) at position 0.)");
@@ -86,7 +86,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun3() {
+  public void testTestRun3() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, bar) at position 1.)");
     driver.withInput(new Text("foo"), new Text("bar"))
@@ -95,7 +95,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun3OrderInsensitive() {
+  public void testTestRun3OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, bar))");
     driver.withInput(new Text("foo"), new Text("bar"))
@@ -104,7 +104,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun4() {
+  public void testTestRun4() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bonusfoo, bar) at position 1.)");
     driver.withInput(new Text("foo"), new Text("bar"))
@@ -113,7 +113,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun4OrderInsensitive() {
+  public void testTestRun4OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bonusfoo, bar))");
     driver.withInput(new Text("foo"), new Text("bar"))
@@ -122,7 +122,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun5() {
+  public void testTestRun5() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, somethingelse) at position 0., "
             + "Received unexpected output (foo, bar) at position 0.)");
@@ -131,7 +131,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun5OrderInsensitive() {
+  public void testTestRun5OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, somethingelse), "
             + "Received unexpected output (foo, bar))");
@@ -140,7 +140,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun6() {
+  public void testTestRun6() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar) at position 0., "
             + "Received unexpected output (foo, bar) at position 0.)");
@@ -149,7 +149,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun6OrderInsensitive() {
+  public void testTestRun6OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar), "
         		+ "Received unexpected output (foo, bar)");
@@ -158,7 +158,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun7() {
+  public void testTestRun7() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Matched expected output (foo, bar) but at "
             + "incorrect position 0 (expected position 1), "
@@ -169,7 +169,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testTestRun7OrderInsensitive() {
+  public void testTestRun7OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (someotherkey, bar))");
     driver.withInput(new Text("foo"), new Text("bar"))
@@ -178,7 +178,7 @@ public class TestMapDriver {
   }
   
   @Test
-  public void testTestRun8OrderInsensitive() {
+  public void testTestRun8OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, bar), "
            + "Missing expected output (foo, bar), "
@@ -191,7 +191,7 @@ public class TestMapDriver {
   }
   
   @Test
-  public void testUnexpectedOutput() {
+  public void testUnexpectedOutput() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar) at position 1.)");
     driver.withMapper(new DuplicatingMapper()).withInput(new Text("foo"),new Text("bar"))
@@ -200,7 +200,7 @@ public class TestMapDriver {
   }
   
   @Test
-  public void testUnexpectedOutputMultiple() {
+  public void testUnexpectedOutputMultiple() throws IOException {
     thrown
         .expectAssertionErrorMessage("3 Error(s): (Received unexpected output (foo, bar) at position 1., "
             + "Received unexpected output (foo, bar) at position 2., "
@@ -211,7 +211,7 @@ public class TestMapDriver {
   }
   
   @Test
-  public void testUnexpectedOutputOrderInsensitive() {
+  public void testUnexpectedOutputOrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar))");
     driver.withMapper(new DuplicatingMapper()).withInput(new Text("foo"),new Text("bar"))
@@ -220,7 +220,7 @@ public class TestMapDriver {
   }
   
   @Test
-  public void testUnexpectedOutputMultipleOrderInsensitive() {
+  public void testUnexpectedOutputMultipleOrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("3 Error(s): (Received unexpected output (foo, bar), "
             + "Received unexpected output (foo, bar), "
@@ -245,14 +245,14 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testNoInput() {
+  public void testNoInput() throws IOException {
     driver = MapDriver.newMapDriver();
     thrown.expectMessage(IllegalStateException.class, "No input was provided");
     driver.runTest();
   }
 
   @Test
-  public void testNoMapper() {
+  public void testNoMapper() throws IOException {
     driver = MapDriver.newMapDriver();
     thrown.expectMessage(IllegalStateException.class,
         "No Mapper class was provided");
@@ -272,7 +272,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testWithCounter() {
+  public void testWithCounter() throws IOException {
     MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
 
     driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
@@ -283,7 +283,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testWithFailedCounter() {
+  public void testWithFailedCounter() throws IOException {
     MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
 
     thrown.expectAssertionErrorMessage("2 Error(s): (" +
@@ -322,7 +322,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testNonTextWritableWithInputFromString() {
+  public void testNonTextWritableWithInputFromString() throws IOException {
     final MapDriver<LongWritable, LongWritable, Text, Text> driver = MapDriver
         .newMapDriver(new NonTextWritableInput());
     driver.withInputFromString("a\tb");
@@ -345,7 +345,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testNonTextWritableKeyWithOutputFromString() {
+  public void testNonTextWritableKeyWithOutputFromString() throws IOException {
     final MapDriver<Text, Text, LongWritable, Text> driver = MapDriver
         .newMapDriver(new NonTextWritableOutputKey());
     driver.withInputFromString("a\tb");
@@ -391,7 +391,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testNonTextWritableValueWithOutputFromString() {
+  public void testNonTextWritableValueWithOutputFromString() throws IOException {
     final MapDriver<Text, Text, Text, LongWritable> driver = MapDriver
         .newMapDriver(new NonTextWritableOutputValue());
     driver.withInputFromString("a\tb");
@@ -405,7 +405,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testJavaSerialization() {
+  public void testJavaSerialization() throws IOException {
     final Configuration conf = new Configuration();
     conf.setStrings("io.serializations", conf.get("io.serializations"),
         "org.apache.hadoop.io.serializer.JavaSerialization");
@@ -418,7 +418,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testCopy() {
+  public void testCopy() throws IOException {
     driver = MapDriver.newMapDriver(new DuplicatingMapper());
     final Text input = new Text("a");
     driver.withInputKey(input);
@@ -434,7 +434,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testOutputFormat() {
+  public void testOutputFormat() throws IOException {
     driver.withOutputFormat(SequenceFileOutputFormat.class,
         SequenceFileInputFormat.class);
     driver.withInput(new Text("a"), new Text("1"));
@@ -443,7 +443,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testOutputFormatWithMismatchInOutputClasses() {
+  public void testOutputFormatWithMismatchInOutputClasses() throws IOException {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     final MapDriver<Text, Text, LongWritable, Text> driver = MapDriver
         .newMapDriver(new IdentityMapper());
@@ -471,7 +471,7 @@ public class TestMapDriver {
   }
 
   @Test
-  public void testMapInputFile() {
+  public void testMapInputFile() throws IOException {
     InputPathStoringMapper mapper = new InputPathStoringMapper();
     Path mapInputPath = new Path("myfile");
     driver = MapDriver.newMapDriver(mapper);

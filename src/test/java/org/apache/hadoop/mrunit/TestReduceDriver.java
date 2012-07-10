@@ -78,14 +78,14 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun1() {
+  public void testTestRun1() throws IOException {
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest();
   }
 
   @Test
-  public void testTestRun2() {
+  public void testTestRun2() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (bar, 10) at position 0., "
             + "Received unexpected output (foo, 10) at position 0.)");
@@ -95,7 +95,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun2OrderInsensitive() {
+  public void testTestRun2OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (bar, 10), "
             + "Received unexpected output (foo, 10))");
@@ -105,7 +105,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun3() {
+  public void testTestRun3() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 12) at position 0., "
             + "Received unexpected output (foo, 10) at position 0.)");
@@ -116,7 +116,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun3OrderInsensitive() {
+  public void testTestRun3OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 12), "
             + "Received unexpected output (foo, 10))");
@@ -127,7 +127,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun4() {
+  public void testTestRun4() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 4) at position 0., "
             + "Received unexpected output (foo, 10) at position 0.)");
@@ -137,7 +137,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun4OrderInsensitive() {
+  public void testTestRun4OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 4), "
             + "Received unexpected output (foo, 10))");
@@ -147,7 +147,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun5() {
+  public void testTestRun5() throws IOException {
     thrown
         .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, 6) at position 1., "
             + "Missing expected output (foo, 4) at position 0., "
@@ -159,7 +159,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun5OrderInsensitive() {
+  public void testTestRun5OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, 6), "
             + "Missing expected output (foo, 4), "
@@ -171,7 +171,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun6() {
+  public void testTestRun6() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 10) at position 1.)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
@@ -181,7 +181,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun6OrderInsensitive() {
+  public void testTestRun6OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 10))");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
@@ -191,7 +191,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun7() {
+  public void testTestRun7() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (bar, 10) at position 0., "
             + "Matched expected output (foo, 10) but at "
@@ -203,7 +203,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun7OrderInsensitive() {
+  public void testTestRun7OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10))");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
@@ -213,7 +213,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun8() {
+  public void testTestRun8() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10) at position 1.)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
@@ -223,7 +223,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testTestRun8OrderInsensitive() {
+  public void testTestRun8OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10))");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
@@ -233,7 +233,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testDuplicateOutputOrderInsensitive() {
+  public void testDuplicateOutputOrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar))");
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
@@ -244,7 +244,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testNoInput() {
+  public void testNoInput() throws IOException {
     driver = ReduceDriver.newReduceDriver();
     thrown.expectMessage(IllegalStateException.class, "No input was provided");
     driver.runTest();
@@ -277,7 +277,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testDoubleIteration() {
+  public void testDoubleIteration() throws IOException {
     reducer = new DoubleIterReducer<Text, LongWritable>();
     driver = ReduceDriver.newReduceDriver(reducer);
 
@@ -289,7 +289,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testNoReducer() {
+  public void testNoReducer() throws IOException {
     driver = ReduceDriver.newReduceDriver();
     thrown.expectMessage(IllegalStateException.class,
         "No Reducer class was provided");
@@ -298,7 +298,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testJavaSerialization() {
+  public void testJavaSerialization() throws IOException {
     final Configuration conf = new Configuration();
     conf.setStrings("io.serializations", conf.get("io.serializations"),
         "org.apache.hadoop.io.serializer.JavaSerialization");
@@ -309,7 +309,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testWithCounter() {
+  public void testWithCounter() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
         .newReduceDriver();
 
@@ -328,7 +328,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testWithFailedEnumCounter() {
+  public void testWithFailedEnumCounter() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
         .newReduceDriver();
 
@@ -348,7 +348,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testCopy() {
+  public void testCopy() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
         .newReduceDriver(new IdentityReducer<Text, Text>());
     final Text input = new Text("a");
@@ -366,7 +366,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void testOutputFormat() {
+  public void testOutputFormat() throws IOException {
     driver.withOutputFormat(SequenceFileOutputFormat.class,
         SequenceFileInputFormat.class);
     driver.withInputKey(new Text("a"));
@@ -378,7 +378,7 @@ public class TestReduceDriver {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
-  public void testOutputFormatWithMismatchInOutputClasses() {
+  public void testOutputFormatWithMismatchInOutputClasses() throws IOException {
     final ReduceDriver driver = ReduceDriver.newReduceDriver(reducer);
     driver.withOutputFormat(TextOutputFormat.class, TextInputFormat.class);
     driver.withInputKey(new Text("a"));

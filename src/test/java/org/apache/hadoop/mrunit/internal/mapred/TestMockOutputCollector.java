@@ -57,7 +57,7 @@ public class TestMockOutputCollector {
   }
 
   @Test
-  public void testRepeatedObjectUse() {
+  public void testRepeatedObjectUse() throws IOException {
     final Mapper<Text, Text, Text, Text> mapper = new RepeatMapper();
     final MapDriver<Text, Text, Text, Text> driver = MapDriver
         .newMapDriver(mapper);

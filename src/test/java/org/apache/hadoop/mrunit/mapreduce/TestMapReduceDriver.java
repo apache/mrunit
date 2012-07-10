@@ -94,7 +94,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testTestRun1() {
+  public void testTestRun1() throws IOException {
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
         .withInput(new Text("bar"), new LongWritable(BAR_IN))
@@ -103,7 +103,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testTestRun2() {
+  public void testTestRun2() throws IOException {
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("bar"), new LongWritable(BAR_IN))
         .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
@@ -112,7 +112,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testTestRun3() {
+  public void testTestRun3() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Matched expected output (foo, 52) but at "
             + "incorrect position 1 (expected position 0), "
@@ -125,7 +125,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testTestRun3OrderInsensitive() {
+  public void testTestRun3OrderInsensitive() throws IOException {
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("bar"), new LongWritable(BAR_IN))
         .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
@@ -134,7 +134,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testNoInput() {
+  public void testNoInput() throws IOException {
     driver = MapReduceDriver.newMapReduceDriver();
     thrown.expectMessage(IllegalStateException.class, "No input was provided");
     driver.runTest();
@@ -232,7 +232,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testConfiguration() {
+  public void testConfiguration() throws IOException {
     final Configuration conf = new Configuration();
     conf.set("TestKey", "TestValue");
 
@@ -251,7 +251,7 @@ public class TestMapReduceDriver {
 
   // Test the key grouping and value ordering comparators
   @Test
-  public void testComparators() {
+  public void testComparators() throws IOException {
     // reducer to track the order of the input values using bit shifting
     driver.withReducer(new Reducer<Text, LongWritable, Text, LongWritable>() {
       @Override
@@ -285,7 +285,7 @@ public class TestMapReduceDriver {
 
   // Test "combining" with an IdentityReducer. Result should be the same.
   @Test
-  public void testIdentityCombiner() {
+  public void testIdentityCombiner() throws IOException {
     driver.withCombiner(new Reducer<Text, LongWritable, Text, LongWritable>())
         .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
@@ -296,7 +296,7 @@ public class TestMapReduceDriver {
 
   // Test "combining" with another LongSumReducer. Result should be the same.
   @Test
-  public void testLongSumCombiner() {
+  public void testLongSumCombiner() throws IOException {
     driver.withCombiner(new LongSumReducer<Text>())
         .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
@@ -308,7 +308,7 @@ public class TestMapReduceDriver {
   // Test "combining" with another LongSumReducer, and with the Reducer
   // set to IdentityReducer. Result should be the same.
   @Test
-  public void testLongSumCombinerAndIdentityReduce() {
+  public void testLongSumCombinerAndIdentityReduce() throws IOException {
     driver.withCombiner(new LongSumReducer<Text>())
         .withReducer(new Reducer<Text, LongWritable, Text, LongWritable>())
         .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
@@ -319,7 +319,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testNoMapper() {
+  public void testNoMapper() throws IOException {
     driver = MapReduceDriver.newMapReduceDriver();
     driver.withReducer(reducer).withInput(new Text("a"), new LongWritable(0));
     thrown.expectMessage(IllegalStateException.class,
@@ -328,7 +328,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testNoReducer() {
+  public void testNoReducer() throws IOException {
     driver = MapReduceDriver.newMapReduceDriver();
     driver.withMapper(mapper).withInput(new Text("a"), new LongWritable(0));
     thrown.expectMessage(IllegalStateException.class,
@@ -337,7 +337,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testWithCounter() {
+  public void testWithCounter() throws IOException {
     MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
         .newMapReduceDriver();
 
@@ -356,7 +356,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testWithFailedCounter() {
+  public void testWithFailedCounter() throws IOException {
     MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
         .newMapReduceDriver();
 
@@ -376,7 +376,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testJavaSerialization() {
+  public void testJavaSerialization() throws IOException {
     final Configuration conf = new Configuration();
     conf.setStrings("io.serializations", conf.get("io.serializations"),
         "org.apache.hadoop.io.serializer.JavaSerialization");
@@ -391,7 +391,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testOutputFormat() {
+  public void testOutputFormat() throws IOException {
     driver.withOutputFormat(SequenceFileOutputFormat.class,
         SequenceFileInputFormat.class);
     driver.withInput(new Text("a"), new LongWritable(1));
@@ -402,7 +402,7 @@ public class TestMapReduceDriver {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
-  public void testOutputFormatWithMismatchInOutputClasses() {
+  public void testOutputFormatWithMismatchInOutputClasses() throws IOException {
     final MapReduceDriver driver = this.driver;
     driver.withOutputFormat(TextOutputFormat.class, TextInputFormat.class);
     driver.withInput(new Text("a"), new LongWritable(1));
@@ -429,7 +429,7 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testMapInputFile() {
+  public void testMapInputFile() throws IOException {
     InputPathStoringMapper mapper = new InputPathStoringMapper();
     Path mapInputPath = new Path("myfile");
     driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
