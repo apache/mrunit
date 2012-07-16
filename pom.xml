@@ -175,6 +175,7 @@
                 <exclude>BUILD.txt</exclude>
                 <exclude>CHANGES.txt</exclude>
                 <exclude>BIN-NOTICE.txt</exclude>
+                <exclude>.idea/</exclude>
               </excludes>
             </configuration>
           </execution>
