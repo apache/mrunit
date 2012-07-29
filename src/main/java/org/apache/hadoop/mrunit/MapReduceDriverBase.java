@@ -78,6 +78,30 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
   }
 
   /**
+   * Adds input to send to the mapper
+   * 
+   * @param inputs
+   *          List of (k, v) pairs to add to the input list
+   */
+  public void addAll(final List<Pair<K1, V1>> inputs) {
+    for (Pair<K1, V1> input : inputs) {
+      addInput(input);
+    }
+  }
+  
+  /**
+   * Adds output (k, v)* pairs we expect from the Reducer
+   * 
+   * @param outputRecords
+   *          List of (k, v) pairs to add
+   */
+  public void addAllOutput(final List<Pair<K3, V3>> outputRecords) {
+    for (Pair<K3, V3> output : outputRecords) {
+      addOutput(output);
+    }
+  }
+  
+  /**
    * Adds an output (k, v) pair we expect from the Reducer
    * 
    * @param outputRecord

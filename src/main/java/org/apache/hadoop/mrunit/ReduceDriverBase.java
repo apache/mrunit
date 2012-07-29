@@ -33,14 +33,15 @@ import org.apache.hadoop.mrunit.types.Pair;
  * sent to the Reducer (as if they came from a Mapper), and outputs you expect
  * to be sent by the Reducer to the collector. By calling runTest(), the harness
  * will deliver the input to the Reducer and will check its outputs against the
- * expected results. This is designed to handle a single (k, v*) -> (k, v)* case
- * from the Reducer, representing a single unit test. Multiple input (k, v*)
- * sets should go in separate unit tests.
+ * expected results. 
  */
 public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
     TestDriver<K1, V1, K2, V2> {
 
+  protected List<Pair<K1, List<V1>>> inputs = new ArrayList<Pair<K1, List<V1>>>();
+  @Deprecated
   protected K1 inputKey;
+  @Deprecated
   private final List<V1> inputValues;
 
   public ReduceDriverBase() {
@@ -48,20 +49,20 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   }
 
   /**
-   * Returns a list which when iterated over, returns the same instance of the
-   * value each time with different contents similar to how Hadoop currently
-   * works with Writables.
+   * Returns a list of values.
    * 
    * @return List of values
    */
+  @Deprecated
   public List<V1> getInputValues() {
-    return new ValueClassInstanceReuseList<V1>(inputValues, getConfiguration());
+    return inputValues;
   }
 
   /**
    * Sets the input key to send to the Reducer
    * 
    */
+  @Deprecated
   public void setInputKey(final K1 key) {
     inputKey = copy(key);
   }
@@ -71,6 +72,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param val
    */
+  @Deprecated
   public void addInputValue(final V1 val) {
     inputValues.add(copy(val));
   }
@@ -80,6 +82,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param values
    */
+  @Deprecated
   public void setInputValues(final List<V1> values) {
     inputValues.clear();
     addInputValues(values);
@@ -90,6 +93,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * 
    * @param values
    */
+  @Deprecated
   public void addInputValues(final List<V1> values) {
     for (V1 value : values) {
       addInputValue(value);
@@ -105,8 +109,70 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   public void setInput(final K1 key, final List<V1> values) {
     setInputKey(key);
     setInputValues(values);
+    
+    clearInput();
+    addInput(key, values);
+  }
+  
+  /**
+   * Clears the input to be sent to the Reducer
+   */
+  public void clearInput() {
+    inputs.clear();
+  }
+  
+  /**
+   * Add input (K, V*) to send to the Reducer
+   * 
+   * @param key
+   *          The key too add
+   * @param values
+   *          The list of values to add
+   */
+  public void addInput(final K1 key, final List<V1> values) {
+    List<V1> copyVals = new ArrayList<V1>();
+    for (V1 val : values) {
+      copyVals.add(copy(val));
+    }
+
+    inputs.add(new Pair<K1, List<V1>>(copy(key),
+        new ValueClassInstanceReuseList<V1>(copyVals, getConfiguration())));
+  }
+  
+  /**
+   * Add input (K, V*) to send to the Reducer
+   * 
+   * @param input
+   *          input pair
+   */
+  public void addInput(final Pair<K1, List<V1>> input) {
+    addInput(input.getFirst(), input.getSecond());
   }
 
+  /**
+   * Adds input to send to the Reducer
+   * 
+   * @param inputs
+   *          list of (K, V*) pairs
+   */
+  public void addAll(final List<Pair<K1, List<V1>>> inputs) {
+    for (Pair<K1, List<V1>> input : inputs) {
+      addInput(input);
+    }
+  }
+  
+  /**
+   * Adds output (k, v)* pairs we expect from the Reducer
+   * 
+   * @param outputRecords
+   *          The (k, v)* pairs to add
+   */
+  public void addAllOutput(final List<Pair<K2, V2>> outputRecords) {
+    for (Pair<K2, V2> output : outputRecords) {
+      addOutput(output);
+    }
+  }
+  
   /**
    * Adds an output (k, v) pair we expect from the Reducer
    * 
@@ -167,10 +233,14 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
 
   @Override
   public void runTest(final boolean orderMatters) throws IOException {
-    final StringBuilder sb = new StringBuilder();
-    formatValueList(inputValues, sb);
-
-    LOG.debug("Reducing input (" + inputKey + ", " + sb + ")");
+    if (LOG.isDebugEnabled()) {
+      final StringBuilder sb = new StringBuilder();
+      for (Pair<K1, List<V1>> input : inputs) {
+        formatValueList(input.getSecond(), sb);
+        LOG.debug("Reducing input (" + input.getFirst() + ", " + sb + ")");
+        sb.delete(0, sb.length());
+      }
+    }
 
     List<Pair<K2, V2>> outputs = null;
     outputs = run();

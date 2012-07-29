@@ -125,6 +125,20 @@ public class TestMapReduceDriver {
   }
 
   @Test
+  public void testAddAll() throws IOException {
+    final List<Pair<Text, LongWritable>> inputs = new ArrayList<Pair<Text, LongWritable>>();
+    inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_IN_A)));
+    inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_IN_B)));
+    inputs.add(new Pair<Text, LongWritable>(new Text("bar"), new LongWritable(BAR_IN)));
+
+    final List<Pair<Text, LongWritable>> outputs = new ArrayList<Pair<Text, LongWritable>>();
+    outputs.add(new Pair<Text, LongWritable>(new Text("bar"), new LongWritable(BAR_IN)));
+    outputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_OUT)));
+
+    driver.withAll(inputs).withAllOutput(outputs).runTest();
+  }
+  
+  @Test
   public void testTestRun3OrderInsensitive() throws IOException {
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("bar"), new LongWritable(BAR_IN))

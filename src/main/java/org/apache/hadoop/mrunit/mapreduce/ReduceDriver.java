@@ -18,10 +18,9 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.*;
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -44,9 +43,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * sent to the Reducer (as if they came from a Mapper), and outputs you expect
  * to be sent by the Reducer to the collector. By calling runTest(), the harness
  * will deliver the input to the Reducer and will check its outputs against the
- * expected results. This is designed to handle a single (k, v*) -> (k, v)* case
- * from the Reducer, representing a single unit test. Multiple input (k, v*)
- * sets should go in separate unit tests.
+ * expected results.
  */
 public class ReduceDriver<K1, V1, K2, V2> extends
     ReduceDriverBase<K1, V1, K2, V2> implements ContextDriver {
@@ -57,7 +54,6 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   private Counters counters;
 
   private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
-  private final List<Pair<K1, List<V1>>> inputs = new ArrayList<Pair<K1, List<V1>>>();
   private final MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>(
       inputs, mockOutputCreator, this);
 
@@ -126,6 +122,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    * 
    * @return this
    */
+  @Deprecated
   public ReduceDriver<K1, V1, K2, V2> withInputKey(final K1 key) {
     setInputKey(key);
     return this;
@@ -137,6 +134,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    * @param val
    * @return this
    */
+  @Deprecated
   public ReduceDriver<K1, V1, K2, V2> withInputValue(final V1 val) {
     addInputValue(val);
     return this;
@@ -148,6 +146,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    * @param values
    * @return this
    */
+  @Deprecated
   public ReduceDriver<K1, V1, K2, V2> withInputValues(final List<V1> values) {
     addInputValues(values);
     return this;
@@ -167,6 +166,29 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
+  /**
+   * Identical to addInput() but returns self for fluent programming style
+   * 
+   * @param input
+   * @return this
+   */
+  public ReduceDriver<K1, V1, K2, V2> withInput(final Pair<K1, List<V1>> input) {
+    addInput(input);
+    return this;
+  }
+
+  /**
+   * Identical to addAll() but returns self for fluent programming style
+   * 
+   * @param inputs
+   * @return this
+   */
+  public ReduceDriver<K1, V1, K2, V2> withAll(
+      final List<Pair<K1, List<V1>>> inputs) {
+    addAll(inputs);
+    return this;
+  }
+  
   /**
    * Works like addOutput(), but returns self for fluent style
    * 
@@ -192,6 +214,18 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
+  /**
+   * Works like addAllOutput(), but returns self for fluent style
+   * 
+   * @param outputRecord
+   * @return this
+   */
+  public ReduceDriver<K1, V1, K2, V2> withAllOutput(
+      final List<Pair<K2, V2>> outputRecords) {
+    addAllOutput(outputRecords);
+    return this;
+  }
+  
   /**
    * Identical to setInput, but with a fluent programming style
    * 
@@ -238,15 +272,19 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    if (inputKey == null || getInputValues().isEmpty()) {
+    // handle inputKey and inputValues for backwards compatibility
+    if (inputKey != null && !getInputValues().isEmpty()) {
+      clearInput();
+      addInput(inputKey, getInputValues());
+    }
+    
+    if (inputs.isEmpty()) {
       throw new IllegalStateException("No input was provided");
     }
+    
     if (myReducer == null) {
       throw new IllegalStateException("No Reducer class was provided");
     }
-
-    inputs.clear();
-    inputs.add(new Pair<K1, List<V1>>(inputKey, getInputValues()));
 
     try {
       myReducer.run(wrapper.getMockContext());

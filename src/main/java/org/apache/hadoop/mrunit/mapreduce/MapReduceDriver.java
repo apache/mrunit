@@ -214,6 +214,31 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   }
 
   /**
+   * Identical to addAll() but returns self for fluent programming style
+   * 
+   * @param inputs
+   *          List of (k, v) pairs to add
+   * @return this
+   */
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withAll(
+      final List<Pair<K1, V1>> inputs) {
+    addAll(inputs);
+    return this;
+  }
+  
+  /**
+   * Works like addAllOutput(), but returns self for fluent style
+   * 
+   * @param outputRecords
+   * @return this
+   */
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withAllOutput(
+      final List<Pair<K3, V3>> outputRecords) {
+    addAllOutput(outputRecords);
+    return this;
+  }
+  
+  /**
    * Works like addOutput(), but returns self for fluent style
    * 
    * @param outputRecord
@@ -296,25 +321,29 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
       final List<Pair<OUTKEY, OUTVAL>> reduceOutputs = new ArrayList<Pair<OUTKEY, OUTVAL>>();
 
-      for (final Pair<K2, List<V2>> input : inputs) {
-        final K2 inputKey = input.getFirst();
-        final List<V2> inputValues = input.getSecond();
-        final StringBuilder sb = new StringBuilder();
-        formatValueList(inputValues, sb);
-        LOG.debug("Reducing input (" + inputKey.toString() + ", "
-            + sb.toString() + ")");
+      if (!inputs.isEmpty()) {
+        if (LOG.isDebugEnabled()) {
+          final StringBuilder sb = new StringBuilder();
+          for (Pair<K2, List<V2>> input : inputs) {
+            formatValueList(input.getSecond(), sb);
+            LOG.debug("Reducing input (" + input.getFirst() + ", " + sb + ")");
+            sb.delete(0, sb.length());
+          }
+        }
 
         final ReduceDriver<K2, V2, OUTKEY, OUTVAL> reduceDriver = ReduceDriver
             .newReduceDriver(reducer).withCounters(getCounters())
-            .withConfiguration(configuration).withInputKey(inputKey)
-            .withInputValues(inputValues);
+            .withConfiguration(configuration).withAll(inputs);
+
         if (getOutputCopyingOrInputFormatConfiguration() != null) {
           reduceDriver
               .withOutputCopyingOrInputFormatConfiguration(getOutputCopyingOrInputFormatConfiguration());
         }
+
         if (outputFormatClass != null) {
           reduceDriver.withOutputFormat(outputFormatClass, inputFormatClass);
         }
+
         reduceOutputs.addAll(reduceDriver.run());
       }
 
@@ -337,13 +366,10 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
 
     // run map component
-    for (final Pair<K1, V1> input : inputList) {
-      LOG.debug("Mapping input " + input.toString() + ")");
-
-      mapOutputs.addAll(MapDriver.newMapDriver(myMapper)
-          .withCounters(getCounters()).withConfiguration(configuration)
-          .withInput(input).withMapInputPath(getMapInputPath()).run());
-    }
+    LOG.debug("Starting map phase with mapper: " + myMapper);
+    mapOutputs.addAll(MapDriver.newMapDriver(myMapper)
+        .withCounters(getCounters()).withConfiguration(configuration)
+        .withAll(inputList).withMapInputPath(getMapInputPath()).run());      
 
     if (myCombiner != null) {
       // User has specified a combiner. Run this and replace the mapper outputs
@@ -379,7 +405,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   /**
    * @param mapInputPath
    *       The Path object which will be given to the mapper
-   * @return
+   * @return this
    */
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withMapInputPath(Path mapInputPath) {
     setMapInputPath(mapInputPath);

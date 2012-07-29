@@ -27,13 +27,11 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * Harness that allows you to test a Mapper instance. You provide the input key
- * and value that should be sent to the Mapper, and outputs you expect to be
+ * Harness that allows you to test a Mapper instance. You provide the input
+ * (k, v)* pairs that should be sent to the Mapper, and outputs you expect to be
  * sent by the Mapper to the collector for those inputs. By calling runTest(),
  * the harness will deliver the input to the Mapper and will check its outputs
- * against the expected results. This is designed to handle a single (k, v) ->
- * (k, v)* case from the Mapper, representing a single unit test. Multiple input
- * (k, v) pairs should go in separate unit tests.
+ * against the expected results.
  */
 public abstract class MapDriverBase<K1, V1, K2, V2> extends
     TestDriver<K1, V1, K2, V2> {
@@ -41,7 +39,10 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   public static final Log LOG = LogFactory.getLog(MapDriverBase.class);
 
   protected List<Pair<K1, V1>> inputs = new ArrayList<Pair<K1, V1>>();
+  
+  @Deprecated
   protected K1 inputKey;
+  @Deprecated
   protected V1 inputVal;
 
   /**
@@ -49,10 +50,11 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    * 
    * @param key
    */
+  @Deprecated
   public void setInputKey(final K1 key) {
     inputKey = copy(key);
   }
-
+  @Deprecated
   public K1 getInputKey() {
     return inputKey;
   }
@@ -62,10 +64,11 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    * 
    * @param val
    */
+  @Deprecated
   public void setInputValue(final V1 val) {
     inputVal = copy(val);
   }
-
+  @Deprecated
   public V1 getInputValue() {
     return inputVal;
   }
@@ -75,8 +78,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    * 
    */
   public void setInput(final K1 key, final V1 val) {
-    setInputKey(key);
-    setInputValue(val);
+  	setInput(new Pair<K1, V1>(key, val));
   }
 
   /**
@@ -88,8 +90,62 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   public void setInput(final Pair<K1, V1> inputRecord) {
     setInputKey(inputRecord.getFirst());
     setInputValue(inputRecord.getSecond());
+
+    clearInput();
+    addInput(inputRecord);
   }
 
+  /**
+   * Adds an input to send to the mapper
+   * 
+   * @param key
+   * @param val
+   */
+  public void addInput(final K1 key, final V1 val) {
+    inputs.add(copyPair(key, val));
+  }
+  
+  /**
+   * Adds an input to send to the mapper
+   * 
+   * @param input
+   *          a (K, V) pair
+   */
+  public void addInput(final Pair<K1, V1> input) {
+    addInput(input.getFirst(), input.getSecond());
+  }
+  
+  /**
+   * Adds list of inputs to send to the mapper
+   * 
+   * @param inputs
+   *          list of (K, V) pairs
+   */
+  public void addAll(final List<Pair<K1, V1>> inputs) {
+    for (Pair<K1, V1> input : inputs) {
+      addInput(input);
+    }
+  }
+  
+  /**
+   * Clears the list of inputs to send to the mapper
+   */
+  public void clearInput() {
+    inputs.clear();
+  }
+  
+  /**
+   * Adds output (k, v)* pairs we expect from the Mapper
+   * 
+   * @param outputRecords
+   *          The (k, v)* pairs to add
+   */
+  public void addAllOutput(final List<Pair<K2, V2>> outputRecords) {
+    for (Pair<K2, V2> output : outputRecords) {
+      addOutput(output);
+    }
+  }
+  
   /**
    * Adds an output (k, v) pair we expect from the Mapper
    * 
@@ -145,7 +201,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
 
   @Override
   public void runTest(final boolean orderMatters) throws IOException {
-    LOG.debug("Mapping input (" + inputKey + ", " + inputVal + ")");
+  	for (Pair<K1, V1> input : inputs) {
+  		LOG.debug("Mapping input (" + input.getFirst() + ", " + input.getSecond() + ")");
+  	}
     final List<Pair<K2, V2>> outputs = run();
     validate(outputs, orderMatters);
     validate(counterWrapper);
