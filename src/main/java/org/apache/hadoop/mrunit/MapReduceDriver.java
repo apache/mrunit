@@ -428,6 +428,12 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     super.withCounter(g, n, e);
     return this;
   }
+  
+  @Override
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withStrictCounterChecking() {
+    super.withStrictCounterChecking();
+    return this;
+  }
 
   /**
    * Returns a new MapReduceDriver without having to specify the generic types

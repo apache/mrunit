@@ -19,6 +19,15 @@ package org.apache.hadoop.mrunit.internal.counters;
 
 import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+
+import org.apache.hadoop.mapred.Counters.Group;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.CounterGroup;
+import org.apache.hadoop.mrunit.types.Pair;
+
 /**
  * Wrapper around Counters from both mapred and mapreduce packages so that we
  * can work with both counter classes in the same way.
@@ -79,6 +88,43 @@ public class CounterWrapper {
       return mapred.findCounter(group, name).getValue();
     } else {
       return mapreduce.findCounter(group, name).getValue();
+    }
+  }
+
+  public Collection<String> getGroupNames() {
+    if (mapred != null) {
+      return mapred.getGroupNames();
+    } else {
+      return mapreduce.getGroupNames();
+    }
+  }
+
+  /**
+   * @return the name of all counters
+   */
+  public Collection<Pair<String, String>> findCounterValues() {
+    final Collection<Pair<String, String>> counters = new LinkedList<Pair<String, String>>();
+    final Collection<String> groupNames = getGroupNames();
+    if (mapred != null) {
+      for (String groupName : groupNames) {
+        final Group group = mapred.getGroup(groupName);
+        collectCounters(counters, groupName, group.iterator());
+      }
+    } else {
+      for (String groupName : groupNames) {
+        final CounterGroup group = mapreduce.getGroup(groupName);
+        collectCounters(counters, groupName, group.iterator());
+      }
+    }
+    return counters;
+  }
+
+  /** Collect counters, same for both APIs **/
+  private void collectCounters(final Collection<Pair<String, String>> counters,
+      String groupName, Iterator<? extends Counter> iterator) {
+    while (iterator.hasNext()) {
+      String counter = iterator.next().getName();
+      counters.add(new Pair<String, String>(groupName, counter));
     }
   }
 }

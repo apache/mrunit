@@ -291,6 +291,12 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     super.withCounter(g, n, e);
     return this;
   }
+  
+  @Override
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withStrictCounterChecking() {
+    super.withStrictCounterChecking();
+    return this;
+  }
 
   /**
    * Expects an input of the form "key \t val" Forces the Reducer output types

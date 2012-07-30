@@ -227,6 +227,12 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     super.withCounter(g, n, e);
     return this;
   }
+  
+  @Override
+  public ReduceDriver<K1, V1, K2, V2> withStrictCounterChecking() {
+    super.withStrictCounterChecking();
+    return this;
+  }
 
   public ReduceDriver<K1, V1, K2, V2> withOutputCopyingOrInputFormatConfiguration(
       Configuration configuration) {

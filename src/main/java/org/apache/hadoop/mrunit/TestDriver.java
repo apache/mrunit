@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   protected List<Pair<K2, V2>> expectedOutputs;
 
+  private boolean strictCountersChecking = false;
   protected List<Pair<Enum<?>, Long>> expectedEnumCounters;
   protected List<Pair<Pair<String, String>, Long>> expectedStringCounters;
 
@@ -127,6 +129,19 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       final String name, final long expectedValue) {
     expectedStringCounters.add(new Pair<Pair<String, String>, Long>(
         new Pair<String, String>(group, name), expectedValue));
+    return this;
+  }
+
+  /**
+   * Change counter checking. After this method is called, the test will fail if
+   * an actual counter is not matched by an expected counter. By default, the
+   * test only check that every expected counter is there.
+   * 
+   * This mode allows you to ensure that no unexpected counters has been
+   * declared.
+   */
+  public TestDriver<K1, V1, K2, V2> withStrictCounterChecking() {
+    strictCountersChecking = true;
     return this;
   }
 
@@ -407,55 +422,109 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     LOG.error(msg);
     errors.add(msg);
   }
+  
+  /**
+   * Check counters.
+   */
+  protected void validate(final CounterWrapper counterWrapper) {
+    validateExpectedAgainstActual(counterWrapper);
+    validateActualAgainstExpected(counterWrapper);
+  }
 
   /**
-   * Check that passed counter do contain all expected counters with proper
+   * Same as {@link CounterWrapper#findCounterValues()} but for expectations.
+   */
+  private Collection<Pair<String, String>> findExpectedCounterValues() {
+    Collection<Pair<String, String>> results = new ArrayList<Pair<String, String>>();
+    for (Pair<Pair<String, String>,Long> counterAndCount : expectedStringCounters) {
+      results.add(counterAndCount.getFirst());
+    }
+    for (Pair<Enum<?>,Long> counterAndCount : expectedEnumCounters) {
+      Enum<?> first = counterAndCount.getFirst();
+      String groupName = first.getDeclaringClass().getName();
+      String counterName = first.name();
+      results.add(new Pair<String, String>(groupName, counterName));
+    }
+    return results;
+  }
+
+  /**
+   * Check that provided actual counters contain all expected counters with proper
    * values.
    * 
    * @param counterWrapper
    */
-  protected void validate(final CounterWrapper counterWrapper) {
+  private void validateExpectedAgainstActual(
+      final CounterWrapper counterWrapper) {
     boolean success = true;
     final List<String> errors = new ArrayList<String>();
-
+  
     // Firstly check enumeration based counters
     for (final Pair<Enum<?>, Long> expected : expectedEnumCounters) {
       final long actualValue = counterWrapper.findCounterValue(expected
           .getFirst());
-
+  
       if (actualValue != expected.getSecond()) {
         final String msg = "Counter "
             + expected.getFirst().getDeclaringClass().getCanonicalName() + "."
             + expected.getFirst().toString() + " have value " + actualValue
             + " instead of expected " + expected.getSecond();
         logError(errors, msg);
-
+  
         success = false;
       }
     }
-
+  
     // Second string based counters
     for (final Pair<Pair<String, String>, Long> expected : expectedStringCounters) {
       final Pair<String, String> counter = expected.getFirst();
-
+  
       final long actualValue = counterWrapper.findCounterValue(
           counter.getFirst(), counter.getSecond());
-
+  
       if (actualValue != expected.getSecond()) {
         final String msg = "Counter with category " + counter.getFirst()
             + " and name " + counter.getSecond() + " have value " + actualValue
             + " instead of expected " + expected.getSecond();
         logError(errors, msg);
-
+  
         success = false;
       }
     }
-
+  
     if (!success) {
       final StringBuilder buffer = new StringBuilder();
       buffer.append(errors.size()).append(" Error(s): ");
       formatValueList(errors, buffer);
       fail(buffer.toString());
+    }
+  }
+
+  /**
+   * Check that provided actual counters are all expected.
+   * 
+   * @param counterWrapper
+   */
+  private void validateActualAgainstExpected(final CounterWrapper counterWrapper) {
+    if (strictCountersChecking) {
+      final List<String> errors = new ArrayList<String>();
+      Collection<Pair<String, String>> unmatchedCounters = counterWrapper.findCounterValues();
+      Collection<Pair<String, String>> findExpectedCounterValues = findExpectedCounterValues();
+      unmatchedCounters.removeAll(findExpectedCounterValues);
+      if(!unmatchedCounters.isEmpty()) {
+        for (Pair<String, String> unmatcherCounter : unmatchedCounters) {
+          final String msg = "Actual counter (\"" + unmatcherCounter.getFirst()
+              + "\",\"" + unmatcherCounter.getSecond()
+              + "\") was not found in expected counters";
+          logError(errors, msg);
+        }
+      }
+      if (!errors.isEmpty()) {
+        final StringBuilder buffer = new StringBuilder();
+        buffer.append(errors.size()).append(" Error(s): ");
+        formatValueList(errors, buffer);
+        fail(buffer.toString());
+      }
     }
   }
 

@@ -337,6 +337,12 @@ extends MapDriverBase<K1, V1, K2, V2> implements ContextDriver {
     super.withCounter(g, n, expectedValue);
     return this;
   }
+  
+  @Override
+  public MapDriver<K1, V1, K2, V2> withStrictCounterChecking() {
+    super.withStrictCounterChecking();
+    return this;
+  }
 
   /**
    * Returns a new MapDriver without having to specify the generic types on the

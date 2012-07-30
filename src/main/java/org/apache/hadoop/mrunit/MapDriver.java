@@ -217,6 +217,12 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     super.withCounter(g, n, expectedValue);
     return this;
   }
+  
+  @Override
+  public MapDriver<K1, V1, K2, V2> withStrictCounterChecking() {
+    super.withStrictCounterChecking();
+    return this;
+  }
 
   public MapDriver<K1, V1, K2, V2> withOutputCopyingOrInputFormatConfiguration(
       Configuration configuration) {

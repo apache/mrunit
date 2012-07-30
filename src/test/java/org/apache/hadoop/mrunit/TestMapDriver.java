@@ -281,6 +281,50 @@ public class TestMapDriver {
         .withCounter(MapperWithCounters.Counters.X, 1)
         .withCounter("category", "name", 1).runTest();
   }
+  
+  @Test
+  public void testWithCounterAndNoneMissing() throws IOException {
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
+
+    driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withStrictCounterChecking()
+        .withCounter(MapperWithCounters.Counters.X, 1)
+        .withCounter("category", "name", 1).runTest();
+  }
+
+  @Test
+  public void testWithCounterAndEnumCounterMissing() throws IOException {
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
+    
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Actual counter ("
+            + "\"org.apache.hadoop.mrunit.TestMapDriver$MapperWithCounters$Counters\",\"X\")"
+            + " was not found in expected counters");
+
+    driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withStrictCounterChecking().withCounter("category", "name", 1)
+        .runTest();
+  }
+
+  @Test
+  public void testWithCounterAndStringCounterMissing() throws IOException {
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
+    
+    thrown
+    .expectAssertionErrorMessage("1 Error(s): (Actual counter ("
+        + "\"category\",\"name\")"
+        + " was not found in expected counters");
+
+    driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withStrictCounterChecking()
+        .withCounter(MapperWithCounters.Counters.X, 1).runTest();
+  }
 
   @Test
   public void testWithFailedCounter() throws IOException {

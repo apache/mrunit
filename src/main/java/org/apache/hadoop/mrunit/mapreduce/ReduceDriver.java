@@ -325,6 +325,12 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
   
+  @Override
+  public ReduceDriver<K1, V1, K2, V2> withStrictCounterChecking() {
+    super.withStrictCounterChecking();
+    return this;
+  }
+  
   /**
    * <p>Obtain Context object for furthering mocking with Mockito.
    * For example, causing write() to throw an exception:</p>

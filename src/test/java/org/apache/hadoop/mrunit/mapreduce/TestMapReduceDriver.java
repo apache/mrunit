@@ -368,6 +368,72 @@ public class TestMapReduceDriver {
         .withCounter("category", "count", 1).withCounter("category", "sum", 1)
         .runTest();
   }
+  
+  @Test
+  public void testWithCounterAndNoneMissing() throws IOException {
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
+        .newMapReduceDriver();
+
+    driver
+        .withMapper(
+            new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withStrictCounterChecking()
+        .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 1)
+        .withCounter("category", "name", 1)
+        .withReducer(
+            new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 1)
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 1)
+        .withCounter("category", "count", 1).withCounter("category", "sum", 1)
+        .runTest();
+  }
+
+  @Test
+  public void testWithCounterAndEnumCounterMissing() throws IOException {
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
+        .newMapReduceDriver();
+
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Actual counter ("
+            + "\"org.apache.hadoop.mrunit.mapreduce.TestMapDriver$MapperWithCounters$Counters\",\"X\")"
+            + " was not found in expected counters");
+
+    driver
+        .withMapper(
+            new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withStrictCounterChecking()
+        .withCounter("category", "name", 1)
+        .withReducer(
+            new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 1)
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 1)
+        .withCounter("category", "count", 1).withCounter("category", "sum", 1)
+        .runTest();
+  }
+
+  @Test
+  public void testWithCounterAndStringCounterMissing() throws IOException {
+    MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
+        .newMapReduceDriver();
+
+    thrown.expectAssertionErrorMessage("1 Error(s): (Actual counter ("
+        + "\"category\",\"name\")" + " was not found in expected counters");
+
+    driver
+        .withMapper(
+            new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withStrictCounterChecking()
+        .withCounter(TestMapDriver.MapperWithCounters.Counters.X, 1)
+        .withReducer(
+            new TestReduceDriver.ReducerWithCounters<Text, Text, Text, Text>())
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.COUNT, 1)
+        .withCounter(TestReduceDriver.ReducerWithCounters.Counters.SUM, 1)
+        .withCounter("category", "count", 1).withCounter("category", "sum", 1)
+        .runTest();
+  }
 
   @Test
   public void testWithFailedCounter() throws IOException {
