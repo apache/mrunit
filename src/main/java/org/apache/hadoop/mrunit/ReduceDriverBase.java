@@ -232,20 +232,13 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   @Override
-  public void runTest(final boolean orderMatters) throws IOException {
-    if (LOG.isDebugEnabled()) {
-      final StringBuilder sb = new StringBuilder();
-      for (Pair<K1, List<V1>> input : inputs) {
-        formatValueList(input.getSecond(), sb);
-        LOG.debug("Reducing input (" + input.getFirst() + ", " + sb + ")");
-        sb.delete(0, sb.length());
-      }
+  protected void printPreTestDebugLog() {
+    final StringBuilder sb = new StringBuilder();
+    for (Pair<K1, List<V1>> input : inputs) {
+      formatValueList(input.getSecond(), sb);
+      LOG.debug("Reducing input (" + input.getFirst() + ", " + sb + ")");
+      sb.delete(0, sb.length());
     }
-
-    List<Pair<K2, V2>> outputs = null;
-    outputs = run();
-    validate(outputs, orderMatters);
-    validate(counterWrapper);
   }
 
   protected static class ValueClassInstanceReuseList<T> extends ArrayList<T> {

@@ -200,12 +200,10 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   @Override
-  public void runTest(final boolean orderMatters) throws IOException {
-  	for (Pair<K1, V1> input : inputs) {
-  		LOG.debug("Mapping input (" + input.getFirst() + ", " + input.getSecond() + ")");
-  	}
-    final List<Pair<K2, V2>> outputs = run();
-    validate(outputs, orderMatters);
-    validate(counterWrapper);
+  protected void printPreTestDebugLog() {
+    for (Pair<K1, V1> input : inputs) {
+      LOG.debug("Mapping input (" + input.getFirst() + ", " + input.getSecond() + ")");
+    }
   }
+
 }

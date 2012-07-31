@@ -281,7 +281,40 @@ public class TestMapDriver {
         .withCounter(MapperWithCounters.Counters.X, 1)
         .withCounter("category", "name", 1).runTest();
   }
-  
+
+  @Test
+  public void testWithCounterUsingRunMethodPerformingCounterChecking() throws IOException {
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
+
+    driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withCounter(MapperWithCounters.Counters.X, 1)
+        .withCounter("category", "name", 1).run(true);
+  }
+
+  @Test
+  public void testWithCounterUsingRunMethodExplicitIgnoreCounterChecking() throws IOException {
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
+
+    driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withCounter(MapperWithCounters.Counters.X, 999)
+        .withCounter("INVALIDCOUNTER", "NOTSET", 999).run(false);
+  }
+
+  @Test
+  public void testWithCounterUsingRunMethodImplicitIgnoreCounterChecking() throws IOException {
+    MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
+
+    driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), new Text("Hi"))
+        .withOutput(new Text("hie"), new Text("Hi"))
+        .withCounter(MapperWithCounters.Counters.X, 999)
+        .withCounter("INVALIDCOUNTER", "NOTSET", 999).run();
+  }
+
   @Test
   public void testWithCounterAndNoneMissing() throws IOException {
     MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();

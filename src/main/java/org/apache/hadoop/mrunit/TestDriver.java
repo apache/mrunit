@@ -170,7 +170,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       final Configuration configuration) {
     this.outputCopyingOrInputFormatConf = returnNonNull(configuration);
   }
-  
+
   /**
    * @return the path passed to the mapper InputSplit
    */
@@ -182,7 +182,24 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    */
   public void setMapInputPath(Path mapInputPath) {
     this.mapInputPath = mapInputPath;
-  }  
+  }
+
+  /**
+   * Runs the test but returns the result set instead of validating it (ignores
+   * any addOutput(), etc calls made before this). 
+   * 
+   * Also optionally performs counter validation. 
+   * 
+   * @param validateCounters whether to run automatic counter validation
+   * @return the list of (k, v) pairs returned as output from the test
+   */
+  public List<Pair<K2, V2>> run(boolean validateCounters) throws IOException {
+    final List<Pair<K2, V2>> outputs = run();
+    if (validateCounters) {
+      validate(counterWrapper);
+    }
+    return outputs;
+  }
 
   /**
    * Runs the test but returns the result set instead of validating it (ignores
@@ -205,7 +222,21 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    * @param orderMatters
    *          Whether or not output ordering is important
    */
-  public abstract void runTest(boolean orderMatters) throws IOException;
+  public void runTest(final boolean orderMatters) throws IOException {
+    if (LOG.isDebugEnabled()) {
+      printPreTestDebugLog();
+    }
+    final List<Pair<K2, V2>> outputs = run();
+    validate(outputs, orderMatters);
+    validate(counterWrapper);
+  }
+
+  /**
+   * Overridable hook for printing pre-test debug information
+   */
+  protected void printPreTestDebugLog() {
+    //
+  }
 
   /**
    * Split "key \t val" into Pair(Text(key), Text(val))

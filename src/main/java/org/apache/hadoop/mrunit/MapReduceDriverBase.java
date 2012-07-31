@@ -154,13 +154,6 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
   @Override
   public abstract List<Pair<K3, V3>> run() throws IOException;
 
-  @Override
-  public void runTest(final boolean orderMatters) throws IOException {
-    final List<Pair<K3, V3>> reduceOutputs = run();
-    validate(reduceOutputs, orderMatters);
-    validate(counterWrapper);
-  }
-
   /**
    * Take the outputs from the Mapper, combine all values for the same key, and
    * sort them by key.
@@ -257,4 +250,5 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
     keyValueOrderComparator = ReflectionUtils.newInstance(
         orderComparator.getClass(), getConfiguration());
   }
+
 }
