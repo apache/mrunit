@@ -368,18 +368,6 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     return (List) inputs;
   }
 
-  @Override
-  public void runTest(final boolean orderMatters) {
-    try {
-      final List<Pair<K2, V2>> outputs = run();
-      validate(outputs, orderMatters);
-      validate(counterWrapper);
-    } catch (final IOException ioe) {
-      LOG.error(ioe);
-      throw new RuntimeException(ioe);
-    }
-  }
-
   /**
    * @param configuration
    *          The configuration object that will given to the mappers and
