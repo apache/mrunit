@@ -244,6 +244,22 @@ public class TestReduceDriver {
   }
 
   @Test
+  public void testAddAll() throws IOException {
+    final List<LongWritable> vals = new ArrayList<LongWritable>();
+    vals.add(new LongWritable(IN_A));
+    vals.add(new LongWritable(IN_B));
+
+    final List<Pair<Text, List<LongWritable>>> inputs = new ArrayList<Pair<Text, List<LongWritable>>>();
+    inputs.add(new Pair<Text, List<LongWritable>>(new Text("foo"), vals));
+
+    final List<Pair<Text, LongWritable>> expected = new ArrayList<Pair<Text, LongWritable>>();
+    expected.add(new Pair<Text, LongWritable>(new Text("foo"),
+        new LongWritable(OUT_VAL)));
+
+    driver.withAll(inputs).withAllOutput(expected).runTest();
+  }
+  
+  @Test
   public void testNoInput() throws IOException {
     driver = ReduceDriver.newReduceDriver();
     thrown.expectMessage(IllegalStateException.class, "No input was provided");

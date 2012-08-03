@@ -39,13 +39,11 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.apache.hadoop.util.ReflectionUtils;
 
 /**
- * Harness that allows you to test a Mapper instance. You provide the input key
- * and value that should be sent to the Mapper, and outputs you expect to be
+ * Harness that allows you to test a Mapper instance. You provide the input
+ * (k, v)* pairs that should be sent to the Mapper, and outputs you expect to be
  * sent by the Mapper to the collector for those inputs. By calling runTest(),
  * the harness will deliver the input to the Mapper and will check its outputs
- * against the expected results. This is designed to handle a single (k, v) ->
- * (k, v)* case from the Mapper, representing a single unit test. Multiple input
- * (k, v) pairs should go in separate unit tests.
+ * against the expected results.
  */
 @SuppressWarnings("deprecation")
 public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
@@ -115,7 +113,11 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
    * Identical to setInputKey() but with fluent programming style
    * 
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v)*. Replaced by {@link #withInput()} and
+   *             {@link #withAll()}
    */
+  @Deprecated
   public MapDriver<K1, V1, K2, V2> withInputKey(final K1 key) {
     setInputKey(key);
     return this;
@@ -126,7 +128,11 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
    * 
    * @param val
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v)*. Replaced by {@link #withInput()} and
+   *             {@link #withAll()}
    */
+  @Deprecated
   public MapDriver<K1, V1, K2, V2> withInputValue(final V1 val) {
     setInputValue(val);
     return this;
@@ -154,6 +160,17 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   }
 
   /**
+   * Identical to addAll() but returns self for fluent programming style
+   * 
+   * @param inputRecords
+   * @return this
+   */
+  public MapDriver<K1, V1, K2, V2> withAll(final List<Pair<K1, V1>> inputRecords) {
+    addAll(inputRecords);
+    return this;
+  }
+  
+  /**
    * Works like addOutput(), but returns self for fluent style
    * 
    * @param outputRecord
@@ -174,6 +191,18 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     return this;
   }
 
+  /**
+   * Functions like addAllOutput() but returns self for fluent programming style
+   * 
+   * @param outputRecords
+   * @return this
+   */
+  public MapDriver<K1, V1, K2, V2> withAllOutput(
+      final List<Pair<K2, V2>> outputRecords) {
+    addAllOutput(outputRecords);
+    return this;
+  }
+  
   /**
    * Identical to setInputFromString, but with a fluent programming style
    * 
@@ -240,9 +269,15 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    if (inputKey == null || inputVal == null) {
+    // handle inputKey and inputVal for backwards compatibility
+    if (inputKey != null && inputVal != null) {
+      setInput(inputKey, inputVal);
+    }
+
+    if (inputs == null || inputs.isEmpty()) {
       throw new IllegalStateException("No input was provided");
     }
+
     if (myMapper == null) {
       throw new IllegalStateException("No Mapper class was provided");
     }
@@ -256,7 +291,10 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
     ReflectionUtils.setConf(myMapper, new JobConf(getConfiguration()));
 
-    myMapper.map(inputKey, inputVal, outputCollectable, reporter);
+    for (Pair<K1, V1> kv : inputs) {
+      myMapper.map(kv.getFirst(), kv.getSecond(), outputCollectable, reporter);
+    }
+
     myMapper.close();
     return outputCollectable.getOutputs();
   }

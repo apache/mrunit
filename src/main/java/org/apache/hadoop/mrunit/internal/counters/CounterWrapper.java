@@ -91,7 +91,7 @@ public class CounterWrapper {
     }
   }
 
-  public Collection<String> getGroupNames() {
+  public Iterable<String> getGroupNames() {
     if (mapred != null) {
       return mapred.getGroupNames();
     } else {
@@ -104,7 +104,7 @@ public class CounterWrapper {
    */
   public Collection<Pair<String, String>> findCounterValues() {
     final Collection<Pair<String, String>> counters = new LinkedList<Pair<String, String>>();
-    final Collection<String> groupNames = getGroupNames();
+    final Iterable<String> groupNames = getGroupNames();
     if (mapred != null) {
       for (String groupName : groupNames) {
         final Group group = mapred.getGroup(groupName);

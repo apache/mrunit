@@ -117,6 +117,9 @@ extends MapDriverBase<K1, V1, K2, V2> implements ContextDriver {
    * Identical to setInputKey() but with fluent programming style
    * 
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v)*. Replaced by {@link #withInput()} and
+   *             {@link #withAll()}
    */
   @Deprecated
   public MapDriver<K1, V1, K2, V2> withInputKey(final K1 key) {
@@ -129,6 +132,9 @@ extends MapDriverBase<K1, V1, K2, V2> implements ContextDriver {
    * 
    * @param val
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v)*. Replaced by {@link #withInput()} and
+   *             {@link #withAll()}
    */
   @Deprecated
   public MapDriver<K1, V1, K2, V2> withInputValue(final V1 val) {
@@ -252,7 +258,7 @@ extends MapDriverBase<K1, V1, K2, V2> implements ContextDriver {
       setInput(inputKey, inputVal);
     }
 
-    if (inputs == null || inputs.size() == 0) {
+    if (inputs == null || inputs.isEmpty()) {
       throw new IllegalStateException("No input was provided");
     }
    	

@@ -49,6 +49,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    * Sets the input key to send to the mapper
    * 
    * @param key
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v)*. Replaced by {@link #setInput()},
+   *             {@link #addInput()}, and {@link #addAll()}
    */
   @Deprecated
   public void setInputKey(final K1 key) {
@@ -63,6 +66,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
    * Sets the input value to send to the mapper
    * 
    * @param val
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v)*. Replaced by {@link #setInput()},
+   *             {@link #addInput()}, and {@link #addAll()}
    */
   @Deprecated
   public void setInputValue(final V1 val) {

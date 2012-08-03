@@ -52,6 +52,8 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * Returns a list of values.
    * 
    * @return List of values
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #getInputValues(Object)}
    */
   @Deprecated
   public List<V1> getInputValues() {
@@ -59,8 +61,26 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   }
 
   /**
+   * Returns a list of values for the given key
+   * 
+   * @param key
+   * @return List for the given key, or null if key does not exist
+   */
+  public List<V1> getInputValues(final K1 key) {
+    for (Pair<K1, List<V1>> p : inputs) {
+      if (p.getFirst().equals(key)) {
+        return p.getSecond();
+      }
+    }
+    return null;
+  }
+  
+  /**
    * Sets the input key to send to the Reducer
    * 
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #setInput()},
+   *             {@link #addInput()}, and {@link #addAll()}
    */
   @Deprecated
   public void setInputKey(final K1 key) {
@@ -71,6 +91,9 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * adds an input value to send to the reducer
    * 
    * @param val
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #setInput()},
+   *             {@link #addInput()}, and {@link #addAll()}
    */
   @Deprecated
   public void addInputValue(final V1 val) {
@@ -81,6 +104,9 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * Sets the input values to send to the reducer; overwrites existing ones
    * 
    * @param values
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #setInput()},
+   *             {@link #addInput()}, and {@link #addAll()}
    */
   @Deprecated
   public void setInputValues(final List<V1> values) {
@@ -92,6 +118,9 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
    * Adds a set of input values to send to the reducer
    * 
    * @param values
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #setInput()},
+   *             {@link #addInput()}, and {@link #addAll()}
    */
   @Deprecated
   public void addInputValues(final List<V1> values) {

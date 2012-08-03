@@ -121,6 +121,9 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    * Identical to setInputKey() but with fluent programming style
    * 
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
+   *             {@link #withAll(List)}, and {@link #withInput(Pair)}
    */
   @Deprecated
   public ReduceDriver<K1, V1, K2, V2> withInputKey(final K1 key) {
@@ -133,6 +136,9 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    * 
    * @param val
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
+   *             {@link #withAll(List)}, and {@link #withInput(Pair)}
    */
   @Deprecated
   public ReduceDriver<K1, V1, K2, V2> withInputValue(final V1 val) {
@@ -145,6 +151,9 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    * 
    * @param values
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
+   *             {@link #withAll(List)}, and {@link #withInput(Pair)}
    */
   @Deprecated
   public ReduceDriver<K1, V1, K2, V2> withInputValues(final List<V1> values) {
@@ -278,7 +287,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
       addInput(inputKey, getInputValues());
     }
     
-    if (inputs.isEmpty()) {
+    if (inputs == null || inputs.isEmpty()) {
       throw new IllegalStateException("No input was provided");
     }
     

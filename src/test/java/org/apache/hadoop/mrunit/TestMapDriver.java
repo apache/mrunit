@@ -191,6 +191,19 @@ public class TestMapDriver {
   }
   
   @Test
+  public void testAddAll() throws IOException {
+    final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
+    inputs.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
+    inputs.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
+
+    final List<Pair<Text, Text>> outputs = new ArrayList<Pair<Text, Text>>();
+    outputs.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
+    outputs.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
+
+    driver.withAll(inputs).withAllOutput(outputs).runTest();
+  }
+  
+  @Test
   public void testUnexpectedOutput() throws IOException {
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Received unexpected output (foo, bar) at position 1.)");
