@@ -69,8 +69,7 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
     return firstResult;
   }
 
-  // TODO: Can this be made static? Same with SecondElemComparator?
-  public class FirstElemComparator implements Comparator<Pair<S, T>> {
+  public static class FirstElemComparator<S, T> implements Comparator<Pair<S, T>> {
     public FirstElemComparator() {
     }
 
@@ -80,7 +79,7 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
     }
   }
 
-  public class SecondElemComparator implements Comparator<Pair<S, T>> {
+  public static class SecondElemComparator<S, T> implements Comparator<Pair<S, T>> {
     public SecondElemComparator() {
     }
 

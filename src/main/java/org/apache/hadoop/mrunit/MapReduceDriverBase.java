@@ -21,9 +21,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -163,7 +164,22 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
    * @return the sorted list of (key, list(val))'s to present to the reducer
    */
   public List<Pair<K2, List<V2>>> shuffle(final List<Pair<K2, V2>> mapOutputs) {
-    // step 1 - use the key group comparator to organise map outputs
+    
+    // sort the map outputs using the key order comparator (if set)
+    if (keyValueOrderComparator != null) {
+      final Comparator<Pair<K2, V2>> pairKeyComparator = new Comparator<Pair<K2, V2>>() {
+        @Override
+        public int compare(final Pair<K2, V2> o1, final Pair<K2, V2> o2) {
+          return keyValueOrderComparator.compare(o1.getFirst(), o2.getFirst());
+        }
+      };
+      Collections.sort(mapOutputs, pairKeyComparator);
+    }
+    else {
+      Collections.sort(mapOutputs, new Pair.FirstElemComparator());
+    }
+    
+    // initialise grouping comparator
     final Comparator<K2> keyGroupComparator;
     if (this.keyGroupComparator == null) {
       keyGroupComparator = new JobConf(getConfiguration())
@@ -171,39 +187,28 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
     } else {
       keyGroupComparator = this.keyGroupComparator;
     }
-    final TreeMap<K2, List<Pair<K2, V2>>> groupedByKey = new TreeMap<K2, List<Pair<K2, V2>>>(
-        keyGroupComparator);
-
-    List<Pair<K2, V2>> groupedKeyList;
+    
+    // apply grouping comparator to create groups
+    final Map<K2, List<Pair<K2, V2>>> groupedByKey = 
+        new LinkedHashMap<K2, List<Pair<K2, V2>>>();
+    
+    List<Pair<K2, V2>> groupedKeyList = null;
+    Pair<K2,V2> previous = null;
+    
     for (final Pair<K2, V2> mapOutput : mapOutputs) {
-      groupedKeyList = groupedByKey.get(mapOutput.getFirst());
-
-      if (groupedKeyList == null) {
+      if (previous == null || keyGroupComparator
+          .compare(previous.getFirst(), mapOutput.getFirst()) != 0) {
         groupedKeyList = new ArrayList<Pair<K2, V2>>();
         groupedByKey.put(mapOutput.getFirst(), groupedKeyList);
       }
-
       groupedKeyList.add(mapOutput);
+      previous = mapOutput;
     }
 
-    // step 2 - sort each key group using the key order comparator (if set)
-    final Comparator<Pair<K2, V2>> pairKeyComparator = new Comparator<Pair<K2, V2>>() {
-      @Override
-      public int compare(final Pair<K2, V2> o1, final Pair<K2, V2> o2) {
-        return keyValueOrderComparator.compare(o1.getFirst(), o2.getFirst());
-      }
-    };
-
-    // create shuffle stage output list
-    final List<Pair<K2, List<V2>>> outputKeyValuesList = new ArrayList<Pair<K2, List<V2>>>();
-
     // populate output list
-    for (final Entry<K2, List<Pair<K2, V2>>> groupedByKeyEntry : groupedByKey
-        .entrySet()) {
-      if (keyValueOrderComparator != null) {
-        // sort the key/value pairs using the key order comparator (if set)
-        Collections.sort(groupedByKeyEntry.getValue(), pairKeyComparator);
-      }
+    final List<Pair<K2, List<V2>>> outputKeyValuesList = new ArrayList<Pair<K2, List<V2>>>();
+    for (final Entry<K2, List<Pair<K2, V2>>> groupedByKeyEntry : 
+            groupedByKey.entrySet()) {
 
       // create list to hold values for the grouped key
       final List<V2> valuesList = new ArrayList<V2>();
@@ -216,7 +221,6 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
           groupedByKeyEntry.getKey(), valuesList));
     }
 
-    // return output list
     return outputKeyValuesList;
   }
 

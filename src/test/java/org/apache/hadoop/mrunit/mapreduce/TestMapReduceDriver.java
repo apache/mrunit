@@ -41,8 +41,8 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
-import org.apache.hadoop.mrunit.TestMapReduceDriver.GroupComparator;
-import org.apache.hadoop.mrunit.TestMapReduceDriver.OrderComparator;
+import org.apache.hadoop.mrunit.TestMapReduceDriver.FirstCharComparator;
+import org.apache.hadoop.mrunit.TestMapReduceDriver.SecondCharComparator;
 import org.apache.hadoop.mrunit.mapreduce.TestMapDriver.ConfigurationMapper;
 import org.apache.hadoop.mrunit.mapreduce.TestReduceDriver.ConfigurationReducer;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -282,17 +282,17 @@ public class TestMapReduceDriver {
       }
     });
 
-    driver.withKeyGroupingComparator(new GroupComparator());
-    driver.withKeyOrderComparator(new OrderComparator());
+    driver.withKeyGroupingComparator(new FirstCharComparator());
+    driver.withKeyOrderComparator(new SecondCharComparator());
 
     driver.addInput(new Text("a1"), new LongWritable(1));
     driver.addInput(new Text("b1"), new LongWritable(1));
     driver.addInput(new Text("a3"), new LongWritable(3));
     driver.addInput(new Text("a2"), new LongWritable(2));
 
-    driver.addOutput(new Text("a1"), new LongWritable(0x1 | (0x2 << 8)
-        | (0x3 << 16)));
+    driver.addOutput(new Text("a1"), new LongWritable(0x1));
     driver.addOutput(new Text("b1"), new LongWritable(0x1));
+    driver.addOutput(new Text("a2"), new LongWritable(0x2 | (0x3 << 8)));
 
     driver.runTest();
   }
@@ -520,4 +520,39 @@ public class TestMapReduceDriver {
     assertNotNull(mapper.getMapInputPath());
     assertEquals(mapInputPath.getName(), mapper.getMapInputPath().getName());
   }
+
+  @Test
+  public void testGroupingComparatorBehaviour1() throws IOException {
+    driver.withInput(new Text("A1"),new LongWritable(1L))
+      .withInput(new Text("A2"),new LongWritable(1L))
+      .withInput(new Text("B1"),new LongWritable(1L))
+      .withInput(new Text("B2"),new LongWritable(1L))
+      .withInput(new Text("C1"),new LongWritable(1L))
+      .withOutput(new Text("A1"),new LongWritable(2L))
+      .withOutput(new Text("B1"),new LongWritable(2L))
+      .withOutput(new Text("C1"),new LongWritable(1L))
+      .withKeyGroupingComparator(new FirstCharComparator())
+      .runTest(false);
+  }
+
+  @Test
+  public void testGroupingComparatorBehaviour2() throws IOException {
+    // this test fails pre-MRUNIT-127 because of the incorrect 
+    // grouping of reduce keys in "shuffle". 
+    // MapReduce doesn't group keys which aren't in a contiguous
+    // range when sorted by their sorting comparator. 
+    driver.withInput(new Text("1A"),new LongWritable(1L))
+      .withInput(new Text("2A"),new LongWritable(1L))
+      .withInput(new Text("1B"),new LongWritable(1L))
+      .withInput(new Text("2B"),new LongWritable(1L))
+      .withInput(new Text("1C"),new LongWritable(1L))
+      .withOutput(new Text("1A"),new LongWritable(1L))
+      .withOutput(new Text("2A"),new LongWritable(1L))
+      .withOutput(new Text("1B"),new LongWritable(1L))
+      .withOutput(new Text("2B"),new LongWritable(1L))
+      .withOutput(new Text("1C"),new LongWritable(1L))
+      .withKeyGroupingComparator(new SecondCharComparator())
+      .runTest(false);
+  }
+
 }
