@@ -30,6 +30,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.serializer.JavaSerializationComparator;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
@@ -46,6 +47,7 @@ import org.apache.hadoop.mrunit.TestMapReduceDriver.SecondCharComparator;
 import org.apache.hadoop.mrunit.mapreduce.TestMapDriver.ConfigurationMapper;
 import org.apache.hadoop.mrunit.mapreduce.TestReduceDriver.ConfigurationReducer;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.mrunit.types.TestWritable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -465,6 +467,7 @@ public class TestMapReduceDriver {
             new IntSumReducer<Integer>()).withConfiguration(conf);
     driver
         .setKeyGroupingComparator(org.apache.hadoop.mrunit.TestMapReduceDriver.INTEGER_COMPARATOR);
+    driver.setKeyOrderComparator(new JavaSerializationComparator<Integer>());
     driver.withInput(new IntWritable(1), 2).withInput(new IntWritable(2), 3);
     driver.withOutput(2, new IntWritable(1)).withOutput(3, new IntWritable(2))
         .runTest();
@@ -553,6 +556,29 @@ public class TestMapReduceDriver {
       .withOutput(new Text("1C"),new LongWritable(1L))
       .withKeyGroupingComparator(new SecondCharComparator())
       .runTest(false);
+  }
+
+  @Test
+  public void testUseOfWritableRegisteredComparator() throws IOException {
+    
+    // this test should use the comparator registered inside TestWritable
+    // to output the keys in reverse order
+    MapReduceDriver<TestWritable,Text,TestWritable,Text,TestWritable,Text> driver 
+      = MapReduceDriver.newMapReduceDriver(new Mapper(), new Reducer());
+    
+    driver.withInput(new TestWritable("A1"), new Text("A1"))
+      .withInput(new TestWritable("A2"), new Text("A2"))
+      .withInput(new TestWritable("A3"), new Text("A3"))
+      .withKeyGroupingComparator(new TestWritable.SingleGroupComparator())
+      // TODO: these output keys are incorrect because of MRUNIT-129 
+      .withOutput(new TestWritable("A3"), new Text("A3"))
+      .withOutput(new TestWritable("A3"), new Text("A2"))
+      .withOutput(new TestWritable("A3"), new Text("A1"))
+      //the following are the actual correct outputs
+      //.withOutput(new TestWritable("A3"), new Text("A3"))
+      //.withOutput(new TestWritable("A2"), new Text("A2"))
+      //.withOutput(new TestWritable("A1"), new Text("A1"))
+      .runTest(true); //ordering is important
   }
 
 }

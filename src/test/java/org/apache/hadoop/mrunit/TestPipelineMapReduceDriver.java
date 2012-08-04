@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.serializer.JavaSerializationComparator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.Reducer;
@@ -268,6 +269,7 @@ public class TestPipelineMapReduceDriver {
     final JobConf conf = new JobConf();
     conf.setStrings("io.serializations", conf.get("io.serializations"),
         "org.apache.hadoop.io.serializer.JavaSerialization");
+    conf.setOutputKeyComparatorClass(JavaSerializationComparator.class);
     conf.setOutputValueGroupingComparator(TestMapReduceDriver.INTEGER_COMPARATOR
         .getClass());
     final PipelineMapReduceDriver<Integer, IntWritable, Integer, IntWritable> driver = PipelineMapReduceDriver

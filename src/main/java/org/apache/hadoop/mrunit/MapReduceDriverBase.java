@@ -29,6 +29,8 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.RawComparator;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -165,29 +167,40 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
    */
   public List<Pair<K2, List<V2>>> shuffle(final List<Pair<K2, V2>> mapOutputs) {
     
-    // sort the map outputs using the key order comparator (if set)
-    if (keyValueOrderComparator != null) {
-      final Comparator<Pair<K2, V2>> pairKeyComparator = new Comparator<Pair<K2, V2>>() {
-        @Override
-        public int compare(final Pair<K2, V2> o1, final Pair<K2, V2> o2) {
-          return keyValueOrderComparator.compare(o1.getFirst(), o2.getFirst());
-        }
-      };
-      Collections.sort(mapOutputs, pairKeyComparator);
+    final Comparator<K2> keyOrderComparator;
+    final Comparator<K2> keyGroupComparator;
+    
+    if (mapOutputs.isEmpty()) {
+      return Collections.emptyList();
     }
-    else {
-      Collections.sort(mapOutputs, new Pair.FirstElemComparator());
+
+    // JobConf needs the map output key class to work out the
+    // comparator to use
+    JobConf conf = new JobConf(getConfiguration());
+    K2 firstKey = mapOutputs.get(0).getFirst();
+    conf.setMapOutputKeyClass(firstKey.getClass());
+
+    // get the ordering comparator or work out from conf
+    if (keyValueOrderComparator == null) {
+      keyOrderComparator = conf.getOutputKeyComparator();
+    } else {
+      keyOrderComparator = this.keyValueOrderComparator;
     }
     
-    // initialise grouping comparator
-    final Comparator<K2> keyGroupComparator;
+    // get the grouping comparator or work out from conf
     if (this.keyGroupComparator == null) {
-      keyGroupComparator = new JobConf(getConfiguration())
-          .getOutputValueGroupingComparator();
+      keyGroupComparator = conf.getOutputValueGroupingComparator();
     } else {
       keyGroupComparator = this.keyGroupComparator;
     }
-    
+
+    // sort the map outputs according to their keys
+    Collections.sort(mapOutputs, new Comparator<Pair<K2, V2>>() {
+      public int compare(final Pair<K2, V2> o1, final Pair<K2, V2> o2) {
+        return keyOrderComparator.compare(o1.getFirst(), o2.getFirst());
+      }
+    });
+
     // apply grouping comparator to create groups
     final Map<K2, List<Pair<K2, V2>>> groupedByKey = 
         new LinkedHashMap<K2, List<Pair<K2, V2>>>();

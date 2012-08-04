@@ -31,6 +31,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.serializer.JavaSerializationComparator;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -46,6 +47,7 @@ import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.mrunit.types.TestWritable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -519,6 +521,7 @@ public class TestMapReduceDriver {
         .newMapReduceDriver(new IdentityMapper<Integer, IntWritable>(),
             new IdentityReducer<Integer, IntWritable>())
         .withConfiguration(conf);
+    driver.withKeyOrderComparator(new JavaSerializationComparator<Integer>());
     driver.withKeyGroupingComparator(INTEGER_COMPARATOR);
     driver.withInput(1, new IntWritable(2)).withInput(2, new IntWritable(3));
     driver.withOutput(1, new IntWritable(2)).withOutput(2, new IntWritable(3));
@@ -627,6 +630,36 @@ public class TestMapReduceDriver {
       .withOutput(new Text("1C"),new LongWritable(1L))
       .withKeyGroupingComparator(new SecondCharComparator())
       .runTest(false);
+  }
+
+  @Test
+  public void testGroupingComparatorSpecifiedByConf() throws IOException {
+    JobConf conf = new JobConf(new Configuration());
+    conf.setOutputValueGroupingComparator(FirstCharComparator.class);
+    driver.withInput(new Text("A1"),new LongWritable(1L))
+      .withInput(new Text("A2"),new LongWritable(1L))
+      .withInput(new Text("B1"),new LongWritable(1L))
+      .withInput(new Text("B2"),new LongWritable(1L))
+      .withInput(new Text("C1"),new LongWritable(1L))
+      .withOutput(new Text("A1"),new LongWritable(2L))
+      .withOutput(new Text("B1"),new LongWritable(2L))
+      .withOutput(new Text("C1"),new LongWritable(1L))
+      .withConfiguration(conf)
+      .runTest(false);
+  }
+
+  @Test
+  public void testUseOfWritableRegisteredComparator() throws IOException {
+    MapReduceDriver<TestWritable,Text,TestWritable,Text,TestWritable,Text> driver 
+      = MapReduceDriver.newMapReduceDriver(new IdentityMapper(), new IdentityReducer());
+    driver.withInput(new TestWritable("A1"), new Text("A1"))
+      .withInput(new TestWritable("A2"), new Text("A2"))
+      .withInput(new TestWritable("A3"), new Text("A3"))
+      .withKeyGroupingComparator(new TestWritable.SingleGroupComparator())
+      .withOutput(new TestWritable("A3"), new Text("A3"))
+      .withOutput(new TestWritable("A3"), new Text("A2"))
+      .withOutput(new TestWritable("A3"), new Text("A1"))
+      .runTest(true); //ordering is important
   }
 
 }
