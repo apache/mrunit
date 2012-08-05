@@ -28,9 +28,9 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -46,9 +46,8 @@ import org.apache.hadoop.util.ReflectionUtils;
  * designed to handle a single (k, v)* -> (k, v)* case from the Mapper/Reducer
  * pair, representing a single unit test.
  */
-
-public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
-    TestDriver<K1, V1, K3, V3> {
+public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T>>
+    extends TestDriver<K1, V1, K3, V3, T> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriverBase.class);
 
@@ -153,7 +152,160 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3> extends
   public void addOutputFromString(final String output) {
     addOutput((Pair<K3, V3>) parseTabbedPair(output));
   }
+  
+  @SuppressWarnings("unchecked")
+  private T thisAsMapReduceDriver() {
+    return (T) this;
+  }
+  
+  /**
+   * Identical to addInput() but returns self for fluent programming style
+   * 
+   * @param key
+   * @param val
+   * @return this
+   */
+  public T withInput(final K1 key,
+      final V1 val) {
+    addInput(key, val);
+    return thisAsMapReduceDriver();
+  }
 
+  /**
+   * Identical to addInput() but returns self for fluent programming style
+   * 
+   * @param input
+   *          The (k, v) pair to add
+   * @return this
+   */
+  public T withInput(
+      final Pair<K1, V1> input) {
+    addInput(input);
+    return thisAsMapReduceDriver();
+  }
+
+  /**
+   * Works like addOutput(), but returns self for fluent style
+   * 
+   * @param outputRecord
+   * @return this
+   */
+  public T withOutput(
+      final Pair<K3, V3> outputRecord) {
+    addOutput(outputRecord);
+    return thisAsMapReduceDriver();
+  }
+
+  /**
+   * Functions like addOutput() but returns self for fluent programming style
+   * 
+   * @param key
+   * @param val
+   * @return this
+   */
+  public T withOutput(final K3 key,
+      final V3 val) {
+    addOutput(key, val);
+    return thisAsMapReduceDriver();
+  }
+
+  /**
+   * Identical to addInputFromString, but with a fluent programming style
+   * 
+   * @param input
+   *          A string of the form "key \t val". Trims any whitespace.
+   * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
+   */
+  @Deprecated
+  public T withInputFromString(
+      final String input) {
+    addInputFromString(input);
+    return thisAsMapReduceDriver();
+  }
+
+  /**
+   * Identical to addOutputFromString, but with a fluent programming style
+   * 
+   * @param output
+   *          A string of the form "key \t val". Trims any whitespace.
+   * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
+   */
+  @Deprecated
+  public T withOutputFromString(
+      final String output) {
+    addOutputFromString(output);
+    return thisAsMapReduceDriver();
+  }
+
+  public T withOutputCopyingOrInputFormatConfiguration(
+      Configuration configuration) {
+    setOutputCopyingOrInputFormatConfiguration(configuration);
+    return thisAsMapReduceDriver();
+  }
+  
+  /**
+   * Identical to addAll() but returns self for fluent programming style
+   * 
+   * @param inputs
+   *          List of (k, v) pairs to add
+   * @return this
+   */
+  public T withAll(
+      final List<Pair<K1, V1>> inputs) {
+    addAll(inputs);
+    return thisAsMapReduceDriver();
+  }
+  
+  /**
+   * Works like addAllOutput(), but returns self for fluent style
+   * 
+   * @param outputRecords
+   * @return this
+   */
+  public T withAllOutput(
+      final List<Pair<K3, V3>> outputRecords) {
+    addAllOutput(outputRecords);
+    return thisAsMapReduceDriver();
+  }
+  
+  /**
+   * @param configuration
+   *          The configuration object that will given to the mapper and reducer
+   *          associated with the driver
+   * @return this driver object for fluent coding
+   */
+  public T withConfiguration(
+      final Configuration configuration) {
+    setConfiguration(configuration);
+    return thisAsMapReduceDriver();
+  }
+  
+  /**
+   * @param mapInputPath
+   *       The Path object which will be given to the mapper
+   * @return
+   */
+  public T withMapInputPath(Path mapInputPath) {
+    setMapInputPath(mapInputPath);
+    return thisAsMapReduceDriver();
+  }
+
+  protected void preRunChecks(Object mapper, Object reducer) {
+    if (inputList.isEmpty()) {
+      throw new IllegalStateException("No input was provided");
+    }
+    if (mapper == null) {
+      throw new IllegalStateException("No Mapper class was provided");
+    }
+    if (reducer == null) {
+      throw new IllegalStateException("No Reducer class was provided");
+    }
+  }
+  
   @Override
   public abstract List<Pair<K3, V3>> run() throws IOException;
 

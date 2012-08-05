@@ -23,7 +23,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -33,8 +36,8 @@ import org.apache.hadoop.mrunit.types.Pair;
  * the harness will deliver the input to the Mapper and will check its outputs
  * against the expected results.
  */
-public abstract class MapDriverBase<K1, V1, K2, V2> extends
-    TestDriver<K1, V1, K2, V2> {
+public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, V1, K2, V2, T>>
+    extends TestDriver<K1, V1, K2, V2, T> {
 
   public static final Log LOG = LogFactory.getLog(MapDriverBase.class);
 
@@ -44,6 +47,8 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   protected K1 inputKey;
   @Deprecated
   protected V1 inputVal;
+  
+  protected final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
 
   /**
    * Sets the input key to send to the mapper
@@ -200,6 +205,171 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   @SuppressWarnings("unchecked")
   public void addOutputFromString(final String output) {
     addOutput((Pair<K2, V2>) parseTabbedPair(output));
+  }
+  
+  @SuppressWarnings("unchecked")
+  private T thisAsMapDriver() {
+    return (T) this;
+  }
+  
+  /**
+   * Identical to setInputKey() but with fluent programming style
+   * 
+   * @return this
+   */
+  public T withInputKey(final K1 key) {
+    setInputKey(key);
+    return thisAsMapDriver();
+  }
+
+  /**
+   * Identical to setInputValue() but with fluent programming style
+   * 
+   * @param val
+   * @return this
+   */
+  public T withInputValue(final V1 val) {
+    setInputValue(val);
+    return thisAsMapDriver();
+  }
+
+  /**
+   * Identical to setInput() but returns self for fluent programming style
+   * 
+   * @return this
+   */
+  public T withInput(final K1 key, final V1 val) {
+    setInput(key, val);
+    return thisAsMapDriver();
+  }
+
+  /**
+   * Identical to setInput() but returns self for fluent programming style
+   * 
+   * @param inputRecord
+   * @return this
+   */
+  public T withInput(final Pair<K1, V1> inputRecord) {
+    setInput(inputRecord);
+    return thisAsMapDriver();
+  }
+
+  /**
+   * Works like addOutput(), but returns self for fluent style
+   * 
+   * @param outputRecord
+   * @return this
+   */
+  public T withOutput(final Pair<K2, V2> outputRecord) {
+    addOutput(outputRecord);
+    return thisAsMapDriver();
+  }
+
+  /**
+   * Functions like addOutput() but returns self for fluent programming style
+   * 
+   * @return this
+   */
+  public T withOutput(final K2 key, final V2 val) {
+    addOutput(key, val);
+    return thisAsMapDriver();
+  }
+
+  /**
+   * Identical to setInputFromString, but with a fluent programming style
+   * 
+   * @param input
+   *          A string of the form "key \t val". Trims any whitespace.
+   * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
+   */
+  @Deprecated
+  public T withInputFromString(final String input) {
+    setInputFromString(input);
+    return thisAsMapDriver();
+  }
+
+  /**
+   * Identical to addOutputFromString, but with a fluent programming style
+   * 
+   * @param output
+   *          A string of the form "key \t val". Trims any whitespace.
+   * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
+   */
+  @Deprecated
+  public T withOutputFromString(final String output) {
+    addOutputFromString(output);
+    return thisAsMapDriver();
+  }
+
+  public T withOutputCopyingOrInputFormatConfiguration(
+      Configuration configuration) {
+    setOutputCopyingOrInputFormatConfiguration(configuration);
+    return thisAsMapDriver();
+  }
+  
+  /**
+   * Identical to addAll() but returns self for fluent programming style
+   * 
+   * @param inputRecords
+   * @return this
+   */
+  public T withAll(final List<Pair<K1, V1>> inputRecords) {
+    addAll(inputRecords);
+    return thisAsMapDriver();
+  }
+
+  /**
+   * Functions like addAllOutput() but returns self for fluent programming style
+   * 
+   * @param outputRecords
+   * @return this
+   */
+  public T withAllOutput(
+      final List<Pair<K2, V2>> outputRecords) {
+    addAllOutput(outputRecords);
+    return thisAsMapDriver();
+  }
+  
+  /**
+   * @param configuration
+   *          The configuration object that will given to the mapper associated
+   *          with the driver
+   * @return this object for fluent coding
+   */
+  public T withConfiguration(
+      final Configuration configuration) {
+    setConfiguration(configuration);
+    return thisAsMapDriver();
+  }
+  /**
+   * @param mapInputPath
+   *       The Path object which will be given to the mapper
+   * @return
+   */
+  public T withMapInputPath(Path mapInputPath) {
+    setMapInputPath(mapInputPath);
+    return thisAsMapDriver();
+  }
+  
+  /**
+   * Handle inputKey and inputVal for backwards compatibility.
+   */
+  protected void preRunChecks(Object mapper) {
+    if (inputKey != null && inputVal != null) {
+      setInput(inputKey, inputVal);
+    }
+
+    if (inputs == null || inputs.isEmpty()) {
+      throw new IllegalStateException("No input was provided");
+    }
+
+    if (mapper == null) {
+      throw new IllegalStateException("No Mapper class was provided");
+    }
   }
 
   @Override

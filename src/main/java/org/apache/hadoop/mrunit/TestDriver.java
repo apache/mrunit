@@ -36,7 +36,7 @@ import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.io.Serialization;
 import org.apache.hadoop.mrunit.types.Pair;
 
-public abstract class TestDriver<K1, V1, K2, V2> {
+public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2, V2, T>> {
 
   public static final Log LOG = LogFactory.getLog(TestDriver.class);
 
@@ -98,6 +98,11 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     expectedEnumCounters.clear();
     expectedStringCounters.clear();
   }
+  
+  @SuppressWarnings("unchecked")
+  private T thisAsTestDriver() {
+    return (T) this;
+  }
 
   /**
    * Register expected enumeration based counter value
@@ -108,10 +113,10 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    *          Expected value
    * @return
    */
-  public TestDriver<K1, V1, K2, V2> withCounter(final Enum<?> e,
+  public T withCounter(final Enum<?> e,
       final long expectedValue) {
     expectedEnumCounters.add(new Pair<Enum<?>, Long>(e, expectedValue));
-    return this;
+    return thisAsTestDriver();
   }
 
   /**
@@ -125,11 +130,11 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    *          Expected value
    * @return
    */
-  public TestDriver<K1, V1, K2, V2> withCounter(final String group,
+  public T withCounter(final String group,
       final String name, final long expectedValue) {
     expectedStringCounters.add(new Pair<Pair<String, String>, Long>(
         new Pair<String, String>(group, name), expectedValue));
-    return this;
+    return thisAsTestDriver();
   }
 
   /**
@@ -140,9 +145,9 @@ public abstract class TestDriver<K1, V1, K2, V2> {
    * This mode allows you to ensure that no unexpected counters has been
    * declared.
    */
-  public TestDriver<K1, V1, K2, V2> withStrictCounterChecking() {
+  public T withStrictCounterChecking() {
     strictCountersChecking = true;
-    return this;
+    return thisAsTestDriver();
   }
 
   /**
@@ -282,12 +287,12 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     return outList;
   }
 
-  protected <T> T copy(T object) {
+  protected <E> E copy(E object) {
     return serialization.copyWithConf(object, configuration);
   }
 
-  protected <S, T> Pair<S, T> copyPair(S first, T second) {
-    return new Pair<S, T>(copy(first), copy(second));
+  protected <S, E> Pair<S, E> copyPair(S first, E second) {
+    return new Pair<S, E>(copy(first), copy(second));
   }
 
   /**

@@ -52,9 +52,9 @@ import org.apache.hadoop.mrunit.types.Pair;
  * to the first Mapper. (K2, V2) refer to the types associated with the final
  * Reducer's output. No intermediate types are specified.
  */
-@SuppressWarnings({ "deprecation", "rawtypes" })
+@SuppressWarnings("rawtypes")
 public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
-    TestDriver<K1, V1, K2, V2> {
+    TestDriver<K1, V1, K2, V2, PipelineMapReduceDriver<K1, V1, K2, V2>> {
 
   public static final Log LOG = LogFactory
       .getLog(PipelineMapReduceDriver.class);
@@ -275,26 +275,6 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   public PipelineMapReduceDriver<K1, V1, K2, V2> withInputFromString(
       final String input) {
     addInputFromString(input);
-    return this;
-  }
-
-  @Override
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(final Enum<?> e,
-      final long expectedValue) {
-    super.withCounter(e, expectedValue);
-    return this;
-  }
-
-  @Override
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounter(final String g,
-      final String n, final long e) {
-    super.withCounter(g, n, e);
-    return this;
-  }
-  
-  @Override
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withStrictCounterChecking() {
-    super.withStrictCounterChecking();
     return this;
   }
 

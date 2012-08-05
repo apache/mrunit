@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -45,8 +44,7 @@ import org.apache.hadoop.util.ReflectionUtils;
  * the harness will deliver the input to the Mapper and will check its outputs
  * against the expected results.
  */
-@SuppressWarnings("deprecation")
-public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
+public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2>> {
 
   public static final Log LOG = LogFactory.getLog(MapDriver.class);
 
@@ -269,18 +267,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    // handle inputKey and inputVal for backwards compatibility
-    if (inputKey != null && inputVal != null) {
-      setInput(inputKey, inputVal);
-    }
-
-    if (inputs == null || inputs.isEmpty()) {
-      throw new IllegalStateException("No input was provided");
-    }
-
-    if (myMapper == null) {
-      throw new IllegalStateException("No Mapper class was provided");
-    }
+    preRunChecks(myMapper);
 
     final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
         .createOutputCollectable(getConfiguration(),
@@ -304,26 +291,6 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     return "MapDriver (" + myMapper + ")";
   }
 
-  /**
-   * @param configuration
-   *          The configuration object that will given to the mapper associated
-   *          with the driver
-   * @return this object for fluent coding
-   */
-  public MapDriver<K1, V1, K2, V2> withConfiguration(
-      final Configuration configuration) {
-    setConfiguration(configuration);
-    return this;
-  }
-  /**
-   * @param mapInputPath
-   *       The Path object which will be given to the mapper
-   * @return
-   */
-  public MapDriver<K1, V1, K2, V2> withMapInputPath(Path mapInputPath) {
-    setMapInputPath(mapInputPath);
-    return this;
-  }
   /**
    * Returns a new MapDriver without having to specify the generic types on the
    * right hand side of the object create statement.

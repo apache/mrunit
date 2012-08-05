@@ -32,7 +32,6 @@ import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.mapred.MockReporter;
-import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.apache.hadoop.util.ReflectionUtils;
@@ -45,16 +44,13 @@ import org.apache.hadoop.util.ReflectionUtils;
  * will deliver the input to the Reducer and will check its outputs against the
  * expected results.
  */
-@SuppressWarnings("deprecation")
 public class ReduceDriver<K1, V1, K2, V2> extends
-    ReduceDriverBase<K1, V1, K2, V2> {
+    ReduceDriverBase<K1, V1, K2, V2, ReduceDriver<K1, V1, K2, V2>> {
 
   public static final Log LOG = LogFactory.getLog(ReduceDriver.class);
 
   private Reducer<K1, V1, K2, V2> myReducer;
   private Counters counters;
-
-  private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
 
   public ReduceDriver(final Reducer<K1, V1, K2, V2> r) {
     this();
@@ -295,19 +291,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    // handle inputKey and inputValues for backwards compatibility
-    if (inputKey != null && !getInputValues().isEmpty()) {
-      clearInput();
-      addInput(inputKey, getInputValues());
-    }
-
-    if (inputs == null || inputs.isEmpty()) {
-      throw new IllegalStateException("No input was provided");
-    }
-    
-    if (myReducer == null) {
-      throw new IllegalStateException("No Reducer class was provided");
-    }
+    preRunChecks(myReducer);
 
     final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
         .createOutputCollectable(getConfiguration(),

@@ -52,7 +52,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
 public class TestMapReduceDriver {
 
   private static final int FOO_IN_A = 42;
@@ -650,8 +649,9 @@ public class TestMapReduceDriver {
 
   @Test
   public void testUseOfWritableRegisteredComparator() throws IOException {
-    MapReduceDriver<TestWritable,Text,TestWritable,Text,TestWritable,Text> driver 
-      = MapReduceDriver.newMapReduceDriver(new IdentityMapper(), new IdentityReducer());
+    MapReduceDriver<TestWritable, Text, TestWritable, Text, TestWritable, Text> driver = MapReduceDriver
+        .newMapReduceDriver(new IdentityMapper<TestWritable, Text>(),
+            new IdentityReducer<TestWritable, Text>());
     driver.withInput(new TestWritable("A1"), new Text("A1"))
       .withInput(new TestWritable("A2"), new Text("A2"))
       .withInput(new TestWritable("A3"), new Text("A3"))

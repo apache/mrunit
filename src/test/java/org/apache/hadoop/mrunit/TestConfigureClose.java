@@ -31,7 +31,6 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
 public class TestConfigureClose {
 
   @Test
@@ -63,6 +62,7 @@ public class TestConfigureClose {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testReducerConfigureClose() throws IOException {
     final AtomicBoolean configureWasCalled = new AtomicBoolean(false);
     final AtomicBoolean closeWasCalled = new AtomicBoolean(false);

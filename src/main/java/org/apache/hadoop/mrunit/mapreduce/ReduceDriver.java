@@ -34,7 +34,6 @@ import org.apache.hadoop.mrunit.ReduceDriverBase;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.mapreduce.ContextDriver;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockReduceContextWrapper;
-import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -46,14 +45,14 @@ import org.apache.hadoop.mrunit.types.Pair;
  * expected results.
  */
 public class ReduceDriver<K1, V1, K2, V2> extends
-    ReduceDriverBase<K1, V1, K2, V2> implements ContextDriver {
+    ReduceDriverBase<K1, V1, K2, V2, ReduceDriver<K1, V1, K2, V2>> implements
+    ContextDriver {
 
   public static final Log LOG = LogFactory.getLog(ReduceDriver.class);
 
   private Reducer<K1, V1, K2, V2> myReducer;
   private Counters counters;
 
-  private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
   private final MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>(
       inputs, mockOutputCreator, this);
 
@@ -281,19 +280,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    // handle inputKey and inputValues for backwards compatibility
-    if (inputKey != null && !getInputValues().isEmpty()) {
-      clearInput();
-      addInput(inputKey, getInputValues());
-    }
-    
-    if (inputs == null || inputs.isEmpty()) {
-      throw new IllegalStateException("No input was provided");
-    }
-    
-    if (myReducer == null) {
-      throw new IllegalStateException("No Reducer class was provided");
-    }
+    preRunChecks(myReducer);
 
     try {
       myReducer.run(wrapper.getMockContext());
@@ -320,26 +307,6 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
-  @Override
-  public ReduceDriver<K1, V1, K2, V2> withCounter(final Enum<?> e,
-      final long expectedValue) {
-    super.withCounter(e, expectedValue);
-    return this;
-  }
-
-  @Override
-  public ReduceDriver<K1, V1, K2, V2> withCounter(final String g,
-      final String n, final long e) {
-    super.withCounter(g, n, e);
-    return this;
-  }
-  
-  @Override
-  public ReduceDriver<K1, V1, K2, V2> withStrictCounterChecking() {
-    super.withStrictCounterChecking();
-    return this;
-  }
-  
   /**
    * <p>Obtain Context object for furthering mocking with Mockito.
    * For example, causing write() to throw an exception:</p>

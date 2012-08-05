@@ -26,7 +26,6 @@ import org.apache.hadoop.mrunit.internal.mapred.MockReporter;
 import org.junit.Rule;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
 public class TestMockReporter {
 
   @Rule

@@ -29,7 +29,6 @@ import org.apache.hadoop.mapred.InputSplit;
  * A fake InputSplit object to be returned by our MockReporter to the user
  * class.
  */
-@SuppressWarnings("deprecation")
 class MockInputSplit extends FileSplit implements InputSplit {
 
   public MockInputSplit(Path mockPath) {

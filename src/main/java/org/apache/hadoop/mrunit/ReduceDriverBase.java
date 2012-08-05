@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.internal.io.Serialization;
+import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -35,14 +36,16 @@ import org.apache.hadoop.mrunit.types.Pair;
  * will deliver the input to the Reducer and will check its outputs against the
  * expected results. 
  */
-public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
-    TestDriver<K1, V1, K2, V2> {
+public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBase<K1, V1, K2, V2, T>>
+    extends TestDriver<K1, V1, K2, V2, T> {
 
   protected List<Pair<K1, List<V1>>> inputs = new ArrayList<Pair<K1, List<V1>>>();
   @Deprecated
   protected K1 inputKey;
   @Deprecated
   private final List<V1> inputValues;
+  
+  protected final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
 
   public ReduceDriverBase() {
     inputValues = new ArrayList<V1>();
@@ -255,6 +258,169 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2> extends
   @SuppressWarnings("unchecked")
   public void addOutputFromString(final String output) {
     addOutput((Pair<K2, V2>) parseTabbedPair(output));
+  }
+  
+  @SuppressWarnings("unchecked")
+  private T thisAsReduceDriver() {
+    return (T) this;
+  }
+  
+  /**
+   * Identical to setInputKey() but with fluent programming style
+   * 
+   * @return this
+   */
+  public T withInputKey(final K1 key) {
+    setInputKey(key);
+    return thisAsReduceDriver();
+  }
+
+  /**
+   * Identical to addInputValue() but with fluent programming style
+   * 
+   * @param val
+   * @return this
+   */
+  public T withInputValue(final V1 val) {
+    addInputValue(val);
+    return thisAsReduceDriver();
+  }
+
+  /**
+   * Identical to addInputValues() but with fluent programming style
+   * 
+   * @param values
+   * @return this
+   */
+  public T withInputValues(final List<V1> values) {
+    addInputValues(values);
+    return thisAsReduceDriver();
+  }
+
+  /**
+   * Identical to setInput() but returns self for fluent programming style
+   * 
+   * @return this
+   */
+  public T withInput(final K1 key,
+      final List<V1> values) {
+    setInput(key, values);
+    return thisAsReduceDriver();
+  }
+
+  /**
+   * Works like addOutput(), but returns self for fluent style
+   * 
+   * @param outputRecord
+   * @return this
+   */
+  public T withOutput(final Pair<K2, V2> outputRecord) {
+    addOutput(outputRecord);
+    return thisAsReduceDriver();
+  }
+
+  /**
+   * Works like addOutput(), but returns self for fluent style
+   * 
+   * @param key
+   *          The key part of a (k, v) pair to add
+   * @param val
+   *          The val part of a (k, v) pair to add
+   * @return this
+   */
+  public T withOutput(final K2 key, final V2 val) {
+    addOutput(key, val);
+    return thisAsReduceDriver();
+  }
+
+  /**
+   * Identical to setInput, but with a fluent programming style
+   * 
+   * @param input
+   *          A string of the form "key \t val". Trims any whitespace.
+   * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
+   */
+  @Deprecated
+  public T withInputFromString(final String input) {
+    setInputFromString(input);
+    return thisAsReduceDriver();
+  }
+
+  /**
+   * Identical to addOutput, but with a fluent programming style
+   * 
+   * @param output
+   *          A string of the form "key \t val". Trims any whitespace.
+   * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
+   */
+  @Deprecated
+  public T withOutputFromString(final String output) {
+    addOutputFromString(output);
+    return thisAsReduceDriver();
+  }
+
+  public T withOutputCopyingOrInputFormatConfiguration(
+      Configuration configuration) {
+    setOutputCopyingOrInputFormatConfiguration(configuration);
+    return thisAsReduceDriver();
+  }
+  
+  /**
+   * Identical to addInput() but returns self for fluent programming style
+   * 
+   * @param input
+   * @return this
+   */
+  public T withInput(final Pair<K1, List<V1>> input) {
+    addInput(input);
+    return thisAsReduceDriver();
+  }
+
+  /**
+   * Identical to addAll() but returns self for fluent programming style
+   * 
+   * @param inputs
+   * @return this
+   */
+  public T withAll(
+      final List<Pair<K1, List<V1>>> inputs) {
+    addAll(inputs);
+    return thisAsReduceDriver();
+  }
+
+  /**
+   * Works like addAllOutput(), but returns self for fluent style
+   * 
+   * @param outputRecord
+   * @return this
+   */
+  public T withAllOutput(
+      final List<Pair<K2, V2>> outputRecords) {
+    addAllOutput(outputRecords);
+    return thisAsReduceDriver();
+  }
+  
+
+  /**
+   * Handle inputKey and inputValues for backwards compatibility.
+   */
+  protected void preRunChecks(Object reducer) {
+    if (inputKey != null && !getInputValues().isEmpty()) {
+      clearInput();
+      addInput(inputKey, getInputValues());
+    }
+
+    if (inputs == null || inputs.isEmpty()) {
+      throw new IllegalStateException("No input was provided");
+    }
+    
+    if (reducer == null) {
+      throw new IllegalStateException("No Reducer class was provided");
+    }
   }
 
   @Override

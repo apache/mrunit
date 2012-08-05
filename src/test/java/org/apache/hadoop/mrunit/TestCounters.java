@@ -33,7 +33,6 @@ import org.junit.Test;
 /**
  * Test counters usage in various drivers.
  */
-@SuppressWarnings("deprecation")
 public class TestCounters {
 
   private static final String GROUP = "GROUP";
@@ -79,6 +78,7 @@ public class TestCounters {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testReducer() throws IOException {
     final Reducer<Text, Text, Text, Text> reducer = new CounterReducer();
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver

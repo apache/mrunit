@@ -17,7 +17,7 @@
  */
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.*;
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,8 +25,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -49,7 +47,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  */
 
 public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
-    MapReduceDriverBase<K1, V1, K2, V2, K3, V3> {
+    MapReduceDriverBase<K1, V1, K2, V2, K3, V3, MapReduceDriver<K1, V1, K2, V2, K3, V3>> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriver.class);
 
@@ -187,120 +185,6 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
     return this;
   }
 
-  /**
-   * Identical to addInput() but returns self for fluent programming style
-   * 
-   * @param key
-   * @param val
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInput(final K1 key,
-      final V1 val) {
-    addInput(key, val);
-    return this;
-  }
-
-  /**
-   * Identical to addInput() but returns self for fluent programming style
-   * 
-   * @param input
-   *          The (k, v) pair to add
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInput(
-      final Pair<K1, V1> input) {
-    addInput(input);
-    return this;
-  }
-
-  /**
-   * Identical to addAll() but returns self for fluent programming style
-   * 
-   * @param inputs
-   *          List of (k, v) pairs to add
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withAll(
-      final List<Pair<K1, V1>> inputs) {
-    addAll(inputs);
-    return this;
-  }
-  
-  /**
-   * Works like addAllOutput(), but returns self for fluent style
-   * 
-   * @param outputRecords
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withAllOutput(
-      final List<Pair<K3, V3>> outputRecords) {
-    addAllOutput(outputRecords);
-    return this;
-  }
-  
-  /**
-   * Works like addOutput(), but returns self for fluent style
-   * 
-   * @param outputRecord
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutput(
-      final Pair<K3, V3> outputRecord) {
-    addOutput(outputRecord);
-    return this;
-  }
-
-  /**
-   * Functions like addOutput() but returns self for fluent programming style
-   * 
-   * @param key
-   * @param val
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutput(final K3 key,
-      final V3 val) {
-    addOutput(key, val);
-    return this;
-  }
-
-  /**
-   * Identical to addInputFromString, but with a fluent programming style
-   * 
-   * @param input
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInputFromString(
-      final String input) {
-    addInputFromString(input);
-    return this;
-  }
-
-  /**
-   * Identical to addOutputFromString, but with a fluent programming style
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputFromString(
-      final String output) {
-    addOutputFromString(output);
-    return this;
-  }
-
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputCopyingOrInputFormatConfiguration(
-      Configuration configuration) {
-    setOutputCopyingOrInputFormatConfiguration(configuration);
-    return this;
-  }
-
   @SuppressWarnings("rawtypes")
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputFormat(
       final Class<? extends OutputFormat> outputFormatClass,
@@ -353,15 +237,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
   @Override
   public List<Pair<K3, V3>> run() throws IOException {
-    if (inputList.isEmpty()) {
-      throw new IllegalStateException("No input was provided");
-    }
-    if (myMapper == null) {
-      throw new IllegalStateException("No Mapper class was provided");
-    }
-    if (myReducer == null) {
-      throw new IllegalStateException("No Reducer class was provided");
-    }
+    preRunChecks(myMapper,myReducer);
 
     List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
 
@@ -391,28 +267,6 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   }
 
   /**
-   * @param configuration
-   *          The configuration object that will given to the mapper and reducer
-   *          associated with the driver
-   * @return this driver object for fluent coding
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withConfiguration(
-      final Configuration configuration) {
-    setConfiguration(configuration);
-    return this;
-  }
-  
-  /**
-   * @param mapInputPath
-   *       The Path object which will be given to the mapper
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withMapInputPath(Path mapInputPath) {
-    setMapInputPath(mapInputPath);
-    return this;
-  }
-  
-  /**
    * Identical to {@link #setKeyGroupingComparator(RawComparator)}, but with a
    * fluent programming style
    * 
@@ -437,26 +291,6 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withKeyOrderComparator(
       final RawComparator<K2> orderComparator) {
     setKeyOrderComparator(orderComparator);
-    return this;
-  }
-
-  @Override
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(final Enum<?> e,
-      final long expectedValue) {
-    super.withCounter(e, expectedValue);
-    return this;
-  }
-
-  @Override
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(final String g,
-      final String n, final long e) {
-    super.withCounter(g, n, e);
-    return this;
-  }
-  
-  @Override
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withStrictCounterChecking() {
-    super.withStrictCounterChecking();
     return this;
   }
 

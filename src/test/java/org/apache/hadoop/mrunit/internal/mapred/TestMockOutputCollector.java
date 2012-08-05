@@ -27,7 +27,6 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mrunit.MapDriver;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
 public class TestMockOutputCollector {
 
   /**

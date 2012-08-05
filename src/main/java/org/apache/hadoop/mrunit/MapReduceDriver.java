@@ -26,7 +26,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.InputFormat;
@@ -49,9 +48,9 @@ import org.apache.hadoop.mrunit.types.Pair;
  * If a combiner is specified, then it will be run exactly once after the Mapper
  * and before the Reducer.
  */
-@SuppressWarnings({ "deprecation" })
-public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
-    MapReduceDriverBase<K1, V1, K2, V2, K3, V3> {
+public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
+    extends
+    MapReduceDriverBase<K1, V1, K2, V2, K3, V3, MapReduceDriver<K1, V1, K2, V2, K3, V3>> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriver.class);
 
@@ -355,15 +354,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
   @Override
   public List<Pair<K3, V3>> run() throws IOException {
-    if (inputList.isEmpty()) {
-      throw new IllegalStateException("No input was provided");
-    }
-    if (myMapper == null) {
-      throw new IllegalStateException("No Mapper class was provided");
-    }
-    if (myReducer == null) {
-      throw new IllegalStateException("No Reducer class was provided");
-    }
+    preRunChecks(myMapper, myReducer);
 
     List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
 
@@ -393,28 +384,6 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   }
 
   /**
-   * @param configuration
-   *          The configuration object that will given to the mapper and reducer
-   *          associated with the driver
-   * @return this driver object for fluent coding
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withConfiguration(
-      final Configuration configuration) {
-    setConfiguration(configuration);
-    return this;
-  }
-  
-  /**
-   * @param mapInputPath
-   *       The Path object which will be given to the mapper
-   * @return
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withMapInputPath(Path mapInputPath) {
-    setMapInputPath(mapInputPath);
-    return this;
-  }
-
-  /**
    * Identical to {@link #setKeyGroupingComparator(RawComparator)}, but with a
    * fluent programming style
    * 
@@ -439,26 +408,6 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withKeyOrderComparator(
       final RawComparator<K2> orderComparator) {
     setKeyOrderComparator(orderComparator);
-    return this;
-  }
-
-  @Override
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(final Enum<?> e,
-      final long expectedValue) {
-    super.withCounter(e, expectedValue);
-    return this;
-  }
-
-  @Override
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounter(final String g,
-      final String n, final long e) {
-    super.withCounter(g, n, e);
-    return this;
-  }
-  
-  @Override
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withStrictCounterChecking() {
-    super.withStrictCounterChecking();
     return this;
   }
 

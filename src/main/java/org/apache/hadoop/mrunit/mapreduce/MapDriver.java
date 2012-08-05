@@ -18,7 +18,7 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.*;
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,7 +26,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -35,7 +34,6 @@ import org.apache.hadoop.mrunit.MapDriverBase;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.mapreduce.ContextDriver;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockMapContextWrapper;
-import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -46,14 +44,13 @@ import org.apache.hadoop.mrunit.types.Pair;
  * against the expected results.
  */
 public class MapDriver<K1, V1, K2, V2> 
-extends MapDriverBase<K1, V1, K2, V2> implements ContextDriver {
-
+extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements ContextDriver {
+  
   public static final Log LOG = LogFactory.getLog(MapDriver.class);
 
   private Mapper<K1, V1, K2, V2> myMapper;
   private Counters counters;
 
-  private final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
   private final MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(
       inputs, mockOutputCreator,  this);
 
@@ -253,18 +250,7 @@ extends MapDriverBase<K1, V1, K2, V2> implements ContextDriver {
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    // handle inputKey and inputVal for backwards compatibility
-    if (inputKey != null && inputVal != null) {
-      setInput(inputKey, inputVal);
-    }
-
-    if (inputs == null || inputs.isEmpty()) {
-      throw new IllegalStateException("No input was provided");
-    }
-   	
-    if (myMapper == null) {
-      throw new IllegalStateException("No Mapper class was provided");
-    }        
+    preRunChecks(myMapper);
 
     try {
       myMapper.run(wrapper.getMockContext());
@@ -277,36 +263,6 @@ extends MapDriverBase<K1, V1, K2, V2> implements ContextDriver {
   @Override
   public String toString() {
     return "MapDriver (0.20+) (" + myMapper + ")";
-  }
-
-  /**
-   * @param configuration
-   *          The configuration object that will given to the mapper associated
-   *          with the driver
-   * @return this object for fluent coding
-   */
-  public MapDriver<K1, V1, K2, V2> withConfiguration(
-      final Configuration configuration) {
-    setConfiguration(configuration);
-    return this;
-  }
-  
-  /**
-   * @param mapInputPath
-   *       The Path object which will be given to the mapper
-   * @return this object for fluent coding
-   */
-  public MapDriver<K1, V1, K2, V2> withMapInputPath(Path mapInputPath) {
-    setMapInputPath(mapInputPath);
-    return this;
-  }
-
-
-  @Override
-  public MapDriver<K1, V1, K2, V2> withCounter(final Enum<?> e,
-      final long expectedValue) {
-    super.withCounter(e, expectedValue);
-    return this;
   }
   
   /**
@@ -335,19 +291,6 @@ extends MapDriverBase<K1, V1, K2, V2> implements ContextDriver {
    */
   public Mapper<K1, V1, K2, V2>.Context getContext() {
     return wrapper.getMockContext();
-  }
-
-  @Override
-  public MapDriver<K1, V1, K2, V2> withCounter(final String g, final String n,
-      final long expectedValue) {
-    super.withCounter(g, n, expectedValue);
-    return this;
-  }
-  
-  @Override
-  public MapDriver<K1, V1, K2, V2> withStrictCounterChecking() {
-    super.withStrictCounterChecking();
-    return this;
   }
 
   /**
