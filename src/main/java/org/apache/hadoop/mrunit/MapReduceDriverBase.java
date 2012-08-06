@@ -29,7 +29,6 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
@@ -269,28 +268,6 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   public T withAllOutput(
       final List<Pair<K3, V3>> outputRecords) {
     addAllOutput(outputRecords);
-    return thisAsMapReduceDriver();
-  }
-  
-  /**
-   * @param configuration
-   *          The configuration object that will given to the mapper and reducer
-   *          associated with the driver
-   * @return this driver object for fluent coding
-   */
-  public T withConfiguration(
-      final Configuration configuration) {
-    setConfiguration(configuration);
-    return thisAsMapReduceDriver();
-  }
-  
-  /**
-   * @param mapInputPath
-   *       The Path object which will be given to the mapper
-   * @return
-   */
-  public T withMapInputPath(Path mapInputPath) {
-    setMapInputPath(mapInputPath);
     return thisAsMapReduceDriver();
   }
 

@@ -269,6 +269,9 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    * Identical to setInputKey() but with fluent programming style
    * 
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
+   *             {@link #withAll(List)}, and {@link #withInput(Pair)}
    */
   public T withInputKey(final K1 key) {
     setInputKey(key);
@@ -280,6 +283,9 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    * 
    * @param val
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
+   *             {@link #withAll(List)}, and {@link #withInput(Pair)}
    */
   public T withInputValue(final V1 val) {
     addInputValue(val);
@@ -291,6 +297,9 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    * 
    * @param values
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
+   *             {@link #withAll(List)}, and {@link #withInput(Pair)}
    */
   public T withInputValues(final List<V1> values) {
     addInputValues(values);

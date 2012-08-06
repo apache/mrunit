@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -216,6 +215,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    * Identical to setInputKey() but with fluent programming style
    * 
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v)*. Replaced by {@link #withInput()} and
+   *             {@link #withAll()}
    */
   public T withInputKey(final K1 key) {
     setInputKey(key);
@@ -227,6 +229,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    * 
    * @param val
    * @return this
+   * @deprecated MRUNIT-64. Moved to list implementation to support multiple
+   *             input (k, v)*. Replaced by {@link #withInput()} and
+   *             {@link #withAll()}
    */
   public T withInputValue(final V1 val) {
     setInputValue(val);
@@ -333,28 +338,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
     addAllOutput(outputRecords);
     return thisAsMapDriver();
   }
-  
-  /**
-   * @param configuration
-   *          The configuration object that will given to the mapper associated
-   *          with the driver
-   * @return this object for fluent coding
-   */
-  public T withConfiguration(
-      final Configuration configuration) {
-    setConfiguration(configuration);
-    return thisAsMapDriver();
-  }
-  /**
-   * @param mapInputPath
-   *       The Path object which will be given to the mapper
-   * @return
-   */
-  public T withMapInputPath(Path mapInputPath) {
-    setMapInputPath(mapInputPath);
-    return thisAsMapDriver();
-  }
-  
+
   /**
    * Handle inputKey and inputVal for backwards compatibility.
    */

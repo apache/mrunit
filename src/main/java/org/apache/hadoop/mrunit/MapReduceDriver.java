@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.InputFormat;
@@ -186,120 +185,6 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
    */
   public Reducer<K2, V2, K2, V2> getCombiner() {
     return myCombiner;
-  }
-
-  /**
-   * Identical to addInput() but returns self for fluent programming style
-   * 
-   * @param key
-   * @param val
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInput(final K1 key,
-      final V1 val) {
-    addInput(key, val);
-    return this;
-  }
-
-  /**
-   * Identical to addInput() but returns self for fluent programming style
-   * 
-   * @param input
-   *          The (k, v) pair to add
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInput(
-      final Pair<K1, V1> input) {
-    addInput(input);
-    return this;
-  }
-
-  /**
-   * Identical to addAll() but returns self for fluent programming style
-   * 
-   * @param inputs
-   *          List of (k, v) pairs to add
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withAll(
-      final List<Pair<K1, V1>> inputs) {
-    addAll(inputs);
-    return this;
-  }
-  
-  /**
-   * Works like addAllOutput(), but returns self for fluent style
-   * 
-   * @param outputRecords
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withAllOutput(
-      final List<Pair<K3, V3>> outputRecords) {
-    addAllOutput(outputRecords);
-    return this;
-  }
-  
-  /**
-   * Works like addOutput(), but returns self for fluent style
-   * 
-   * @param outputRecord
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutput(
-      final Pair<K3, V3> outputRecord) {
-    addOutput(outputRecord);
-    return this;
-  }
-
-  /**
-   * Functions like addOutput() but returns self for fluent programming style
-   * 
-   * @param key
-   * @param val
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutput(final K3 key,
-      final V3 val) {
-    addOutput(key, val);
-    return this;
-  }
-
-  /**
-   * Identical to addInputFromString, but with a fluent programming style
-   * 
-   * @param input
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInputFromString(
-      final String input) {
-    addInputFromString(input);
-    return this;
-  }
-
-  /**
-   * Identical to addOutputFromString, but with a fluent programming style
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputFromString(
-      final String output) {
-    addOutputFromString(output);
-    return this;
-  }
-
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputCopyingOrInputFormatConfiguration(
-      Configuration configuration) {
-    setOutputCopyingOrInputFormatConfiguration(configuration);
-    return this;
   }
 
   @SuppressWarnings("rawtypes")

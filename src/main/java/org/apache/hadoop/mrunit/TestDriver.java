@@ -167,6 +167,18 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     this.configuration = returnNonNull(configuration);
   }
 
+  /**
+   * @param configuration
+   *          The configuration object that will given to the mapper associated
+   *          with the driver
+   * @return this object for fluent coding
+   */
+  public T withConfiguration(
+      final Configuration configuration) {
+    setConfiguration(configuration);
+    return thisAsTestDriver();
+  }
+
   public Configuration getOutputCopyingOrInputFormatConfiguration() {
     return outputCopyingOrInputFormatConf;
   }
@@ -182,11 +194,22 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   public Path getMapInputPath() {
     return mapInputPath;
   }
+
   /**
    * @param mapInputPath Path which is to be passed to the mappers InputSplit
    */
   public void setMapInputPath(Path mapInputPath) {
     this.mapInputPath = mapInputPath;
+  }
+  
+  /**
+   * @param mapInputPath
+   *       The Path object which will be given to the mapper
+   * @return
+   */
+  public final T withMapInputPath(Path mapInputPath) {
+    setMapInputPath(mapInputPath);
+    return thisAsTestDriver();
   }
 
   /**
