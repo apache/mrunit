@@ -30,12 +30,12 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.junit.Test;
 
-public class TestReducerInputValueResuse {
+public class TestReducerInputValueReuse {
 
   private class TestReducer extends
       Reducer<Text, LongWritable, Text, LongWritable> {
     public LongWritable outputValue = new LongWritable();
-    protected boolean instanceCheckOccured = false;
+    protected boolean instanceCheckOccurred = false;
     protected boolean instanceCheckFailed = false;
 
     @Override
@@ -45,7 +45,7 @@ public class TestReducerInputValueResuse {
       LongWritable inputValue = null;
       for (final LongWritable val : vals) {
         if (inputValue != null) {
-          instanceCheckOccured = true;
+          instanceCheckOccurred = true;
           if (inputValue != val) {
             instanceCheckFailed = true;
           }
@@ -74,7 +74,7 @@ public class TestReducerInputValueResuse {
     driver.withInput(new Text("foo"), values);
     driver.withOutput(new Text("foo"), new LongWritable(4));
     driver.runTest();
-    assertTrue(reducer.instanceCheckOccured);
+    assertTrue(reducer.instanceCheckOccurred);
     assertFalse(reducer.instanceCheckFailed);
   }
 
