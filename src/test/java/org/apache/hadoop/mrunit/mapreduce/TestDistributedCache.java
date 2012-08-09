@@ -157,7 +157,7 @@ public class TestDistributedCache {
   public void testAddCacheFileToMapperUsingDriverMethod() throws IOException
   {
     mapDriver.withCacheFile("testfile")
-      .withOutput(new Text("testfile"), new Text("file")).runTest();
+      .withOutput(new Text("testfile"), new Text("file")).runTest(false);
   }
 
   @Test
@@ -166,7 +166,7 @@ public class TestDistributedCache {
     Configuration conf = new Configuration();
     DistributedCache.addCacheFile(new File("README.txt").toURI(), conf);
     mapDriver.withConfiguration(conf)
-      .withOutput(new Text("README.txt"), new Text("file")).runTest();
+      .withOutput(new Text("README.txt"), new Text("file")).runTest(false);
   }
 
   @Test
@@ -180,7 +180,7 @@ public class TestDistributedCache {
       .withOutput(new Text("testarchive.tar/b"), new Text("file"))
       .withOutput(new Text("testarchive.tar/c"), new Text("file"))
       .withOutput(new Text("testarchive.tar/d"), new Text("file"))
-      .runTest();
+      .runTest(false);
   }
 
   @Test
@@ -190,14 +190,14 @@ public class TestDistributedCache {
     // through without being expanded
     mapDriver.withCacheArchive("testarchive.tar.abc")
       .withOutput(new Text("testarchive.tar.abc"), new Text("file"))
-      .runTest();
+      .runTest(false);
   }
 
   @Test
   public void testAddCacheFileToReducerUsingDriverMethod() throws IOException
   {
     reduceDriver.withCacheFile("testfile")
-      .withOutput(new Text("testfile"), new Text("file")).runTest();
+      .withOutput(new Text("testfile"), new Text("file")).runTest(false);
   }
   
   @Test
@@ -206,7 +206,7 @@ public class TestDistributedCache {
     Configuration conf = new Configuration();
     DistributedCache.addCacheFile(new File("README.txt").toURI(), conf);
     reduceDriver.withConfiguration(conf)
-      .withOutput(new Text("README.txt"), new Text("file")).runTest();
+      .withOutput(new Text("README.txt"), new Text("file")).runTest(false);
   }
 
   @Test
@@ -218,7 +218,7 @@ public class TestDistributedCache {
       .withOutput(new Text("testarchive.tar/b"), new Text("file"))
       .withOutput(new Text("testarchive.tar/c"), new Text("file"))
       .withOutput(new Text("testarchive.tar/d"), new Text("file"))
-      .runTest();
+      .runTest(false);
   }
 
   @Test
@@ -234,7 +234,7 @@ public class TestDistributedCache {
       .withOutput(new Text("testarchive.tar/b"), new Text("file"))
       .withOutput(new Text("testarchive.tar/c"), new Text("file"))
       .withOutput(new Text("testarchive.tar/d"), new Text("file"))
-      .runTest();
+      .runTest(false);
   }
   
   @Test
@@ -250,7 +250,7 @@ public class TestDistributedCache {
       .withOutput(new Text("testarchive.tar/b"), new Text("file"))
       .withOutput(new Text("testarchive.tar/c"), new Text("file"))
       .withOutput(new Text("testarchive.tar/d"), new Text("file"))
-      .runTest();
+      .runTest(false);
   }
 
 }
