@@ -566,27 +566,10 @@ public class TestMapReduceDriver {
     driver.runTest();
   }
 
-  private static class InputPathStoringMapper extends MapReduceBase implements
-      Mapper<Text, LongWritable, Text, LongWritable> {
-    private Path mapInputPath;
-
-    @Override
-    public void map(Text key, LongWritable value,
-        OutputCollector<Text, LongWritable> output, Reporter reporter)
-        throws IOException {
-      if (reporter.getInputSplit() instanceof FileSplit) {
-        mapInputPath = ((FileSplit) reporter.getInputSplit()).getPath();
-      }
-    }
-
-    private Path getMapInputPath() {
-      return mapInputPath;
-    }
-  }
-
   @Test
   public void testMapInputFile() throws IOException {
-    InputPathStoringMapper mapper = new InputPathStoringMapper();
+    InputPathStoringMapper<LongWritable,LongWritable> mapper = 
+        new InputPathStoringMapper<LongWritable,LongWritable>();
     Path mapInputPath = new Path("myfile");
     driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
     driver.setMapInputPath(mapInputPath);

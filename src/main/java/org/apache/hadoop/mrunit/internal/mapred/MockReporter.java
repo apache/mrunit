@@ -34,11 +34,19 @@ public class MockReporter implements Reporter {
 
   private final ReporterType typ;
 
+  public MockReporter(final ReporterType kind, final Counters ctrs) {
+    this(kind, ctrs, null);
+  }
+  
   public MockReporter(final ReporterType kind, final Counters ctrs,
       final Path mapInputPath) {
     typ = kind;
     counters = ctrs;
-    inputSplit = new MockInputSplit(mapInputPath);
+    if(mapInputPath == null) {
+      inputSplit = null;
+    } else {
+      inputSplit = new MockInputSplit(mapInputPath);
+    }
   }
 
   @Override

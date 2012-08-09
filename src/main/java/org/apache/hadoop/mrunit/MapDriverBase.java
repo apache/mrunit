@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -41,7 +42,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   public static final Log LOG = LogFactory.getLog(MapDriverBase.class);
 
   protected List<Pair<K1, V1>> inputs = new ArrayList<Pair<K1, V1>>();
-  
+
+  protected Path mapInputPath = new Path("somefile");
+
   @Deprecated
   protected K1 inputKey;
   @Deprecated
@@ -97,6 +100,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    * @param inputRecord
    *          a (key, val) pair
    */
+  @SuppressWarnings("deprecation")
   public void setInput(final Pair<K1, V1> inputRecord) {
     setInputKey(inputRecord.getFirst());
     setInputValue(inputRecord.getSecond());
@@ -340,8 +344,33 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   }
 
   /**
+   * @return the path passed to the mapper InputSplit
+   */
+  public Path getMapInputPath() {
+    return mapInputPath;
+  }
+
+  /**
+   * @param mapInputPath Path which is to be passed to the mappers InputSplit
+   */
+  public void setMapInputPath(Path mapInputPath) {
+    this.mapInputPath = mapInputPath;
+  }
+  
+  /**
+   * @param mapInputPath
+   *       The Path object which will be given to the mapper
+   * @return
+   */
+  public final T withMapInputPath(Path mapInputPath) {
+    setMapInputPath(mapInputPath);
+    return thisAsTestDriver();
+  }
+  
+  /**
    * Handle inputKey and inputVal for backwards compatibility.
    */
+  @SuppressWarnings("deprecation")
   protected void preRunChecks(Object mapper) {
     if (inputKey != null && inputVal != null) {
       setInput(inputKey, inputVal);

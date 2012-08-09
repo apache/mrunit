@@ -29,7 +29,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -543,26 +542,9 @@ public class TestMapDriver {
     driver.runTest();
   }
 
-  private static class InputPathStoringMapper extends MapReduceBase implements
-      Mapper<Text, Text, Text, Text> {
-    private Path mapInputPath;
-
-    @Override
-    public void map(Text key, Text value, OutputCollector<Text, Text> output,
-        Reporter reporter) throws IOException {
-      if (reporter.getInputSplit() instanceof FileSplit) {
-        mapInputPath = ((FileSplit) reporter.getInputSplit()).getPath();
-      }
-    }
-
-    private Path getMapInputPath() {
-      return mapInputPath;
-    }
-  }
-
   @Test
   public void testMapInputFile() throws IOException {
-    InputPathStoringMapper mapper = new InputPathStoringMapper();
+    InputPathStoringMapper<Text, Text> mapper = new InputPathStoringMapper<Text, Text>();
     Path mapInputPath = new Path("myfile");
     driver = MapDriver.newMapDriver(mapper);
     driver.setMapInputPath(mapInputPath);

@@ -56,8 +56,6 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   protected CounterWrapper counterWrapper;
 
   protected Serialization serialization;
-  
-  protected Path mapInputPath = new Path("somefile");
 
   public TestDriver() {
     expectedOutputs = new ArrayList<Pair<K2, V2>>();
@@ -104,7 +102,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
   
   @SuppressWarnings("unchecked")
-  private T thisAsTestDriver() {
+  protected T thisAsTestDriver() {
     return (T) this;
   }
 
@@ -190,30 +188,6 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   public void setOutputCopyingOrInputFormatConfiguration(
       final Configuration configuration) {
     this.outputCopyingOrInputFormatConf = returnNonNull(configuration);
-  }
-
-  /**
-   * @return the path passed to the mapper InputSplit
-   */
-  public Path getMapInputPath() {
-    return mapInputPath;
-  }
-
-  /**
-   * @param mapInputPath Path which is to be passed to the mappers InputSplit
-   */
-  public void setMapInputPath(Path mapInputPath) {
-    this.mapInputPath = mapInputPath;
-  }
-  
-  /**
-   * @param mapInputPath
-   *       The Path object which will be given to the mapper
-   * @return
-   */
-  public final T withMapInputPath(Path mapInputPath) {
-    setMapInputPath(mapInputPath);
-    return thisAsTestDriver();
   }
 
   /**

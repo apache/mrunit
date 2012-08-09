@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.Reducer;
@@ -61,6 +62,8 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   private List<Pair<Mapper, Reducer>> mapReducePipeline;
   private final List<Pair<K1, V1>> inputList;
   private Counters counters;
+  
+  protected Path mapInputPath = new Path("somefile");
 
   public PipelineMapReduceDriver(final List<Pair<Mapper, Reducer>> pipeline) {
     this();
@@ -308,6 +311,30 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     addOutputFromString(output);
     return this;
   }
+  
+  /**
+   * @return the path passed to the mapper InputSplit
+   */
+  public Path getMapInputPath() {
+    return mapInputPath;
+  }
+
+  /**
+   * @param mapInputPath Path which is to be passed to the mappers InputSplit
+   */
+  public void setMapInputPath(Path mapInputPath) {
+    this.mapInputPath = mapInputPath;
+  }
+  
+  /**
+   * @param mapInputPath
+   *       The Path object which will be given to the mapper
+   * @return
+   */
+  public final PipelineMapReduceDriver<K1, V1, K2, V2> withMapInputPath(Path mapInputPath) {
+    setMapInputPath(mapInputPath);
+    return this;
+  }
 
   @Override
   @SuppressWarnings("unchecked")
@@ -329,6 +356,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
       mrDriver.setCounters(getCounters());
       mrDriver.setConfiguration(configuration);
+      mrDriver.setMapInputPath(mapInputPath);
 
       // Add the inputs from the user, or from the previous stage of the
       // pipeline.

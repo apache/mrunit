@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
@@ -51,6 +52,8 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   public static final Log LOG = LogFactory.getLog(MapReduceDriverBase.class);
 
   protected List<Pair<K1, V1>> inputList = new ArrayList<Pair<K1, V1>>();
+  
+  protected Path mapInputPath = new Path("somefile");
 
   /** Key group comparator */
   protected Comparator<K2> keyGroupComparator;
@@ -269,6 +272,30 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
       final List<Pair<K3, V3>> outputRecords) {
     addAllOutput(outputRecords);
     return thisAsMapReduceDriver();
+  }
+  
+  /**
+   * @return the path passed to the mapper InputSplit
+   */
+  public Path getMapInputPath() {
+    return mapInputPath;
+  }
+
+  /**
+   * @param mapInputPath Path which is to be passed to the mappers InputSplit
+   */
+  public void setMapInputPath(Path mapInputPath) {
+    this.mapInputPath = mapInputPath;
+  }
+  
+  /**
+   * @param mapInputPath
+   *       The Path object which will be given to the mapper
+   * @return
+   */
+  public final T withMapInputPath(Path mapInputPath) {
+    setMapInputPath(mapInputPath);
+    return thisAsTestDriver();
   }
 
   protected void preRunChecks(Object mapper, Object reducer) {

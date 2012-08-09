@@ -17,10 +17,13 @@
  */
 package org.apache.hadoop.mrunit;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -305,5 +308,21 @@ public class TestPipelineMapReduceDriver {
     value.set("d");
     driver.addOutput(key, value);
     driver.runTest();
+  }
+  
+  @Test
+  public void testMapInputFile() throws IOException {
+    InputPathStoringMapper<LongWritable,LongWritable> mapper = 
+        new InputPathStoringMapper<LongWritable,LongWritable>();
+    Path mapInputPath = new Path("myfile");
+    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = PipelineMapReduceDriver
+        .newPipelineMapReduceDriver();
+    driver.addMapReduce(mapper, new IdentityReducer<Text, LongWritable>());
+    driver.setMapInputPath(mapInputPath);
+    assertEquals(mapInputPath.getName(), driver.getMapInputPath().getName());
+    driver.withInput(new Text("a"), new LongWritable(1));
+    driver.runTest();
+    assertNotNull(mapper.getMapInputPath());
+    assertEquals(mapInputPath.getName(), mapper.getMapInputPath().getName());
   }
 }
