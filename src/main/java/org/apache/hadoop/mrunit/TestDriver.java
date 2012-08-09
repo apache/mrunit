@@ -66,6 +66,100 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
 
   /**
+   * Adds output (k, v)* pairs we expect
+   * 
+   * @param outputRecords
+   *          The (k, v)* pairs to add
+   */
+  public void addAllOutput(final List<Pair<K2, V2>> outputRecords) {
+    for (Pair<K2, V2> output : outputRecords) {
+      addOutput(output);
+    }
+  }
+
+  /**
+   * Functions like addAllOutput() but returns self for fluent programming style
+   * 
+   * @param outputRecords
+   * @return this
+   */
+  public T withAllOutput(
+      final List<Pair<K2, V2>> outputRecords) {
+    addAllOutput(outputRecords);
+    return thisAsTestDriver();
+  }
+
+  /**
+   * Adds an output (k, v) pair we expect
+   * 
+   * @param outputRecord
+   *          The (k, v) pair to add
+   */
+  public void addOutput(final Pair<K2, V2> outputRecord) {
+    addOutput(outputRecord.getFirst(), outputRecord.getSecond());
+  }
+
+  /**
+   * Adds a (k, v) pair we expect as output
+   * @param key the key
+   * @param val the value
+   */
+  public void addOutput(final K2 key, final V2 val) {
+    expectedOutputs.add(copyPair(key, val));
+  }
+
+  /**
+   * Works like addOutput(), but returns self for fluent style
+   * 
+   * @param outputRecord
+   * @return this
+   */
+  public T withOutput(final Pair<K2, V2> outputRecord) {
+    addOutput(outputRecord);
+    return thisAsTestDriver();
+  }
+
+  /**
+   * Works like addOutput() but returns self for fluent programming style
+   * 
+   * @return this
+   */
+  public T withOutput(final K2 key, final V2 val) {
+    addOutput(key, val);
+    return thisAsTestDriver();
+  }
+
+  /**
+   * Expects an input of the form "key \t val" Forces the output types to
+   * Text.
+   * 
+   * @param output
+   *          A string of the form "key \t val". Trims any whitespace.
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
+   */
+  @Deprecated
+  @SuppressWarnings("unchecked")
+  public void addOutputFromString(final String output) {
+    addOutput((Pair<K2, V2>) parseTabbedPair(output));
+  }
+
+  /**
+   * Identical to addOutputFromString, but with a fluent programming style
+   * 
+   * @param output
+   *          A string of the form "key \t val". Trims any whitespace.
+   * @return this
+   * @deprecated No replacement due to lack of type safety and incompatibility
+   *             with non Text Writables
+   */
+  @Deprecated
+  public T withOutputFromString(final String output) {
+    addOutputFromString(output);
+    return thisAsTestDriver();
+  }
+
+  /**
    * @return the list of (k, v) pairs expected as output from this driver
    */
   public List<Pair<K2, V2>> getExpectedOutputs() {
@@ -188,6 +282,12 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   public void setOutputCopyingOrInputFormatConfiguration(
       final Configuration configuration) {
     this.outputCopyingOrInputFormatConf = returnNonNull(configuration);
+  }
+
+  public T withOutputCopyingOrInputFormatConfiguration(
+      Configuration configuration) {
+    setOutputCopyingOrInputFormatConfiguration(configuration);
+    return thisAsTestDriver();
   }
 
   /**

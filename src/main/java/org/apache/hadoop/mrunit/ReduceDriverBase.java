@@ -44,7 +44,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
   protected K1 inputKey;
   @Deprecated
   private final List<V1> inputValues;
-  
+
   protected final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
 
   public ReduceDriverBase() {
@@ -77,7 +77,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
     }
     return null;
   }
-  
+
   /**
    * Sets the input key to send to the Reducer
    * 
@@ -145,14 +145,14 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
     clearInput();
     addInput(key, values);
   }
-  
+
   /**
    * Clears the input to be sent to the Reducer
    */
   public void clearInput() {
     inputs.clear();
   }
-  
+
   /**
    * Add input (K, V*) to send to the Reducer
    * 
@@ -170,7 +170,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
     inputs.add(new Pair<K1, List<V1>>(copy(key),
         new ValueClassInstanceReuseList<V1>(copyVals, getConfiguration())));
   }
-  
+
   /**
    * Add input (K, V*) to send to the Reducer
    * 
@@ -192,40 +192,6 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
       addInput(input);
     }
   }
-  
-  /**
-   * Adds output (k, v)* pairs we expect from the Reducer
-   * 
-   * @param outputRecords
-   *          The (k, v)* pairs to add
-   */
-  public void addAllOutput(final List<Pair<K2, V2>> outputRecords) {
-    for (Pair<K2, V2> output : outputRecords) {
-      addOutput(output);
-    }
-  }
-  
-  /**
-   * Adds an output (k, v) pair we expect from the Reducer
-   * 
-   * @param outputRecord
-   *          The (k, v) pair to add
-   */
-  public void addOutput(final Pair<K2, V2> outputRecord) {
-    addOutput(outputRecord.getFirst(), outputRecord.getSecond());
-  }
-
-  /**
-   * Adds an output (k, v) pair we expect from the Reducer
-   * 
-   * @param key
-   *          The key part of a (k, v) pair to add
-   * @param val
-   *          The val part of a (k, v) pair to add
-   */
-  public void addOutput(final K2 key, final V2 val) {
-    expectedOutputs.add(copyPair(key, val));
-  }
 
   /**
    * Expects an input of the form "key \t val, val, val..." Forces the Reducer
@@ -245,26 +211,11 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
         .toString()));
   }
 
-  /**
-   * Expects an input of the form "key \t val" Forces the Reducer output types
-   * to Text.
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  @SuppressWarnings("unchecked")
-  public void addOutputFromString(final String output) {
-    addOutput((Pair<K2, V2>) parseTabbedPair(output));
-  }
-  
   @SuppressWarnings("unchecked")
   private T thisAsReduceDriver() {
     return (T) this;
   }
-  
+
   /**
    * Identical to setInputKey() but with fluent programming style
    * 
@@ -318,31 +269,6 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
   }
 
   /**
-   * Works like addOutput(), but returns self for fluent style
-   * 
-   * @param outputRecord
-   * @return this
-   */
-  public T withOutput(final Pair<K2, V2> outputRecord) {
-    addOutput(outputRecord);
-    return thisAsReduceDriver();
-  }
-
-  /**
-   * Works like addOutput(), but returns self for fluent style
-   * 
-   * @param key
-   *          The key part of a (k, v) pair to add
-   * @param val
-   *          The val part of a (k, v) pair to add
-   * @return this
-   */
-  public T withOutput(final K2 key, final V2 val) {
-    addOutput(key, val);
-    return thisAsReduceDriver();
-  }
-
-  /**
    * Identical to setInput, but with a fluent programming style
    * 
    * @param input
@@ -357,27 +283,6 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
     return thisAsReduceDriver();
   }
 
-  /**
-   * Identical to addOutput, but with a fluent programming style
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  public T withOutputFromString(final String output) {
-    addOutputFromString(output);
-    return thisAsReduceDriver();
-  }
-
-  public T withOutputCopyingOrInputFormatConfiguration(
-      Configuration configuration) {
-    setOutputCopyingOrInputFormatConfiguration(configuration);
-    return thisAsReduceDriver();
-  }
-  
   /**
    * Identical to addInput() but returns self for fluent programming style
    * 
@@ -400,19 +305,6 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
     addAll(inputs);
     return thisAsReduceDriver();
   }
-
-  /**
-   * Works like addAllOutput(), but returns self for fluent style
-   * 
-   * @param outputRecord
-   * @return this
-   */
-  public T withAllOutput(
-      final List<Pair<K2, V2>> outputRecords) {
-    addAllOutput(outputRecords);
-    return thisAsReduceDriver();
-  }
-  
 
   /**
    * Handle inputKey and inputValues for backwards compatibility.

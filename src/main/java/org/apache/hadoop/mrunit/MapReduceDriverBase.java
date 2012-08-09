@@ -28,7 +28,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.JobConf;
@@ -52,7 +51,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   public static final Log LOG = LogFactory.getLog(MapReduceDriverBase.class);
 
   protected List<Pair<K1, V1>> inputList = new ArrayList<Pair<K1, V1>>();
-  
+
   protected Path mapInputPath = new Path("somefile");
 
   /** Key group comparator */
@@ -92,38 +91,6 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
       addInput(input);
     }
   }
-  
-  /**
-   * Adds output (k, v)* pairs we expect from the Reducer
-   * 
-   * @param outputRecords
-   *          List of (k, v) pairs to add
-   */
-  public void addAllOutput(final List<Pair<K3, V3>> outputRecords) {
-    for (Pair<K3, V3> output : outputRecords) {
-      addOutput(output);
-    }
-  }
-  
-  /**
-   * Adds an output (k, v) pair we expect from the Reducer
-   * 
-   * @param outputRecord
-   *          The (k, v) pair to add
-   */
-  public void addOutput(final Pair<K3, V3> outputRecord) {
-    addOutput(outputRecord.getFirst(), outputRecord.getSecond());
-  }
-
-  /**
-   * Adds a (k, v) pair we expect as output from the Reducer
-   * 
-   * @param key
-   * @param val
-   */
-  public void addOutput(final K3 key, final V3 val) {
-    expectedOutputs.add(copyPair(key, val));
-  }
 
   /**
    * Expects an input of the form "key \t val" Forces the Mapper input types to
@@ -140,26 +107,11 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
     addInput((Pair<K1, V1>) parseTabbedPair(input));
   }
 
-  /**
-   * Expects an input of the form "key \t val" Forces the Reducer output types
-   * to Text.
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  @SuppressWarnings("unchecked")
-  public void addOutputFromString(final String output) {
-    addOutput((Pair<K3, V3>) parseTabbedPair(output));
-  }
-  
   @SuppressWarnings("unchecked")
   private T thisAsMapReduceDriver() {
     return (T) this;
   }
-  
+
   /**
    * Identical to addInput() but returns self for fluent programming style
    * 
@@ -187,31 +139,6 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   }
 
   /**
-   * Works like addOutput(), but returns self for fluent style
-   * 
-   * @param outputRecord
-   * @return this
-   */
-  public T withOutput(
-      final Pair<K3, V3> outputRecord) {
-    addOutput(outputRecord);
-    return thisAsMapReduceDriver();
-  }
-
-  /**
-   * Functions like addOutput() but returns self for fluent programming style
-   * 
-   * @param key
-   * @param val
-   * @return this
-   */
-  public T withOutput(final K3 key,
-      final V3 val) {
-    addOutput(key, val);
-    return thisAsMapReduceDriver();
-  }
-
-  /**
    * Identical to addInputFromString, but with a fluent programming style
    * 
    * @param input
@@ -228,28 +155,6 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   }
 
   /**
-   * Identical to addOutputFromString, but with a fluent programming style
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  public T withOutputFromString(
-      final String output) {
-    addOutputFromString(output);
-    return thisAsMapReduceDriver();
-  }
-
-  public T withOutputCopyingOrInputFormatConfiguration(
-      Configuration configuration) {
-    setOutputCopyingOrInputFormatConfiguration(configuration);
-    return thisAsMapReduceDriver();
-  }
-  
-  /**
    * Identical to addAll() but returns self for fluent programming style
    * 
    * @param inputs
@@ -261,19 +166,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
     addAll(inputs);
     return thisAsMapReduceDriver();
   }
-  
-  /**
-   * Works like addAllOutput(), but returns self for fluent style
-   * 
-   * @param outputRecords
-   * @return this
-   */
-  public T withAllOutput(
-      final List<Pair<K3, V3>> outputRecords) {
-    addAllOutput(outputRecords);
-    return thisAsMapReduceDriver();
-  }
-  
+
   /**
    * @return the path passed to the mapper InputSplit
    */
@@ -287,7 +180,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   public void setMapInputPath(Path mapInputPath) {
     this.mapInputPath = mapInputPath;
   }
-  
+
   /**
    * @param mapInputPath
    *       The Path object which will be given to the mapper
@@ -309,7 +202,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
       throw new IllegalStateException("No Reducer class was provided");
     }
   }
-  
+
   @Override
   public abstract List<Pair<K3, V3>> run() throws IOException;
 

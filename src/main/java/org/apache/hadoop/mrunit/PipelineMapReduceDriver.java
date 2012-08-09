@@ -62,7 +62,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   private List<Pair<Mapper, Reducer>> mapReducePipeline;
   private final List<Pair<K1, V1>> inputList;
   private Counters counters;
-  
+
   protected Path mapInputPath = new Path("somefile");
 
   public PipelineMapReduceDriver(final List<Pair<Mapper, Reducer>> pipeline) {
@@ -205,51 +205,6 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   }
 
   /**
-   * Adds an output (k, v) pair we expect from the Reducer
-   * 
-   * @param outputRecord
-   *          The (k, v) pair to add
-   */
-  public void addOutput(final Pair<K2, V2> outputRecord) {
-    addOutput(outputRecord.getFirst(), outputRecord.getSecond());
-  }
-
-  /**
-   * Works like addOutput(), but returns self for fluent style
-   * 
-   * @param outputRecord
-   * @return this
-   */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withOutput(
-      final Pair<K2, V2> outputRecord) {
-    addOutput(outputRecord);
-    return this;
-  }
-
-  /**
-   * Adds a (k, v) pair we expect as output from the Reducer
-   * 
-   * @param key
-   * @param val
-   */
-  public void addOutput(final K2 key, final V2 val) {
-    expectedOutputs.add(copyPair(key, val));
-  }
-
-  /**
-   * Functions like addOutput() but returns self for fluent programming style
-   * 
-   * @param key
-   * @param val
-   * @return this
-   */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withOutput(final K2 key,
-      final V2 val) {
-    addOutput(key, val);
-    return this;
-  }
-
-  /**
    * Expects an input of the form "key \t val" Forces the Mapper input types to
    * Text.
    * 
@@ -281,38 +236,6 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   }
 
   /**
-   * Expects an input of the form "key \t val" Forces the Reducer output types
-   * to Text.
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * 
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  @SuppressWarnings("unchecked")
-  public void addOutputFromString(final String output) {
-    addOutput((Pair<K2, V2>) parseTabbedPair(output));
-  }
-
-  /**
-   * Identical to addOutputFromString, but with a fluent programming style
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withOutputFromString(
-      final String output) {
-    addOutputFromString(output);
-    return this;
-  }
-  
-  /**
    * @return the path passed to the mapper InputSplit
    */
   public Path getMapInputPath() {
@@ -325,7 +248,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   public void setMapInputPath(Path mapInputPath) {
     this.mapInputPath = mapInputPath;
   }
-  
+
   /**
    * @param mapInputPath
    *       The Path object which will be given to the mapper

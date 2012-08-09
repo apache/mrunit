@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
@@ -49,7 +48,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   protected K1 inputKey;
   @Deprecated
   protected V1 inputVal;
-  
+
   protected final MockOutputCreator<K2, V2> mockOutputCreator = new MockOutputCreator<K2, V2>();
 
   /**
@@ -118,7 +117,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   public void addInput(final K1 key, final V1 val) {
     inputs.add(copyPair(key, val));
   }
-  
+
   /**
    * Adds an input to send to the mapper
    * 
@@ -128,7 +127,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   public void addInput(final Pair<K1, V1> input) {
     addInput(input.getFirst(), input.getSecond());
   }
-  
+
   /**
    * Adds list of inputs to send to the mapper
    * 
@@ -140,42 +139,12 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
       addInput(input);
     }
   }
-  
+
   /**
    * Clears the list of inputs to send to the mapper
    */
   public void clearInput() {
     inputs.clear();
-  }
-  
-  /**
-   * Adds output (k, v)* pairs we expect from the Mapper
-   * 
-   * @param outputRecords
-   *          The (k, v)* pairs to add
-   */
-  public void addAllOutput(final List<Pair<K2, V2>> outputRecords) {
-    for (Pair<K2, V2> output : outputRecords) {
-      addOutput(output);
-    }
-  }
-  
-  /**
-   * Adds an output (k, v) pair we expect from the Mapper
-   * 
-   * @param outputRecord
-   *          The (k, v) pair to add
-   */
-  public void addOutput(final Pair<K2, V2> outputRecord) {
-    addOutput(outputRecord.getFirst(), outputRecord.getSecond());
-  }
-
-  /**
-   * Adds a (k, v) pair we expect as output from the mapper
-   * 
-   */
-  public void addOutput(final K2 key, final V2 val) {
-    expectedOutputs.add(copyPair(key, val));
   }
 
   /**
@@ -195,26 +164,11 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
     setInputValue((V1) inputPair.getSecond());
   }
 
-  /**
-   * Expects an input of the form "key \t val" Forces the Mapper output types to
-   * Text.
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  @SuppressWarnings("unchecked")
-  public void addOutputFromString(final String output) {
-    addOutput((Pair<K2, V2>) parseTabbedPair(output));
-  }
-  
   @SuppressWarnings("unchecked")
   private T thisAsMapDriver() {
     return (T) this;
   }
-  
+
   /**
    * Identical to setInputKey() but with fluent programming style
    * 
@@ -264,27 +218,6 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   }
 
   /**
-   * Works like addOutput(), but returns self for fluent style
-   * 
-   * @param outputRecord
-   * @return this
-   */
-  public T withOutput(final Pair<K2, V2> outputRecord) {
-    addOutput(outputRecord);
-    return thisAsMapDriver();
-  }
-
-  /**
-   * Functions like addOutput() but returns self for fluent programming style
-   * 
-   * @return this
-   */
-  public T withOutput(final K2 key, final V2 val) {
-    addOutput(key, val);
-    return thisAsMapDriver();
-  }
-
-  /**
    * Identical to setInputFromString, but with a fluent programming style
    * 
    * @param input
@@ -300,27 +233,6 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   }
 
   /**
-   * Identical to addOutputFromString, but with a fluent programming style
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
-   * @return this
-   * @deprecated No replacement due to lack of type safety and incompatibility
-   *             with non Text Writables
-   */
-  @Deprecated
-  public T withOutputFromString(final String output) {
-    addOutputFromString(output);
-    return thisAsMapDriver();
-  }
-
-  public T withOutputCopyingOrInputFormatConfiguration(
-      Configuration configuration) {
-    setOutputCopyingOrInputFormatConfiguration(configuration);
-    return thisAsMapDriver();
-  }
-  
-  /**
    * Identical to addAll() but returns self for fluent programming style
    * 
    * @param inputRecords
@@ -328,18 +240,6 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    */
   public T withAll(final List<Pair<K1, V1>> inputRecords) {
     addAll(inputRecords);
-    return thisAsMapDriver();
-  }
-
-  /**
-   * Functions like addAllOutput() but returns self for fluent programming style
-   * 
-   * @param outputRecords
-   * @return this
-   */
-  public T withAllOutput(
-      final List<Pair<K2, V2>> outputRecords) {
-    addAllOutput(outputRecords);
     return thisAsMapDriver();
   }
 
@@ -356,7 +256,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   public void setMapInputPath(Path mapInputPath) {
     this.mapInputPath = mapInputPath;
   }
-  
+
   /**
    * @param mapInputPath
    *       The Path object which will be given to the mapper
@@ -366,7 +266,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
     setMapInputPath(mapInputPath);
     return thisAsTestDriver();
   }
-  
+
   /**
    * Handle inputKey and inputVal for backwards compatibility.
    */
