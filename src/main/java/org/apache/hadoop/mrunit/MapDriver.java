@@ -116,23 +116,28 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2, Map
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    preRunChecks(myMapper);
+    try {
+      preRunChecks(myMapper);
+      initDistributedCache();
+      final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
+          .createOutputCollectable(getConfiguration(),
+              getOutputCopyingOrInputFormatConfiguration());
+      final MockReporter reporter = new MockReporter(
+          MockReporter.ReporterType.Mapper, getCounters(),
+          getMapInputPath());
 
-    final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
-        .createOutputCollectable(getConfiguration(),
-            getOutputCopyingOrInputFormatConfiguration());
-    final MockReporter reporter = new MockReporter(
-        MockReporter.ReporterType.Mapper, getCounters(),
-        getMapInputPath());
+      ReflectionUtils.setConf(myMapper, new JobConf(getConfiguration()));
 
-    ReflectionUtils.setConf(myMapper, new JobConf(getConfiguration()));
+      for (Pair<K1, V1> kv : inputs) {
+        myMapper.map(kv.getFirst(), kv.getSecond(), outputCollectable, reporter);
+      }
 
-    for (Pair<K1, V1> kv : inputs) {
-      myMapper.map(kv.getFirst(), kv.getSecond(), outputCollectable, reporter);
+      myMapper.close();
+
+      return outputCollectable.getOutputs();
+    } finally {
+      cleanupDistributedCache();
     }
-
-    myMapper.close();
-    return outputCollectable.getOutputs();
   }
 
   @Override

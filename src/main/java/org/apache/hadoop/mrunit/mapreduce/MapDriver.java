@@ -119,13 +119,15 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    preRunChecks(myMapper);
-
     try {
+      preRunChecks(myMapper);
+      initDistributedCache();
       myMapper.run(wrapper.getMockContext());
       return wrapper.getOutputs();
     } catch (final InterruptedException ie) {
       throw new IOException(ie);
+    } finally {
+      cleanupDistributedCache();
     }
   }
 

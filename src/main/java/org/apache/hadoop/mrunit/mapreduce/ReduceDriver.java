@@ -126,13 +126,15 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    preRunChecks(myReducer);
-
     try {
+      preRunChecks(myReducer);
+      initDistributedCache();
       myReducer.run(wrapper.getMockContext());
       return wrapper.getOutputs();
     } catch (final InterruptedException ie) {
       throw new IOException(ie);
+    } finally {
+      cleanupDistributedCache();
     }
   }
 

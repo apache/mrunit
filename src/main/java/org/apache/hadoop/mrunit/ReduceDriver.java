@@ -119,24 +119,27 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    preRunChecks(myReducer);
+    try {
+      preRunChecks(myReducer);
+      initDistributedCache();
+      final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
+          .createOutputCollectable(getConfiguration(),
+              getOutputCopyingOrInputFormatConfiguration());
+      final MockReporter reporter = new MockReporter(
+          MockReporter.ReporterType.Reducer, getCounters(),
+          getMapInputPath());
 
-    final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
-        .createOutputCollectable(getConfiguration(),
-            getOutputCopyingOrInputFormatConfiguration());
-    final MockReporter reporter = new MockReporter(
-        MockReporter.ReporterType.Reducer, getCounters(),
-        getMapInputPath());
+      ReflectionUtils.setConf(myReducer, new JobConf(getConfiguration()));
 
-    ReflectionUtils.setConf(myReducer, new JobConf(getConfiguration()));
-
-    for (Pair<K1, List<V1>> kv : inputs) {
-      myReducer.reduce(kv.getFirst(), kv.getSecond().iterator(),
-          outputCollectable, reporter);
+      for (Pair<K1, List<V1>> kv : inputs) {
+        myReducer.reduce(kv.getFirst(), kv.getSecond().iterator(),
+            outputCollectable, reporter);
+      }
+      myReducer.close();
+      return outputCollectable.getOutputs();
+    } finally {
+      cleanupDistributedCache();  
     }
-    
-    myReducer.close();
-    return outputCollectable.getOutputs();
   }
 
   @Override

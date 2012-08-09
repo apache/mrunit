@@ -237,28 +237,29 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
   @Override
   public List<Pair<K3, V3>> run() throws IOException {
-    preRunChecks(myMapper,myReducer);
-
-    List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
-
-    // run map component
-    LOG.debug("Starting map phase with mapper: " + myMapper);
-    mapOutputs.addAll(MapDriver.newMapDriver(myMapper)
-        .withCounters(getCounters()).withConfiguration(configuration)
-        .withAll(inputList).withMapInputPath(getMapInputPath()).run());      
-
-    if (myCombiner != null) {
-      // User has specified a combiner. Run this and replace the mapper outputs
-      // with the result of the combiner.
-      LOG.debug("Starting combine phase with combiner: " + myCombiner);
-      mapOutputs = new ReducePhaseRunner<K2, V2>().runReduce(
-          shuffle(mapOutputs), myCombiner);
+    try {
+      preRunChecks(myMapper, myReducer);
+      initDistributedCache();
+      List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
+      // run map component
+      LOG.debug("Starting map phase with mapper: " + myMapper);
+      mapOutputs.addAll(MapDriver.newMapDriver(myMapper)
+          .withCounters(getCounters()).withConfiguration(configuration)
+          .withAll(inputList).withMapInputPath(getMapInputPath()).run());
+      if (myCombiner != null) {
+        // User has specified a combiner. Run this and replace the mapper outputs
+        // with the result of the combiner.
+        LOG.debug("Starting combine phase with combiner: " + myCombiner);
+        mapOutputs = new ReducePhaseRunner<K2, V2>().runReduce(
+            shuffle(mapOutputs), myCombiner);
+      }
+      // Run the reduce phase.
+      LOG.debug("Starting reduce phase with reducer: " + myReducer);
+      return new ReducePhaseRunner<K3, V3>().runReduce(shuffle(mapOutputs),
+          myReducer);
+    } finally {
+      cleanupDistributedCache();
     }
-
-    // Run the reduce phase.
-    LOG.debug("Starting reduce phase with reducer: " + myReducer);
-    return new ReducePhaseRunner<K3, V3>().runReduce(shuffle(mapOutputs),
-        myReducer);
   }
 
   @Override

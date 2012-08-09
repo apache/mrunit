@@ -20,7 +20,9 @@ package org.apache.hadoop.mrunit;
 import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,10 +32,13 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.io.Serialization;
+import org.apache.hadoop.mrunit.internal.util.DistCacheUtils;
 import org.apache.hadoop.mrunit.types.Pair;
 
 public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2, V2, T>> {
@@ -45,10 +50,9 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   private boolean strictCountersChecking = false;
   protected List<Pair<Enum<?>, Long>> expectedEnumCounters;
   protected List<Pair<Pair<String, String>, Long>> expectedStringCounters;
-
   protected Configuration configuration;
   private Configuration outputCopyingOrInputFormatConf;
-
+  private File tmpDistCacheDir;
   protected CounterWrapper counterWrapper;
 
   protected Serialization serialization;
@@ -213,6 +217,106 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
 
   /**
+   * Adds a file to be put on the distributed cache. 
+   * The path may be relative and will try to be resolved from
+   * the classpath of the test. 
+   *  
+   * @param path path to the file
+   */
+  public void addCacheFile(String path) {
+    addCacheFile(DistCacheUtils.findResource(path));
+  }
+
+  /**
+   * Adds a file to be put on the distributed cache.
+   * @param uri uri of the file
+   */
+  public void addCacheFile(URI uri) {
+    DistributedCache.addCacheFile(uri, getConfiguration());
+  }
+
+  /**
+   * Set the list of files to put on the distributed cache
+   * @param files list of URIs
+   */
+  public void setCacheFiles(URI[] files) {
+    DistributedCache.setCacheFiles(files, getConfiguration());
+  }
+
+  /**
+   * Adds an archive to be put on the distributed cache. 
+   * The path may be relative and will try to be resolved from
+   * the classpath of the test. 
+   *  
+   * @param path path to the archive
+   */
+  public void addCacheArchive(String path) {
+    addCacheArchive(DistCacheUtils.findResource(path));
+  }
+
+  /**
+   * Adds an archive to be put on the distributed cache.
+   * @param uri uri of the archive
+   */
+  public void addCacheArchive(URI uri) {
+    DistributedCache.addCacheArchive(uri, getConfiguration());
+  }
+
+  /**
+   * Set the list of archives to put on the distributed cache
+   * @param archives list of URIs
+   */
+  public void setCacheArchives(URI[] archives) {
+    DistributedCache.setCacheArchives(archives, getConfiguration());
+  }
+
+  /**
+   * Adds a file to be put on the distributed cache. 
+   * The path may be relative and will try to be resolved from
+   * the classpath of the test. 
+   *  
+   * @param file path to the file
+   * @return the driver
+   */
+  public T withCacheFile(String file) {
+    addCacheFile(file);
+    return thisAsTestDriver();
+  }
+
+  /**
+   * Adds a file to be put on the distributed cache.
+   * @param file uri of the file
+   * @return the driver
+   */
+  public T withCacheFile(URI file) {
+    addCacheFile(file);
+    return thisAsTestDriver();
+  }
+
+  /**
+   * Adds an archive to be put on the distributed cache. 
+   * The path may be relative and will try to be resolved from
+   * the classpath of the test. 
+   *  
+   * @param archive path to the archive
+   * @return the driver
+   */
+  public T withCacheArchive(String archive) {
+    addCacheArchive(archive);
+    return thisAsTestDriver();
+  }
+
+  /**
+   * Adds an archive to be put on the distributed cache.
+   * @param file uri of the archive
+   * @return the driver
+   */
+  public T withCacheArchive(URI archive) {
+    addCacheArchive(archive);
+    return thisAsTestDriver();
+  }
+
+  /**
    * Runs the test but returns the result set instead of validating it (ignores
    * any addOutput(), etc calls made before this). 
    * 
@@ -227,6 +331,86 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
       validate(counterWrapper);
     }
     return outputs;
+  }
+
+  /**
+   * Initialises the test distributed cache if required. This
+   * process is referred to as "localizing" by Hadoop, but since
+   * this is a unit test all files/archives are already local. 
+   * 
+   * Cached files are not moved but cached archives are extracted 
+   * into a temporary directory. 
+   * 
+   * @throws IOException
+   */
+  protected void initDistributedCache() throws IOException {
+
+    Configuration conf = getConfiguration();
+
+    if (isDistributedCacheInitialised(conf)) {
+      return;
+    }
+
+    List<Path> localArchives = new ArrayList<Path>();
+    List<Path> localFiles = new ArrayList<Path>();
+
+    if (DistributedCache.getCacheFiles(conf) != null) {
+      for (URI uri: DistributedCache.getCacheFiles(conf)) {
+        Path filePath = new Path(uri.getPath());
+        localFiles.add(filePath);
+      }
+      if (!localFiles.isEmpty()) {
+        DistributedCache.addLocalFiles(conf, 
+            DistCacheUtils.stringifyPathList(localFiles));
+      }
+    }
+    if (DistributedCache.getCacheArchives(conf) != null) {
+      for (URI uri: DistributedCache.getCacheArchives(conf)) {
+        Path archivePath = new Path(uri.getPath());
+        if (tmpDistCacheDir == null) {
+          tmpDistCacheDir = DistCacheUtils.createTempDirectory();
+        }
+        localArchives.add(DistCacheUtils.extractArchiveToTemp(
+            archivePath, tmpDistCacheDir));
+      }
+      if (!localArchives.isEmpty()) {
+        DistributedCache.addLocalArchives(conf, 
+            DistCacheUtils.stringifyPathList(localArchives));
+      }
+    }
+  }
+
+  /**
+   * Checks whether the distributed cache has been "localized", i.e.
+   * archives extracted and paths moved so that they can be accessed
+   * through {@link DistributedCache#getLocalCacheArchives()} and 
+   * {@link DistributedCache#getLocalCacheFiles()}
+   * 
+   * @param conf the configuration
+   * @return true if the cache is initialised
+   * @throws IOException
+   */
+  private boolean isDistributedCacheInitialised(Configuration conf) 
+      throws IOException {
+    return DistributedCache.getLocalCacheArchives(conf) != null ||
+        DistributedCache.getLocalCacheFiles(conf) != null;
+  }
+
+  /**
+   * Cleans up the distributed cache test by deleting the 
+   * temporary directory and any extracted cache archives
+   * contained within
+   * 
+   * @throws IOException 
+   *  if the local fs handle cannot be retrieved 
+   */
+  protected void cleanupDistributedCache() throws IOException {
+    if (tmpDistCacheDir != null) {
+      FileSystem fs = FileSystem.getLocal(getConfiguration());
+      LOG.debug("Deleting " + tmpDistCacheDir.toURI());
+      fs.delete(new Path(tmpDistCacheDir.toURI()), true);
+    }
+    tmpDistCacheDir = null;
   }
 
   /**
