@@ -444,8 +444,8 @@ public class TestMapReduceDriver {
 
     thrown
         .expectAssertionErrorMessage("2 Error(s): ("
-            + "Counter org.apache.hadoop.mrunit.mapreduce.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 20, "
-            + "Counter with category category and name name have value 1 instead of expected 20)");
+            + "Counter org.apache.hadoop.mrunit.mapreduce.TestMapDriver.MapperWithCounters.Counters.X has value 1 instead of expected 20, "
+            + "Counter with category category and name name has value 1 instead of expected 20)");
 
     driver
         .withMapper(

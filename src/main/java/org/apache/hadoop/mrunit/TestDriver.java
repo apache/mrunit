@@ -784,7 +784,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
       if (actualValue != expected.getSecond()) {
         final String msg = "Counter "
             + expected.getFirst().getDeclaringClass().getCanonicalName() + "."
-            + expected.getFirst().toString() + " have value " + actualValue
+            + expected.getFirst().toString() + " has value " + actualValue
             + " instead of expected " + expected.getSecond();
         logError(errors, msg);
   
@@ -801,7 +801,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   
       if (actualValue != expected.getSecond()) {
         final String msg = "Counter with category " + counter.getFirst()
-            + " and name " + counter.getSecond() + " have value " + actualValue
+            + " and name " + counter.getSecond() + " has value " + actualValue
             + " instead of expected " + expected.getSecond();
         logError(errors, msg);
   

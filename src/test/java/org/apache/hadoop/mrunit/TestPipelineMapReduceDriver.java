@@ -258,8 +258,8 @@ public class TestPipelineMapReduceDriver {
 
     thrown
         .expectAssertionErrorMessage("2 Error(s): ("
-            + "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 2 instead of expected 20, "
-            + "Counter with category category and name name have value 2 instead of expected 20)");
+            + "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X has value 2 instead of expected 20, "
+            + "Counter with category category and name name has value 2 instead of expected 20)");
 
     driver.withInput(new Text("hie"), new Text("Hi"))
         .withOutput(new Text("hie"), new Text("Hi"))

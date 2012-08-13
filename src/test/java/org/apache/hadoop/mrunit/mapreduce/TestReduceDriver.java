@@ -386,8 +386,8 @@ public class TestReduceDriver {
 
     thrown
         .expectAssertionErrorMessage("2 Error(s): ("
-            + "Counter org.apache.hadoop.mrunit.mapreduce.TestReduceDriver.ReducerWithCounters.Counters.SUM have value 1 instead of expected 4, "
-            + "Counter with category category and name sum have value 1 instead of expected 4)");
+            + "Counter org.apache.hadoop.mrunit.mapreduce.TestReduceDriver.ReducerWithCounters.Counters.SUM has value 1 instead of expected 4, "
+            + "Counter with category category and name sum has value 1 instead of expected 4)");
 
     driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
         .withInputKey(new Text("hie")).withInputValue(new Text(""))

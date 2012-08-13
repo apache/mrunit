@@ -376,8 +376,8 @@ public class TestMapDriver {
     MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
 
     thrown.expectAssertionErrorMessage("2 Error(s): (" +
-      "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X have value 1 instead of expected 4, " +
-      "Counter with category category and name name have value 1 instead of expected 4)");
+      "Counter org.apache.hadoop.mrunit.TestMapDriver.MapperWithCounters.Counters.X has value 1 instead of expected 4, " +
+      "Counter with category category and name name has value 1 instead of expected 4)");
 
     driver.withMapper(new MapperWithCounters<Text, Text, Text, Text>())
         .withInput(new Text("hie"), new Text("Hi"))
