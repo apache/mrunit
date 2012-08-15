@@ -317,4 +317,30 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
         orderComparator.getClass(), getConfiguration());
   }
 
+  /**
+   * Identical to {@link #setKeyGroupingComparator(RawComparator)}, but with a
+   * fluent programming style
+   * 
+   * @param groupingComparator
+   *          Comparator to use in the shuffle stage for key grouping
+   * @return this
+   */
+  public T withKeyGroupingComparator(final RawComparator<K2> groupingComparator) {
+    setKeyGroupingComparator(groupingComparator);
+    return thisAsMapReduceDriver();
+  }
+
+  /**
+   * Identical to {@link #setKeyOrderComparator(RawComparator)}, but with a
+   * fluent programming style
+   * 
+   * @param orderComparator
+   *          Comparator to use in the shuffle stage for key value ordering
+   * @return this
+   */
+  public T withKeyOrderComparator(final RawComparator<K2> orderComparator) {
+    setKeyOrderComparator(orderComparator);
+    return thisAsMapReduceDriver();
+  }
+
 }

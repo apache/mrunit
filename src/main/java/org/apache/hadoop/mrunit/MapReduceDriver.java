@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.Mapper;
@@ -271,34 +270,6 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
   @Override
   public String toString() {
     return "MapReduceDriver (" + myMapper + ", " + myReducer + ")";
-  }
-
-  /**
-   * Identical to {@link #setKeyGroupingComparator(RawComparator)}, but with a
-   * fluent programming style
-   * 
-   * @param groupingComparator
-   *          Comparator to use in the shuffle stage for key grouping
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withKeyGroupingComparator(
-      final RawComparator<K2> groupingComparator) {
-    setKeyGroupingComparator(groupingComparator);
-    return this;
-  }
-
-  /**
-   * Identical to {@link #setKeyOrderComparator(RawComparator)}, but with a
-   * fluent programming style
-   * 
-   * @param orderComparator
-   *          Comparator to use in the shuffle stage for key value ordering
-   * @return this
-   */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withKeyOrderComparator(
-      final RawComparator<K2> orderComparator) {
-    setKeyOrderComparator(orderComparator);
-    return this;
   }
 
   /**
