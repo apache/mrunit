@@ -50,9 +50,9 @@
   </ciManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/mrunit/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mrunit/trunk/</developerConnection>
-    <url>http://svn.apache.org/viewvc/mrunit/trunk/</url>
+    <connection>scm:git:http://git-wip-us.apache.org/repos/asf/mrunit.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/mrunit.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=mrunit.git;a=summary</url>
   </scm>
 
   <mailingLists>
@@ -176,6 +176,7 @@
                 <exclude>CHANGES.txt</exclude>
                 <exclude>BIN-NOTICE.txt</exclude>
                 <exclude>.idea/</exclude>
+                <exclude>.git/</exclude>
               </excludes>
             </configuration>
           </execution>
