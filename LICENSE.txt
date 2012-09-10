@@ -204,7 +204,7 @@
 
 ==========================================================================
 The Apache License, Version 2.0 applies to the following libraries:
-commons-logging, log4j
+commons-logging
 
 ==========================================================================
 The following license applies to the junit library
