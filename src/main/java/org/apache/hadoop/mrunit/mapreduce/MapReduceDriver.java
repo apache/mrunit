@@ -227,9 +227,9 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
             .newReduceDriver(reducer).withCounters(getCounters())
             .withConfiguration(configuration).withAll(inputs);
 
-        if (getOutputCopyingOrInputFormatConfiguration() != null) {
+        if (getOutputSerializationConfiguration() != null) {
           reduceDriver
-              .withOutputCopyingOrInputFormatConfiguration(getOutputCopyingOrInputFormatConfiguration());
+              .withOutputSerializationConfiguration(getOutputSerializationConfiguration());
         }
 
         if (outputFormatClass != null) {

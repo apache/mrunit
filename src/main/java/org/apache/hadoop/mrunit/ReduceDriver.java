@@ -133,7 +133,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
       initDistributedCache();
       final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
           .createOutputCollectable(getConfiguration(),
-              getOutputCopyingOrInputFormatConfiguration());
+              getOutputSerializationConfiguration());
       final MockReporter reporter = new MockReporter(
           MockReporter.ReporterType.Reducer, getCounters());
 

@@ -24,5 +24,5 @@ public interface ContextDriver {
 
   public Counters getCounters();
   public Configuration getConfiguration();
-  public Configuration getOutputCopyingOrInputFormatConfiguration();
+  public Configuration getOutputSerializationConfiguration();
 }

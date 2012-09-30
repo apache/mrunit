@@ -51,7 +51,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   protected List<Pair<Enum<?>, Long>> expectedEnumCounters;
   protected List<Pair<Pair<String, String>, Long>> expectedStringCounters;
   protected Configuration configuration;
-  private Configuration outputCopyingOrInputFormatConf;
+  private Configuration outputSerializationConfiguration;
   private File tmpDistCacheDir;
   protected CounterWrapper counterWrapper;
 
@@ -275,18 +275,45 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     return thisAsTestDriver();
   }
 
-  public Configuration getOutputCopyingOrInputFormatConfiguration() {
-    return outputCopyingOrInputFormatConf;
+  /**
+   * Get the {@link Configuration} to use when copying output for use with run*
+   * methods or for the InputFormat when reading output back in when setting a
+   * real OutputFormat.
+   * 
+   * @return outputSerializationConfiguration, null when no
+   *         outputSerializationConfiguration is set
+   */
+  public Configuration getOutputSerializationConfiguration() {
+    return outputSerializationConfiguration;
   }
 
-  public void setOutputCopyingOrInputFormatConfiguration(
+  /**
+   * Set the {@link Configuration} to use when copying output for use with run*
+   * methods or for the InputFormat when reading output back in when setting a
+   * real OutputFormat. When this configuration is not set, MRUnit will use the
+   * configuration set with {@link #withConfiguration(Configuration)} or
+   * {@link #setConfiguration(Configuration)}
+   * 
+   * @param configuration
+   */
+  public void setOutputSerializationConfiguration(
       final Configuration configuration) {
-    this.outputCopyingOrInputFormatConf = returnNonNull(configuration);
+    this.outputSerializationConfiguration = returnNonNull(configuration);
   }
 
-  public T withOutputCopyingOrInputFormatConfiguration(
+  /**
+   * Set the {@link Configuration} to use when copying output for use with run*
+   * methods or for the InputFormat when reading output back in when setting a
+   * real OutputFormat. When this configuration is not set, MRUnit will use the
+   * configuration set with {@link #withConfiguration(Configuration)} or
+   * {@link #setConfiguration(Configuration)}
+   * 
+   * @param configuration
+   * @return this for fluent style
+   */
+  public T withOutputSerializationConfiguration(
       Configuration configuration) {
-    setOutputCopyingOrInputFormatConfiguration(configuration);
+    setOutputSerializationConfiguration(configuration);
     return thisAsTestDriver();
   }
 

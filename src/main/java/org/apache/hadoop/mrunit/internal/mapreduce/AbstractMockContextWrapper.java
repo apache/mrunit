@@ -79,7 +79,7 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
           try {
             if(outputCollectable == null) {
               outputCollectable = mockOutputCreator.createOutputCollectable(contextDriver.getConfiguration(), 
-                  contextDriver.getOutputCopyingOrInputFormatConfiguration());
+                  contextDriver.getOutputSerializationConfiguration());
             }
             outputCollectable.collect((KEYOUT)args[0], (VALUEOUT)args[1]);
           } catch (IOException e) {
