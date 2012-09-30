@@ -106,6 +106,15 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2, Map
     return myMapper;
   }
 
+  /**
+   * Configure {@link Mapper} to output with a real {@link OutputFormat}. Set
+   * {@link InputFormat} to read output back in for use with {@link #run()} and
+   * {@link #runTest()}
+   * 
+   * @param outputFormatClass
+   * @param inputFormatClass
+   * @return this for fluent style
+   */
   @SuppressWarnings("rawtypes")
   public MapDriver<K1, V1, K2, V2> withOutputFormat(
       final Class<? extends OutputFormat> outputFormatClass,
