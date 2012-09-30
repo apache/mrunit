@@ -188,8 +188,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
 
   /**
    * Configure {@link Reducer} to output with a real {@link OutputFormat}. Set
-   * {@link InputFormat} to read output back in for use with {@link #run()} and
-   * {@link #runTest()}
+   * {@link InputFormat} to read output back in for use with run* methods
    * 
    * @param outputFormatClass
    * @param inputFormatClass

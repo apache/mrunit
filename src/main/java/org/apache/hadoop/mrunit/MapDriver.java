@@ -108,8 +108,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2, Map
 
   /**
    * Configure {@link Mapper} to output with a real {@link OutputFormat}. Set
-   * {@link InputFormat} to read output back in for use with {@link #run()} and
-   * {@link #runTest()}
+   * {@link InputFormat} to read output back in for use with run* methods
    * 
    * @param outputFormatClass
    * @param inputFormatClass
