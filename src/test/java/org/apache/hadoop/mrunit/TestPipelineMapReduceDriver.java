@@ -110,6 +110,28 @@ public class TestPipelineMapReduceDriver {
   }
 
   @Test
+  public void testSumAtEndWithInputAddAll() throws IOException {
+    
+    final List<Pair<Text, LongWritable>> inputs = new ArrayList<Pair<Text, LongWritable>>();
+    inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_IN_A)));
+    inputs.add(new Pair<Text, LongWritable>(new Text("bar"), new LongWritable(BAR_IN)));
+    inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_IN_B)));
+    
+    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver 
+      = PipelineMapReduceDriver.newPipelineMapReduceDriver();
+    driver
+        .withMapReduce(new IdentityMapper<Text, LongWritable>(),
+            new IdentityReducer<Text, LongWritable>())
+        .withMapReduce(new IdentityMapper<Text, LongWritable>(),
+            new IdentityReducer<Text, LongWritable>())
+        .withMapReduce(new IdentityMapper<Text, LongWritable>(),
+            new LongSumReducer<Text>())
+        .withAll(inputs)
+        .withOutput(new Text("bar"), new LongWritable(BAR_OUT))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+  }
+
+  @Test
   public void testSumInMiddle() throws IOException {
     final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver

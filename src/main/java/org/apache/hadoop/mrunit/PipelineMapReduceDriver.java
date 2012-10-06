@@ -169,6 +169,18 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   }
 
   /**
+   * Adds list of inputs to send to the mapper
+   * 
+   * @param inputs
+   *          list of (K, V) pairs
+   */
+  public void addAll(final List<Pair<K1, V1>> inputs) {
+    for (Pair<K1, V1> input : inputs) {
+      addInput(input);
+    }
+  }
+
+  /**
    * Identical to addInput() but returns self for fluent programming style
    * 
    * @param key
@@ -232,6 +244,18 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   public PipelineMapReduceDriver<K1, V1, K2, V2> withInputFromString(
       final String input) {
     addInputFromString(input);
+    return this;
+  }
+
+  /**
+   * Identical to addAll() but returns self for fluent programming style
+   * 
+   * @param inputRecords input key/value pairs
+   * @return this
+   */
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withAll(
+      final List<Pair<K1, V1>> inputRecords) {
+    addAll(inputRecords);
     return this;
   }
 
