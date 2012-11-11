@@ -461,7 +461,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
         localFiles.add(filePath);
       }
       if (!localFiles.isEmpty()) {
-        DistributedCache.addLocalFiles(conf, 
+        DistCacheUtils.addLocalFiles(conf, 
             DistCacheUtils.stringifyPathList(localFiles));
       }
     }
@@ -475,7 +475,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
             archivePath, tmpDistCacheDir));
       }
       if (!localArchives.isEmpty()) {
-        DistributedCache.addLocalArchives(conf, 
+        DistCacheUtils.addLocalArchives(conf, 
             DistCacheUtils.stringifyPathList(localArchives));
       }
     }

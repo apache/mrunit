@@ -27,12 +27,15 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.RunJar;
 
 public class DistCacheUtils {
 
+  private static final String CACHE_LOCALARCHIVES = "mapred.cache.localArchives";
+  private static final String CACHE_LOCALFILES = "mapred.cache.localFiles";
   private static final Log LOG = LogFactory.getLog(DistCacheUtils.class);
 
   private DistCacheUtils() {
@@ -127,6 +130,18 @@ public class DistCacheUtils {
   private static boolean isTarFile(String filename) {
     return (filename.endsWith(".tgz") || filename.endsWith(".tar.gz") ||
            filename.endsWith(".tar"));
+  }
+
+  public static void addLocalFiles(Configuration conf, String str) {
+    String files = conf.get(CACHE_LOCALFILES);
+    conf.set(CACHE_LOCALFILES, files == null ? str
+        : files + "," + str);
+  }
+
+  public static void addLocalArchives(Configuration conf, String str) {
+    String files = conf.get(CACHE_LOCALARCHIVES);
+    conf.set(CACHE_LOCALARCHIVES, files == null ? str
+        : files + "," + str);
   }
 
 }
