@@ -18,7 +18,6 @@
 package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +38,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.io.Serialization;
 import org.apache.hadoop.mrunit.internal.util.DistCacheUtils;
+import org.apache.hadoop.mrunit.internal.util.Errors;
+import org.apache.hadoop.mrunit.internal.util.StringUtils;
 import org.apache.hadoop.mrunit.types.Pair;
 
 public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2, V2, T>> {
@@ -558,12 +559,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * @return
    */
   public static Pair<Text, Text> parseTabbedPair(final String tabSeparatedPair) {
-    final int split = tabSeparatedPair.indexOf('\t');
-    if (split == -1) {
-      throw new IllegalArgumentException("String pair missing a tab separator");
-    }
-    return new Pair<Text, Text>(new Text(tabSeparatedPair.substring(0, split)),
-        new Text(tabSeparatedPair.substring(split + 1)));
+    return StringUtils.parseTabbedPair(tabSeparatedPair);
   }
 
   /**
@@ -574,25 +570,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    */
   protected static List<Text> parseCommaDelimitedList(
       final String commaDelimList) {
-    final ArrayList<Text> outList = new ArrayList<Text>();
-
-    final int len = commaDelimList.length();
-    int curPos = 0;
-    int curComma = commaDelimList.indexOf(',');
-    if (curComma == -1) {
-      curComma = len;
-    }
-
-    while (curPos < len) {
-      outList.add(new Text(commaDelimList.substring(curPos, curComma).trim()));
-      curPos = curComma + 1;
-      curComma = commaDelimList.indexOf(',', curPos);
-      if (curComma == -1) {
-        curComma = len;
-      }
-    }
-
-    return outList;
+    return StringUtils.parseCommaDelimitedList(commaDelimList);
   }
 
   protected <E> E copy(E object) {
@@ -615,12 +593,11 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   protected void validate(final List<Pair<K2, V2>> outputs,
       final boolean orderMatters) {
 
-    final List<String> errors = new ArrayList<String>();
+    final Errors errors = new Errors(LOG);
 
     // were we supposed to get output in the first place?
     if (expectedOutputs.isEmpty() && !outputs.isEmpty()) {
-      logError(errors,
-          String.format("Expected no outputs; got %d outputs.", outputs.size()));
+      errors.record("Expected no outputs; got %d outputs.", outputs.size());
     }
 
     final Map<Pair<K2, V2>, List<Integer>> expectedPositions = buildPositionMap(expectedOutputs);
@@ -648,21 +625,18 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
                   LOG.debug(String.format("Matched expected output %s at "
                       + "position %d", output, expectedPosition));
                 } else {
-                  logError(errors, String.format(
-                      "Matched expected output %s but at "
-                          + "incorrect position %d (expected position %d)",
-                      output, actualPosition, expectedPosition));
+                  errors.record("Matched expected output %s but at "
+                      + "incorrect position %d (expected position %d)", output,
+                      actualPosition, expectedPosition);
                 }
               } else if (expectedPositionsCount > i) {
                 // not ok, value wasn't seen enough times
-                logError(errors, String.format(
-                    "Missing expected output %s at position %d.", output,
-                    expectedPositionList.get(i)));
+                errors.record("Missing expected output %s at position %d.",
+                    output, expectedPositionList.get(i));
               } else {
                 // not ok, value seen too many times
-                logError(errors, String.format(
-                    "Received unexpected output %s at position %d.", output,
-                    actualPositionList.get(i)));
+                errors.record("Received unexpected output %s at position %d.",
+                    output, actualPositionList.get(i));
               }
               i++;
             }
@@ -676,14 +650,12 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
           } else if (expectedPositionsCount > actualPositionsCount) {
             // not ok, value wasn't seen enough times
             for (int i = 0; i < expectedPositionsCount - actualPositionsCount; i++) {
-              logError(errors,
-                  String.format("Missing expected output %s", output));
+              errors.record("Missing expected output %s", output);
             }
           } else {
             // not ok, value seen too many times
             for (int i = 0; i < actualPositionsCount - expectedPositionsCount; i++) {
-              logError(errors,
-                  String.format("Received unexpected output %s", output));
+              errors.record("Received unexpected output %s", output);
             }
           }
         }
@@ -700,19 +672,13 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
       checkTypesAndLogError(outputs, output, actualPositions.get(output),
           orderMatters, errors, "Received unexpected output");
     }
-
-    if (!errors.isEmpty()) {
-      final StringBuilder buffer = new StringBuilder();
-      buffer.append(errors.size()).append(" Error(s): ");
-      formatValueList(errors, buffer);
-      fail(buffer.toString());
-    }
-
+    
+    errors.assertNone();
   }
 
   private void checkTypesAndLogError(final List<Pair<K2, V2>> outputs,
       final Pair<K2, V2> output, final List<Integer> positions,
-      final boolean orderMatters, final List<String> errors,
+      final boolean orderMatters, final Errors errors,
       final String errorString) {
     for (final int pos : positions) {
       String msg = null;
@@ -741,7 +707,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
           msg = String.format("%s %s", errorString, output);
         }
       }
-      logError(errors, msg);
+      errors.record(msg);
     }
   }
 
@@ -762,10 +728,6 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     return valuePositions;
   }
 
-  private void logError(final List<String> errors, final String msg) {
-    LOG.error(msg);
-    errors.add(msg);
-  }
   
   /**
    * Check counters.
@@ -800,8 +762,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    */
   private void validateExpectedAgainstActual(
       final CounterWrapper counterWrapper) {
-    boolean success = true;
-    final List<String> errors = new ArrayList<String>();
+    final Errors errors = new Errors(LOG);
   
     // Firstly check enumeration based counters
     for (final Pair<Enum<?>, Long> expected : expectedEnumCounters) {
@@ -809,13 +770,9 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
           .getFirst());
   
       if (actualValue != expected.getSecond()) {
-        final String msg = "Counter "
-            + expected.getFirst().getDeclaringClass().getCanonicalName() + "."
-            + expected.getFirst().toString() + " has value " + actualValue
-            + " instead of expected " + expected.getSecond();
-        logError(errors, msg);
-  
-        success = false;
+        errors.record("Counter %s.%s has value %d instead of expected %d",
+            expected.getFirst().getDeclaringClass().getCanonicalName(),
+            expected.getFirst().toString(), actualValue, expected.getSecond());
       }
     }
   
@@ -827,21 +784,15 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
           counter.getFirst(), counter.getSecond());
   
       if (actualValue != expected.getSecond()) {
-        final String msg = "Counter with category " + counter.getFirst()
-            + " and name " + counter.getSecond() + " has value " + actualValue
-            + " instead of expected " + expected.getSecond();
-        logError(errors, msg);
-  
-        success = false;
+        errors
+            .record(
+                "Counter with category %s and name %s has value %d instead of expected %d",
+                counter.getFirst(), counter.getSecond(), actualValue,
+                expected.getSecond());
       }
     }
-  
-    if (!success) {
-      final StringBuilder buffer = new StringBuilder();
-      buffer.append(errors.size()).append(" Error(s): ");
-      formatValueList(errors, buffer);
-      fail(buffer.toString());
-    }
+    
+    errors.assertNone();
   }
 
   /**
@@ -851,40 +802,24 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    */
   private void validateActualAgainstExpected(final CounterWrapper counterWrapper) {
     if (strictCountersChecking) {
-      final List<String> errors = new ArrayList<String>();
+      final Errors errors = new Errors(LOG);
       Collection<Pair<String, String>> unmatchedCounters = counterWrapper.findCounterValues();
       Collection<Pair<String, String>> findExpectedCounterValues = findExpectedCounterValues();
       unmatchedCounters.removeAll(findExpectedCounterValues);
       if(!unmatchedCounters.isEmpty()) {
         for (Pair<String, String> unmatcherCounter : unmatchedCounters) {
-          final String msg = "Actual counter (\"" + unmatcherCounter.getFirst()
-              + "\",\"" + unmatcherCounter.getSecond()
-              + "\") was not found in expected counters";
-          logError(errors, msg);
+          errors
+              .record(
+                  "Actual counter (\"%s\",\"%s\") was not found in expected counters",
+                  unmatcherCounter.getFirst(), unmatcherCounter.getSecond());
         }
       }
-      if (!errors.isEmpty()) {
-        final StringBuilder buffer = new StringBuilder();
-        buffer.append(errors.size()).append(" Error(s): ");
-        formatValueList(errors, buffer);
-        fail(buffer.toString());
-      }
+      errors.assertNone();
     }
   }
 
   protected static void formatValueList(final List<?> values,
       final StringBuilder sb) {
-    sb.append("(");
-
-    boolean first = true;
-    for (final Object val : values) {
-      if (!first) {
-        sb.append(", ");
-      }
-      first = false;
-      sb.append(val);
-    }
-
-    sb.append(")");
+    StringUtils.formatValueList(values, sb);
   }
 }
