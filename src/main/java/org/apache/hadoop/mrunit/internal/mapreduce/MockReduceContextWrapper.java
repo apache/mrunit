@@ -27,6 +27,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.TaskAttemptID;
+import org.apache.hadoop.mapreduce.TaskID;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -97,6 +99,13 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
         @Override
         public Iterable<VALUEIN> answer(final InvocationOnMock invocation) {
           return makeOneUseIterator(currentKeyValue.getSecond().iterator());
+        }
+      });
+      when(context.getTaskAttemptID()).thenAnswer(new Answer<TaskAttemptID>(){
+        @Override
+        public TaskAttemptID answer(InvocationOnMock invocation)
+            throws Throwable {
+          return new TaskAttemptID("", 0, false, 0, 0);
         }
       });
     } catch (IOException e) {

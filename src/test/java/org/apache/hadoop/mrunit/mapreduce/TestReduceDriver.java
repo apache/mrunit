@@ -486,4 +486,21 @@ public class TestReduceDriver {
         new LongWritable(2));
     driver.runTest();
   }
+
+  static class TaskAttemptReducer extends Reducer<Text,NullWritable,Text,NullWritable> {
+    @Override
+    protected void reduce(Text key, Iterable<NullWritable> values, Context context) 
+        throws IOException,InterruptedException {
+      context.write(new Text(context.getTaskAttemptID().toString()), NullWritable.get());
+    }
+  }
+
+  @Test
+  public void testWithTaskAttemptUse() throws IOException {
+    final ReduceDriver<Text,NullWritable,Text,NullWritable> driver 
+      = ReduceDriver.newReduceDriver(new TaskAttemptReducer());
+    driver.withInput(new Text("anything"), Arrays.asList(NullWritable.get())).withOutput(
+        new Text("attempt__0000_r_000000_0"), NullWritable.get()).runTest();
+  }
+
 }

@@ -27,6 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.TaskAttemptID;
+import org.apache.hadoop.mapreduce.TaskID;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -97,6 +99,13 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
         @Override
         public VALUEIN answer(final InvocationOnMock invocation) {
           return currentKeyValue.getSecond();
+        }
+      });
+      when(context.getTaskAttemptID()).thenAnswer(new Answer<TaskAttemptID>(){
+        @Override
+        public TaskAttemptID answer(InvocationOnMock invocation)
+            throws Throwable {
+          return new TaskAttemptID("", 0, true, 0, 0);
         }
       });
     } catch (IOException e) {

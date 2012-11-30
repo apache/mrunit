@@ -427,4 +427,21 @@ public class TestMapDriver {
     driver.withOutput(new Text("a"), new Text("1"));
     driver.runTest();
   }
+  
+  static class TaskAttemptMapper extends Mapper<Text,NullWritable,Text,NullWritable> {
+    @Override
+    protected void map(Text key, NullWritable value, Context context) 
+        throws IOException,InterruptedException {
+      context.write(new Text(context.getTaskAttemptID().toString()), NullWritable.get());
+    }
+  }
+
+  @Test
+  public void testWithTaskAttemptUse() throws IOException {
+    final MapDriver<Text,NullWritable,Text,NullWritable> driver 
+      = MapDriver.newMapDriver(new TaskAttemptMapper());
+    driver.withInput(new Text("anything"), NullWritable.get()).withOutput(
+        new Text("attempt__0000_m_000000_0"), NullWritable.get()).runTest();
+  }
+  
 }
