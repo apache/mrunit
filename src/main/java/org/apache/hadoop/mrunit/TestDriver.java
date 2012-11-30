@@ -595,9 +595,13 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
     final Errors errors = new Errors(LOG);
 
-    // were we supposed to get output in the first place?
-    if (expectedOutputs.isEmpty() && !outputs.isEmpty()) {
-      errors.record("Expected no outputs; got %d outputs.", outputs.size());
+    if (!outputs.isEmpty()) {
+      // were we supposed to get output in the first place?
+      if (expectedOutputs.isEmpty()) {
+        errors.record("Expected no outputs; got %d outputs.", outputs.size());
+      }
+      // check that user's key and value writables implement equals, hashCode, toString
+      checkOverrides(outputs.get(0));
     }
 
     final Map<Pair<K2, V2>, List<Integer>> expectedPositions = buildPositionMap(expectedOutputs);
@@ -674,6 +678,33 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     }
     
     errors.assertNone();
+  }
+
+  private void checkOverrides(final Pair<K2,V2> outputPair) {
+    checkOverride(outputPair.getFirst().getClass());
+    checkOverride(outputPair.getSecond().getClass());
+  }
+
+  private void checkOverride(final Class<?> clazz) {
+    try {
+      if (clazz.getMethod("equals", Object.class).getDeclaringClass() != clazz) {
+        LOG.warn(clazz.getCanonicalName() + ".equals(Object) " +
+            "is not being overridden - tests may fail!");
+      }
+      if (clazz.getMethod("hashCode").getDeclaringClass() != clazz) {
+        LOG.warn(clazz.getCanonicalName() + ".hashCode() " +
+            "is not being overridden - tests may fail!");
+      }
+      if (clazz.getMethod("toString").getDeclaringClass() != clazz) {
+        LOG.warn(clazz.getCanonicalName() + ".toString() " +
+            "is not being overridden - test failures may be difficult to diagnose.");
+        LOG.warn("Consider executing test using run() to access outputs");
+      }
+    } catch (SecurityException e) {
+      LOG.error(e);
+    } catch (NoSuchMethodException e) {
+      LOG.error(e);
+    }
   }
 
   private void checkTypesAndLogError(final List<Pair<K2, V2>> outputs,
