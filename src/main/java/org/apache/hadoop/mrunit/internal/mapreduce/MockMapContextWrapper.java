@@ -105,7 +105,7 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
         @Override
         public TaskAttemptID answer(InvocationOnMock invocation)
             throws Throwable {
-          return new TaskAttemptID("", 0, true, 0, 0);
+          return TaskAttemptID.forName("attempt__0000_m_000000_0");
         }
       });
     } catch (IOException e) {
