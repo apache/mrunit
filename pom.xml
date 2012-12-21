@@ -177,6 +177,7 @@
                 <exclude>BIN-NOTICE.txt</exclude>
                 <exclude>.idea/</exclude>
                 <exclude>.git/</exclude>
+                <exclude>.gitignore</exclude>
               </excludes>
             </configuration>
           </execution>
