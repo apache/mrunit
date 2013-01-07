@@ -94,43 +94,6 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
           return null;
         }
       }).when(context).write(any(), any());
-      
-      
-      when(context.getSymlink()).thenAnswer(new Answer<Boolean>() {
-        @Override
-        @SuppressWarnings("deprecation")
-        public Boolean answer(InvocationOnMock invocation) throws Throwable {
-          return DistributedCache.getSymlink(configuration);
-        }      
-      });
-      when(context.getCacheArchives()).thenAnswer(new Answer<URI[]>() {
-        @Override
-        @SuppressWarnings("deprecation")
-        public URI[] answer(InvocationOnMock invocation) throws Throwable {
-          return DistributedCache.getCacheArchives(configuration);
-        }      
-      });
-      when(context.getCacheFiles()).thenAnswer(new Answer<URI[]>() {
-        @Override
-        @SuppressWarnings("deprecation")
-        public URI[] answer(InvocationOnMock invocation) throws Throwable {
-          return DistributedCache.getCacheFiles(configuration);
-        }      
-      });
-      when(context.getLocalCacheArchives()).thenAnswer(new Answer<Path[]>() {
-        @Override
-        @SuppressWarnings("deprecation")
-        public Path[] answer(InvocationOnMock invocation) throws Throwable {
-          return DistributedCache.getLocalCacheArchives(configuration);
-        }      
-      });
-      when(context.getLocalCacheFiles()).thenAnswer(new Answer<Path[]>() {
-        @Override
-        @SuppressWarnings("deprecation")
-        public Path[] answer(InvocationOnMock invocation) throws Throwable {
-          return DistributedCache.getLocalCacheFiles(configuration);
-        }      
-      });
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (InterruptedException e) {
