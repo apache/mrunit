@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.TaskID;
@@ -56,10 +57,11 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
   protected Pair<KEYIN, List<VALUEIN>> currentKeyValue;
   
   public MockReduceContextWrapper(
+      final Configuration configuration,
       final List<Pair<KEYIN, List<VALUEIN>>> inputs, 
       final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator,
       final ReduceDriver<KEYIN, VALUEIN, KEYOUT, VALUEOUT> driver) {
-    super(mockOutputCreator);
+    super(configuration, mockOutputCreator);
     this.inputs = inputs;
     this.driver = driver;
     context = create();

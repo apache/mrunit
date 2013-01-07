@@ -51,19 +51,28 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   private boolean strictCountersChecking = false;
   protected List<Pair<Enum<?>, Long>> expectedEnumCounters;
   protected List<Pair<Pair<String, String>, Long>> expectedStringCounters;
-  protected Configuration configuration;
+  /**
+   * Configuration object, do not use directly, always use the 
+   * the getter as it lazily creates the object in the case
+   * the setConfiguration() method will be used by the user.
+   */
+  private Configuration configuration;
+  /**
+   * Serialization object, do not use directly, always use the 
+   * the getter as it lazily creates the object in the case
+   * the setConfiguration() method will be used by the user.
+   */
+  private Serialization serialization;
+  
   private Configuration outputSerializationConfiguration;
   private File tmpDistCacheDir;
   protected CounterWrapper counterWrapper;
 
-  protected Serialization serialization;
 
   public TestDriver() {
     expectedOutputs = new ArrayList<Pair<K2, V2>>();
     expectedEnumCounters = new ArrayList<Pair<Enum<?>, Long>>();
     expectedStringCounters = new ArrayList<Pair<Pair<String, String>, Long>>();
-    configuration = new Configuration();
-    serialization = new Serialization(configuration);
   }
 
   /**
@@ -252,14 +261,23 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    *         reducer associated with the driver
    */
   public Configuration getConfiguration() {
+    if(configuration == null) {
+      configuration = new Configuration();
+    }
     return configuration;
   }
 
   /**
    * @param configuration
    *          The configuration object that will given to the mapper and/or
-   *          reducer associated with the driver
+   *          reducer associated with the driver. This method should only be
+   *          called directly after the constructor as the internal state
+   *          of the driver depends on the configuration object
+   * @deprecated
+   *          Use getConfiguration() to set configuration items as opposed to
+   *          overriding the entire configuration object as it's used internally.
    */
+  @Deprecated
   public void setConfiguration(final Configuration configuration) {
     this.configuration = returnNonNull(configuration);
   }
@@ -267,9 +285,15 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   /**
    * @param configuration
    *          The configuration object that will given to the mapper associated
-   *          with the driver
+   *          with the driver. This method should only be called directly after 
+   *          the constructor as the internal state of the driver depends on the 
+   *          configuration object
+   * @deprecated
+   *          Use getConfiguration() to set configuration items as opposed to
+   *          overriding the entire configuration object as it's used internally.
    * @return this object for fluent coding
    */
+  @Deprecated
   public T withConfiguration(
       final Configuration configuration) {
     setConfiguration(configuration);
@@ -435,6 +459,13 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     return outputs;
   }
 
+  private Serialization getSerialization() {
+    if(serialization == null) {
+      serialization = new Serialization(getConfiguration());
+    }
+    return serialization;
+  }
+  
   /**
    * Initialises the test distributed cache if required. This
    * process is referred to as "localizing" by Hadoop, but since
@@ -574,7 +605,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
 
   protected <E> E copy(E object) {
-    return serialization.copyWithConf(object, configuration);
+    return getSerialization().copyWithConf(object, getConfiguration());
   }
 
   protected <S, E> Pair<S, E> copyPair(S first, E second) {

@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
@@ -55,10 +56,12 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
   
   protected Pair<KEYIN, VALUEIN> currentKeyValue;
   
-  public MockMapContextWrapper(final List<Pair<KEYIN, VALUEIN>> inputs,
+  public MockMapContextWrapper(
+      final Configuration configuration,
+      final List<Pair<KEYIN, VALUEIN>> inputs,
       final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator,
       final MapDriver<KEYIN, VALUEIN, KEYOUT, VALUEOUT> driver) {
-    super(mockOutputCreator);
+    super(configuration, mockOutputCreator);
     this.inputs = inputs;
     this.driver = driver;
     context = create();

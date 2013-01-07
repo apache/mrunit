@@ -49,9 +49,12 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
 
   private Mapper<K1, V1, K2, V2> myMapper;
   private Counters counters;
-
-  private final MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(
-      inputs, mockOutputCreator,  this);
+  /**
+   * Context creator, do not use directly, always use the 
+   * the getter as it lazily creates the object in the case
+   * the setConfiguration() method will be used by the user.
+   */
+  private MockMapContextWrapper<K1, V1, K2, V2> wrapper;
 
 
   public MapDriver(final Mapper<K1, V1, K2, V2> m) {
@@ -130,6 +133,7 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
     try {
       preRunChecks(myMapper);
       initDistributedCache();
+      MockMapContextWrapper<K1, V1, K2, V2> wrapper = getContextWrapper();
       myMapper.run(wrapper.getMockContext());
       return wrapper.getOutputs();
     } catch (final InterruptedException ie) {
@@ -142,6 +146,14 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
   @Override
   public String toString() {
     return "MapDriver (0.20+) (" + myMapper + ")";
+  }
+  
+  private MockMapContextWrapper<K1, V1, K2, V2> getContextWrapper() {
+    if(wrapper == null) {
+      wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(getConfiguration(),
+          inputs, mockOutputCreator,  this);
+    }
+    return wrapper;
   }
   
   /**
@@ -169,7 +181,7 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
    * @return the mocked context
    */
   public Mapper<K1, V1, K2, V2>.Context getContext() {
-    return wrapper.getMockContext();
+    return getContextWrapper().getMockContext();
   }
 
   /**
