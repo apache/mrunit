@@ -302,7 +302,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
           job.getFirst(), job.getSecond());
 
       mrDriver.setCounters(getCounters());
-      mrDriver.setConfiguration(configuration);
+      mrDriver.setConfiguration(getConfiguration());
       mrDriver.setMapInputPath(mapInputPath);
 
       // Add the inputs from the user, or from the previous stage of the

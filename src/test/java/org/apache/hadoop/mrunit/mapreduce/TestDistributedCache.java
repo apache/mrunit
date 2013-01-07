@@ -252,5 +252,4 @@ public class TestDistributedCache {
       .withOutput(new Text("testarchive.tar/d"), new Text("file"))
       .runTest(false);
   }
-
 }

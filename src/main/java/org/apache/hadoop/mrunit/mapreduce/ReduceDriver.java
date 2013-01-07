@@ -51,9 +51,12 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   private Reducer<K1, V1, K2, V2> myReducer;
   private Counters counters;
-
-  private final MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>(
-      inputs, mockOutputCreator, this);
+  /**
+   * Context creator, do not use directly, always use the 
+   * the getter as it lazily creates the object in the case
+   * the setConfiguration() method will be used by the user.
+   */
+  private MockReduceContextWrapper<K1, V1, K2, V2> wrapper;
 
 
   public ReduceDriver(final Reducer<K1, V1, K2, V2> r) {
@@ -136,6 +139,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     try {
       preRunChecks(myReducer);
       initDistributedCache();
+      MockReduceContextWrapper<K1, V1, K2, V2> wrapper = getContextWrapper();
       myReducer.run(wrapper.getMockContext());
       return wrapper.getOutputs();
     } catch (final InterruptedException ie) {
@@ -150,6 +154,14 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return "ReduceDriver (0.20+) (" + myReducer + ")";
   }
 
+  private MockReduceContextWrapper<K1, V1, K2, V2> getContextWrapper() {
+    if(wrapper == null) {
+      wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>(
+          getConfiguration(), inputs, mockOutputCreator, this);
+    }
+    return wrapper;
+  }
+  
   /**
    * <p>Obtain Context object for furthering mocking with Mockito.
    * For example, causing write() to throw an exception:</p>
@@ -175,7 +187,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    * @return the mocked context
    */
   public Reducer<K1, V1, K2, V2>.Context getContext() {
-    return wrapper.getMockContext();
+    return getContextWrapper().getMockContext();
   }
 
   /**

@@ -226,7 +226,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
 
         final ReduceDriver<K2, V2, OUTKEY, OUTVAL> reduceDriver = ReduceDriver
             .newReduceDriver(reducer).withCounters(getCounters())
-            .withConfiguration(configuration).withAll(inputs);
+            .withConfiguration(getConfiguration()).withAll(inputs);
 
         if (getOutputSerializationConfiguration() != null) {
           reduceDriver
@@ -254,7 +254,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
       // run map component
       LOG.debug("Starting map phase with mapper: " + myMapper);
       mapOutputs.addAll(MapDriver.newMapDriver(myMapper)
-          .withCounters(getCounters()).withConfiguration(configuration)
+          .withCounters(getCounters()).withConfiguration(getConfiguration())
           .withAll(inputList).withMapInputPath(getMapInputPath()).run());
 
       if (myCombiner != null) {

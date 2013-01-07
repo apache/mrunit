@@ -21,12 +21,15 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.internal.output.OutputCollectable;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -38,10 +41,13 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
 
   protected CONTEXT context;
   protected final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator;
+  protected final Configuration configuration;
   protected OutputCollectable<KEYOUT, VALUEOUT> outputCollectable;
 
-  public AbstractMockContextWrapper(final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator) {
+  public AbstractMockContextWrapper(final Configuration configuration, 
+      final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator) {
     this.mockOutputCreator = mockOutputCreator;
+    this.configuration = configuration;
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -88,6 +94,43 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
           return null;
         }
       }).when(context).write(any(), any());
+      
+      
+      when(context.getSymlink()).thenAnswer(new Answer<Boolean>() {
+        @Override
+        @SuppressWarnings("deprecation")
+        public Boolean answer(InvocationOnMock invocation) throws Throwable {
+          return DistributedCache.getSymlink(configuration);
+        }      
+      });
+      when(context.getCacheArchives()).thenAnswer(new Answer<URI[]>() {
+        @Override
+        @SuppressWarnings("deprecation")
+        public URI[] answer(InvocationOnMock invocation) throws Throwable {
+          return DistributedCache.getCacheArchives(configuration);
+        }      
+      });
+      when(context.getCacheFiles()).thenAnswer(new Answer<URI[]>() {
+        @Override
+        @SuppressWarnings("deprecation")
+        public URI[] answer(InvocationOnMock invocation) throws Throwable {
+          return DistributedCache.getCacheFiles(configuration);
+        }      
+      });
+      when(context.getLocalCacheArchives()).thenAnswer(new Answer<Path[]>() {
+        @Override
+        @SuppressWarnings("deprecation")
+        public Path[] answer(InvocationOnMock invocation) throws Throwable {
+          return DistributedCache.getLocalCacheArchives(configuration);
+        }      
+      });
+      when(context.getLocalCacheFiles()).thenAnswer(new Answer<Path[]>() {
+        @Override
+        @SuppressWarnings("deprecation")
+        public Path[] answer(InvocationOnMock invocation) throws Throwable {
+          return DistributedCache.getLocalCacheFiles(configuration);
+        }      
+      });
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (InterruptedException e) {
