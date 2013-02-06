@@ -31,6 +31,10 @@
   <artifactId>mrunit</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
+  <properties>
+    <envClassifier>hadoop1</envClassifier>
+  </properties>
+
   <name>MRUnit</name>
   <url>http://mrunit.apache.org</url>
 
@@ -262,58 +266,6 @@
 
   <profiles>
     <profile>
-      <id>hadoop1</id>
-      <activation>
-        <property>
-          <name>!hadoop.version</name>
-        </property>
-      </activation>
-      <properties>
-        <envClassifier>hadoop1</envClassifier>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-core</artifactId>
-          <version>1.0.3</version>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
-      <id>hadoop2</id>
-      <activation>
-        <property>
-          <name>hadoop.version</name>
-          <value>2</value>
-        </property>
-      </activation>
-
-      <properties>
-        <envClassifier>hadoop2</envClassifier>
-        <specificHadoopVersion>2.0.0-alpha</specificHadoopVersion>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-common</artifactId>
-          <version>${specificHadoopVersion}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-core</artifactId>
-          <version>${specificHadoopVersion}</version>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
       <id>sign</id>
       <build>
         <plugins>
@@ -390,6 +342,13 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>1.8.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>1.0.3</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
