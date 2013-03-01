@@ -58,7 +58,7 @@ public class TestMapDriver {
     mapper = new IdentityMapper<Text, Text>();
     driver = MapDriver.newMapDriver(mapper);
   }
-
+  
   @Test
   public void testRun() throws IOException {
     final List<Pair<Text, Text>> out = driver.withInput(new Text("foo"),
@@ -553,5 +553,13 @@ public class TestMapDriver {
     driver.runTest();
     assertNotNull(mapper.getMapInputPath());
     assertEquals(mapInputPath.getName(), mapper.getMapInputPath().getName());
+  }
+
+  @Test
+  public void testMultipleWithInput() throws IOException {
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withInput(new Text("bar"), new Text("baz"))
+        .withOutput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("bar"), new Text("baz")).runTest(false);
   }
 }

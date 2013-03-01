@@ -76,6 +76,8 @@ public class TestReduceDriver {
     assertListEquals(out, expected);
 
   }
+  
+ 
 
   @Test
   public void testTestRun1() throws IOException {
@@ -258,7 +260,7 @@ public class TestReduceDriver {
 
     driver.withAll(inputs).withAllOutput(expected).runTest();
   }
-  
+
   @Test
   public void testNoInput() throws IOException {
     driver = ReduceDriver.newReduceDriver();
@@ -342,7 +344,7 @@ public class TestReduceDriver {
         .withCounter("category", "count", 1).withCounter("category", "sum", 2)
         .runTest();
   }
-  
+
   @Test
   public void testWithCounterAndNoneMissing() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
@@ -406,6 +408,96 @@ public class TestReduceDriver {
         .withCounter("category", "sum", 2).runTest();
   }
 
+  @Test
+  public void testWithCounterMultipleInput() throws IOException {
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver();
+
+    final LinkedList<Text> valuesAlpha = new LinkedList<Text>();
+    valuesAlpha.add(new Text("a"));
+    final LinkedList<Text> valuesBeta = new LinkedList<Text>();
+    valuesBeta.add(new Text("b"));
+
+    driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), valuesAlpha)
+        .withInput(new Text("hie"), valuesBeta)
+        .withOutput(new Text("hie"), new Text("a"))
+        .withOutput(new Text("hie"), new Text("b"))
+        .withCounter(ReducerWithCounters.Counters.COUNT, 2)
+        .withCounter(ReducerWithCounters.Counters.SUM, 2)
+        .withCounter("category", "count", 2).withCounter("category", "sum", 2)
+        .runTest();
+  }
+  
+  @Test
+  public void testWithCounterAndNoneMissingMultipleInput() throws IOException {
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver();
+
+    final LinkedList<Text> valuesAlpha = new LinkedList<Text>();
+    valuesAlpha.add(new Text("a"));
+    final LinkedList<Text> valuesBeta = new LinkedList<Text>();
+    valuesBeta.add(new Text("b"));
+
+    driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), valuesAlpha)
+        .withInput(new Text("hie"), valuesBeta)
+        .withOutput(new Text("hie"), new Text("a"))
+        .withOutput(new Text("hie"), new Text("b")).withStrictCounterChecking()
+        .withCounter(ReducerWithCounters.Counters.COUNT, 2)
+        .withCounter(ReducerWithCounters.Counters.SUM, 2)
+        .withCounter("category", "count", 2).withCounter("category", "sum", 2)
+        .runTest();
+  }
+
+  @Test
+  public void testWithCounterAndEnumCounterMissingMultipleInput() throws IOException {
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver();
+
+    thrown
+        .expectAssertionErrorMessage("1 Error(s): (Actual counter ("
+            + "\"org.apache.hadoop.mrunit.TestReduceDriver$ReducerWithCounters$Counters\",\"COUNT\")"
+            + " was not found in expected counters");
+
+    final LinkedList<Text> valuesAlpha = new LinkedList<Text>();
+    valuesAlpha.add(new Text("a"));
+    final LinkedList<Text> valuesBeta = new LinkedList<Text>();
+    valuesBeta.add(new Text("b"));
+
+    driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), valuesAlpha)
+        .withInput(new Text("hie"), valuesBeta)
+        .withOutput(new Text("hie"), new Text("a"))
+        .withOutput(new Text("hie"), new Text("b")).withStrictCounterChecking()
+        .withCounter(ReducerWithCounters.Counters.SUM, 2)
+        .withCounter("category", "count", 2).withCounter("category", "sum", 2)
+        .runTest();
+  }
+
+  @Test
+  public void testWithCounterAndStringCounterMissingMultipleInput() throws IOException {
+    final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
+        .newReduceDriver();
+
+    thrown.expectAssertionErrorMessage("1 Error(s): (Actual counter ("
+        + "\"category\",\"count\")" + " was not found in expected counters");
+
+    final LinkedList<Text> valuesAlpha = new LinkedList<Text>();
+    valuesAlpha.add(new Text("a"));
+    final LinkedList<Text> valuesBeta = new LinkedList<Text>();
+    valuesBeta.add(new Text("b"));
+
+    driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
+        .withInput(new Text("hie"), valuesAlpha)
+        .withInput(new Text("hie"), valuesBeta)
+        .withOutput(new Text("hie"), new Text("a"))
+        .withOutput(new Text("hie"), new Text("b")).withStrictCounterChecking()
+        .withCounter(ReducerWithCounters.Counters.COUNT, 2)
+        .withCounter(ReducerWithCounters.Counters.SUM, 2)
+        .withCounter("category", "sum", 2).runTest();
+  }
+  
   @Test
   public void testWithFailedEnumCounter() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
