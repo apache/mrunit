@@ -26,6 +26,7 @@ import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 import org.apache.hadoop.mrunit.internal.mapred.MockMapredOutputFormat;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockMapreduceOutputFormat;
 
@@ -51,19 +52,30 @@ public class MockOutputCreator<K, V> {
     mapreduceInputFormatClass = returnNonNull(inputFormatClass);
   }
 
-  public OutputCollectable<K, V> createOutputCollectable(
+  @SuppressWarnings("deprecation")
+  public OutputCollectable<K, V> createMapReduceOutputCollectable(
       Configuration configuration,
-      Configuration outputCopyingOrInputFormatConfiguration) throws IOException {
+      Configuration outputCopyingOrInputFormatConfiguration,
+      TaskInputOutputContext context) throws IOException {
     outputCopyingOrInputFormatConfiguration = outputCopyingOrInputFormatConfiguration == null ? configuration
         : outputCopyingOrInputFormatConfiguration;
-    if (mapredOutputFormatClass != null) {
-      return new MockMapredOutputFormat<K, V>(new JobConf(configuration),
-          mapredOutputFormatClass, mapredInputFormatClass, new JobConf(
-              outputCopyingOrInputFormatConfiguration));
-    }
     if (mapreduceOutputFormatClass != null) {
       return new MockMapreduceOutputFormat<K, V>(new Job(configuration),
           mapreduceOutputFormatClass, mapreduceInputFormatClass, new Job(
+              outputCopyingOrInputFormatConfiguration),
+              context);
+    }
+    return new MockOutputCollector<K, V>(
+        outputCopyingOrInputFormatConfiguration);
+  }
+  public OutputCollectable<K, V> createMapredOutputCollectable(
+      Configuration configuration,
+      Configuration outputCopyingOrInputFormatConfiguration) throws IOException {
+    outputCopyingOrInputFormatConfiguration = outputCopyingOrInputFormatConfiguration == null ? configuration
+        : outputCopyingOrInputFormatConfiguration;    
+    if (mapredOutputFormatClass != null) {
+      return new MockMapredOutputFormat<K, V>(new JobConf(configuration),
+          mapredOutputFormatClass, mapredInputFormatClass, new JobConf(
               outputCopyingOrInputFormatConfiguration));
     }
     return new MockOutputCollector<K, V>(
