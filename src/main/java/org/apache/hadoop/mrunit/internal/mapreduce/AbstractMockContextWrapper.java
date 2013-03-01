@@ -84,8 +84,8 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
           final Object[] args = invocation.getArguments();
           try {
             if(outputCollectable == null) {
-              outputCollectable = mockOutputCreator.createOutputCollectable(contextDriver.getConfiguration(), 
-                  contextDriver.getOutputSerializationConfiguration());
+              outputCollectable = mockOutputCreator.createMapReduceOutputCollectable(contextDriver.getConfiguration(), 
+                  contextDriver.getOutputSerializationConfiguration(), context);
             }
             outputCollectable.collect((KEYOUT)args[0], (VALUEOUT)args[1]);
           } catch (IOException e) {

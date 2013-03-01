@@ -26,6 +26,7 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -34,10 +35,14 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.map.InverseMapper;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
@@ -366,6 +371,43 @@ public class TestMapDriver {
     driver.runTest();
   }
 
+  // tests to ensure counters can be incremented in record writer
+  private static enum RecordCounter {
+    NUM_RECORDS
+  };
+  public static class CountingOutputFormat extends FileOutputFormat<Text, Text> {
+    private final TextOutputFormat<Text, Text> delegate;
+    public CountingOutputFormat() {
+      delegate = new TextOutputFormat<Text, Text>();
+    }
+    @Override
+    public RecordWriter<Text, Text> getRecordWriter(final TaskAttemptContext job)
+        throws IOException, InterruptedException {
+      final RecordWriter<Text, Text> writer = delegate.getRecordWriter(job);
+      return new RecordWriter<Text, Text>() {
+        @Override
+        public void write(Text key, Text value) throws IOException,
+            InterruptedException {
+          job.getCounter(RecordCounter.NUM_RECORDS).increment(1);
+          writer.write(key, value);
+        }
+        @Override
+        public void close(TaskAttemptContext context) throws IOException,
+            InterruptedException {
+          writer.close(context);
+        }        
+      };
+    }    
+  }
+  @Test
+  public void testCountingOutputFormat() throws IOException {
+    driver.withOutputFormat(CountingOutputFormat.class,
+        KeyValueTextInputFormat.class);
+    driver.withInput(new Text("a"), new Text("1"));
+    driver.withOutput(new Text("a"), new Text("1"));
+    driver.withCounter(RecordCounter.NUM_RECORDS, 1);
+    driver.runTest();
+  }
   @Test
   public void testOutputFormat() throws IOException {
     driver.withOutputFormat(SequenceFileOutputFormat.class,

@@ -131,7 +131,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
       preRunChecks(myReducer);
       initDistributedCache();
       final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
-          .createOutputCollectable(getConfiguration(),
+          .createMapredOutputCollectable(getConfiguration(),
               getOutputSerializationConfiguration());
       final MockReporter reporter = new MockReporter(
           MockReporter.ReporterType.Reducer, getCounters());

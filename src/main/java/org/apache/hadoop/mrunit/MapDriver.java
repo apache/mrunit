@@ -128,7 +128,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2, Map
       preRunChecks(myMapper);
       initDistributedCache();
       final OutputCollectable<K2, V2> outputCollectable = mockOutputCreator
-          .createOutputCollectable(getConfiguration(),
+          .createMapredOutputCollectable(getConfiguration(),
               getOutputSerializationConfiguration());
       final MockReporter reporter = new MockReporter(
           MockReporter.ReporterType.Mapper, getCounters(),
