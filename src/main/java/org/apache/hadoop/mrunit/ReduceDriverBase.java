@@ -224,6 +224,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
    *             {@link #withAll(List)}, and {@link #withInput(Pair)}
    */
+  @Deprecated
   public T withInputKey(final K1 key) {
     setInputKey(key);
     return thisAsReduceDriver();
@@ -238,6 +239,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
    *             {@link #withAll(List)}, and {@link #withInput(Pair)}
    */
+  @Deprecated
   public T withInputValue(final V1 val) {
     addInputValue(val);
     return thisAsReduceDriver();
@@ -252,6 +254,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
    *             {@link #withAll(List)}, and {@link #withInput(Pair)}
    */
+  @Deprecated
   public T withInputValues(final List<V1> values) {
     addInputValues(values);
     return thisAsReduceDriver();
@@ -264,7 +267,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    */
   public T withInput(final K1 key,
       final List<V1> values) {
-    setInput(key, values);
+    addInput(key, values);
     return thisAsReduceDriver();
   }
 

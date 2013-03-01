@@ -177,6 +177,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    *             input (k, v)*. Replaced by {@link #withInput()} and
    *             {@link #withAll()}
    */
+  @Deprecated
   public T withInputKey(final K1 key) {
     setInputKey(key);
     return thisAsMapDriver();
@@ -191,6 +192,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    *             input (k, v)*. Replaced by {@link #withInput()} and
    *             {@link #withAll()}
    */
+  @Deprecated
   public T withInputValue(final V1 val) {
     setInputValue(val);
     return thisAsMapDriver();
@@ -202,7 +204,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    * @return this
    */
   public T withInput(final K1 key, final V1 val) {
-    setInput(key, val);
+    addInput(key, val);
     return thisAsMapDriver();
   }
 
