@@ -23,6 +23,8 @@
 
   <id>bin</id>
 
+  <baseDirectory>apache-mrunit-${project.version}-${envClassifier}</baseDirectory>
+
   <formats>
     <format>tar.gz</format>
   </formats>
