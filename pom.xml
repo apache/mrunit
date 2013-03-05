@@ -296,6 +296,7 @@
             <version>2.3</version>
             <configuration>
               <tarLongFileMode>gnu</tarLongFileMode>
+              <finalName>apache-mrunit-${project.version}-${envClassifier}</finalName>
               <descriptors>
                 <descriptor>src/main/assembly/src-assembly.xml</descriptor>
               </descriptors>
@@ -315,10 +316,10 @@
             <version>2.3</version>
             <configuration>
               <tarLongFileMode>gnu</tarLongFileMode>
+              <finalName>apache-mrunit-${project.version}-${envClassifier}</finalName>
               <descriptors>
                 <descriptor>src/main/assembly/bin-assembly.xml</descriptor>
               </descriptors>
-              <appendAssemblyId>false</appendAssemblyId>
             </configuration>
           </plugin>
         </plugins>
