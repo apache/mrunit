@@ -29,7 +29,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.mrunit</groupId>
   <artifactId>mrunit</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
 
   <properties>
     <envClassifier>hadoop2</envClassifier>
