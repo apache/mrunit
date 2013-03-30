@@ -72,6 +72,15 @@ public class TestTemporaryPath {
   }
 
   @Test
+  public void testCopyResourceNested() throws IOException {
+    File dest = tmpDir.getFile("data.txt");
+    assertThat(dest.exists(), is(false));
+
+    tmpDir.copyResourceFile("testdir/data.txt");
+    assertThat(dest.exists(), is(true));
+  }
+  
+  @Test
   public void testGetDefaultConfiguration() {
     Configuration conf = tmpDir.getDefaultConfiguration();
     String fooDir = conf.get("foo.tmp");
