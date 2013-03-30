@@ -132,7 +132,7 @@ public final class TemporaryPath extends ExternalResource {
    * Copy a classpath resource to {@link File}.
    */
   public File copyResourceFile(String resourceName) throws IOException {
-    File dest = new File(tmp.getRoot(), resourceName);
+    File dest = new File(tmp.getRoot(), new File(resourceName).getName());
     copy(resourceName, dest);
     return dest;
   }
