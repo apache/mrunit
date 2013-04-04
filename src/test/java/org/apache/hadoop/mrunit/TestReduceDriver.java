@@ -21,6 +21,7 @@ import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -129,6 +130,47 @@ public class TestReduceDriver {
   }
 
   @Test
+  public void testTestRun3ComparatorOK() throws IOException {
+    Comparator<LongWritable> toleranceComparator = new Comparator<LongWritable>() {
+
+      @Override
+      public int compare(LongWritable o1, LongWritable o2) {
+        if (Math.abs(o1.get() - o2.get()) < 5) {
+            return 0;
+        }
+        return o1.compareTo(o2);
+      }
+    };
+    driver.setValueComparator(toleranceComparator);
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .withInputValue(new LongWritable(IN_B))
+        .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT))
+        .runTest(true);
+  }
+
+  @Test
+  public void testTestRun3ComparatorFail() throws IOException {
+    Comparator<LongWritable> toleranceComparator = new Comparator<LongWritable>() {
+
+      @Override
+      public int compare(LongWritable o1, LongWritable o2) {
+        if (Math.abs(o1.get() - o2.get()) < 2) {
+            return 0;
+        }
+        return o1.compareTo(o2);
+      }
+    };
+    driver.setValueComparator(toleranceComparator);
+    thrown.expectAssertionErrorMessage("2 Error(s)");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 12)");
+    thrown.expectAssertionErrorMessage("Received unexpected output (foo, 10)");
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
+        .withInputValue(new LongWritable(IN_B))
+        .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT))
+        .runTest(true);
+  }
+
+  @Test
   public void testTestRun4() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 4) at position 0., "
@@ -150,10 +192,10 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun5() throws IOException {
-    thrown
-        .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, 6) at position 1., "
-            + "Missing expected output (foo, 4) at position 0., "
-            + "Received unexpected output (foo, 10) at position 0.)");
+    thrown.expectAssertionErrorMessage("3 Error(s)");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 4) at position 0.");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 6) at position 1.");
+    thrown.expectAssertionErrorMessage("Received unexpected output (foo, 10) at position 0.");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(IN_A))
@@ -162,10 +204,10 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun5OrderInsensitive() throws IOException {
-    thrown
-        .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, 6), "
-            + "Missing expected output (foo, 4), "
-            + "Received unexpected output (foo, 10))");
+    thrown.expectAssertionErrorMessage("3 Error(s)");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 4)");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 6)");
+    thrown.expectAssertionErrorMessage("Received unexpected output (foo, 10)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(IN_A))

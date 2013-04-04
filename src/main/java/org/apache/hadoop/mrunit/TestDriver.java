@@ -24,7 +24,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,7 @@ import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.io.Serialization;
 import org.apache.hadoop.mrunit.internal.util.DistCacheUtils;
 import org.apache.hadoop.mrunit.internal.util.Errors;
+import org.apache.hadoop.mrunit.internal.util.PairComparator;
 import org.apache.hadoop.mrunit.internal.util.StringUtils;
 import org.apache.hadoop.mrunit.types.Pair;
 
@@ -65,6 +67,8 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   private Serialization serialization;
   
   private Configuration outputSerializationConfiguration;
+  private Comparator<K2> keyComparator;
+  private Comparator<V2> valueComparator;
   private File tmpDistCacheDir;
   protected CounterWrapper counterWrapper;
 
@@ -268,6 +272,20 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
 
   /**
+   * @return The comparator for output keys or null of none has been set
+   */
+  public Comparator<K2> getKeyComparator() {
+    return this.keyComparator;
+  }
+
+  /**
+   * @return The comparator for output values or null of none has been set
+   */
+  public Comparator<V2> getValueComparator() {
+    return this.valueComparator;
+  }
+
+  /**
    * @param configuration
    *          The configuration object that will given to the mapper and/or
    *          reducer associated with the driver. This method should only be
@@ -367,6 +385,22 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    */
   public void setCacheFiles(URI[] files) {
     DistributedCache.setCacheFiles(files, getConfiguration());
+  }
+
+  /**
+   * Set the output key comparator
+   * @param keyComparator the key comparator
+   */
+  public void setKeyComparator(Comparator<K2> keyComparator) {
+    this.keyComparator = keyComparator;
+  }
+
+  /**
+   * Set the output value comparator
+   * @param valueComparator the value comparator
+   */
+  public void setValueComparator(Comparator<V2> valueComparator) {
+    this.valueComparator = valueComparator;
   }
 
   /**
@@ -635,8 +669,12 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
       checkOverrides(outputs.get(0));
     }
 
-    final Map<Pair<K2, V2>, List<Integer>> expectedPositions = buildPositionMap(expectedOutputs);
-    final Map<Pair<K2, V2>, List<Integer>> actualPositions = buildPositionMap(outputs);
+    final Comparator<Pair<K2, V2>> pairComparator = new PairComparator<K2, V2>(
+      keyComparator, valueComparator);
+    final Map<Pair<K2, V2>, List<Integer>> expectedPositions = buildPositionMap(
+      expectedOutputs, pairComparator);
+    final Map<Pair<K2, V2>, List<Integer>> actualPositions = buildPositionMap(
+      outputs, pairComparator);
 
     for (final Pair<K2, V2> output : expectedPositions.keySet()) {
       final List<Integer> expectedPositionList = expectedPositions.get(output);
@@ -774,8 +812,9 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
 
   private Map<Pair<K2, V2>, List<Integer>> buildPositionMap(
-      final List<Pair<K2, V2>> values) {
-    final Map<Pair<K2, V2>, List<Integer>> valuePositions = new HashMap<Pair<K2, V2>, List<Integer>>();
+      final List<Pair<K2, V2>> values, Comparator<Pair<K2, V2>> comparator) {
+    final Map<Pair<K2, V2>, List<Integer>> valuePositions =
+        new TreeMap<Pair<K2, V2>, List<Integer>>(comparator);
     for (int i = 0; i < values.size(); i++) {
       final Pair<K2, V2> output = values.get(i);
       List<Integer> positions;
