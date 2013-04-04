@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -130,6 +131,21 @@ public class TestMapDriver {
   }
 
   @Test
+  public void testTestRun5Comparator() throws IOException {
+    Comparator<Text> valueComparator = new Comparator<Text>() {
+
+      @Override
+      public int compare(Text o1, Text o2) {
+        return 0;
+      }
+    };
+    driver.setValueComparator(valueComparator);
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("foo"), new Text("somethingelse"))
+        .runTest(true);
+  }
+
+  @Test
   public void testTestRun5OrderInsensitive() throws IOException {
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, somethingelse), "
@@ -145,6 +161,24 @@ public class TestMapDriver {
             + "Received unexpected output (foo, bar) at position 0.)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("someotherkey"), new Text("bar")).runTest(true);
+  }
+
+  @Test
+  public void testTestRun6Comparator() throws IOException {
+    Comparator<Text> keyComparator = new Comparator<Text>() {
+
+      @Override
+      public int compare(Text o1, Text o2) {
+        if (o2.toString().equals("foo") && o1.toString().equals("someotherkey")) {
+            return 0;
+        }
+        return o1.compareTo(o2);
+      }
+    };
+    driver.setKeyComparator(keyComparator);
+    driver.withInput(new Text("foo"), new Text("bar"))
+        .withOutput(new Text("someotherkey"), new Text("bar"))
+        .runTest(true);
   }
 
   @Test
@@ -222,6 +256,30 @@ public class TestMapDriver {
         .runTest(true);
   }
   
+  @Test
+  public void testUnexpectedOutputMultipleComparator() throws IOException {
+    Comparator<Text> comparatorAlwaysEqual = new Comparator<Text>() {
+
+      @Override
+      public int compare(Text o1, Text o2) {
+        return 0;
+      }
+    };
+    driver.setKeyComparator(comparatorAlwaysEqual);
+    driver.setValueComparator(comparatorAlwaysEqual);
+    thrown.expectAssertionErrorMessage("3 Error(s)");
+    thrown.expectAssertionErrorMessage(
+        "Received unexpected output (foo, bar) at position 1.");
+    thrown.expectAssertionErrorMessage(
+        "Received unexpected output (foo, bar) at position 2.");
+    thrown.expectAssertionErrorMessage(
+        "Received unexpected output (foo, bar) at position 3.");
+    driver.withMapper(new DuplicatingMapper(4))
+        .withInput(new Text("foo"),new Text("bar"))
+        .withOutput(new Text("foo"),new Text("bar"))
+        .runTest(true);
+  }
+
   @Test
   public void testUnexpectedOutputOrderInsensitive() throws IOException {
     thrown
@@ -439,11 +497,13 @@ public class TestMapDriver {
         .newMapDriver(new NonTextWritableOutputKey());
     driver.withInputFromString("a\tb");
     driver.withOutputFromString("1\ta");
-    thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (1, a): Mismatch in key class: "
-            + "expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable, "
-            + "Received unexpected output (1, a): "
-            + "Mismatch in key class: expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable)");
+    thrown.expectAssertionErrorMessage("2 Error(s)");
+    thrown.expectAssertionErrorMessage("Missing expected output (1, a): "
+        + "Mismatch in key class: expected: class org.apache.hadoop.io.Text "
+        + "actual: class org.apache.hadoop.io.LongWritable");
+    thrown.expectAssertionErrorMessage("Received unexpected output (1, a): "
+        + "Mismatch in key class: expected: class org.apache.hadoop.io.Text "
+        + "actual: class org.apache.hadoop.io.LongWritable");
     driver.runTest();
   }
 

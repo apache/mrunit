@@ -150,10 +150,10 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun5() throws IOException {
-    thrown
-        .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, 6) at position 1., "
-            + "Missing expected output (foo, 4) at position 0., "
-            + "Received unexpected output (foo, 10) at position 0.)");
+    thrown.expectAssertionErrorMessage("3 Error(s)");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 6) at position 1.");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 4) at position 0.");
+    thrown.expectAssertionErrorMessage("Received unexpected output (foo, 10) at position 0.");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(IN_A))
@@ -162,10 +162,10 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun5OrderInsensitive() throws IOException {
-    thrown
-        .expectAssertionErrorMessage("3 Error(s): (Missing expected output (foo, 6), "
-            + "Missing expected output (foo, 4), "
-            + "Received unexpected output (foo, 10))");
+    thrown.expectAssertionErrorMessage("3 Error(s)");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 6)");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 4)");
+    thrown.expectAssertionErrorMessage("Received unexpected output (foo, 10)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(IN_A))
