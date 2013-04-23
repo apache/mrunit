@@ -50,6 +50,14 @@ public class TestErrors {
   }
 
   @Test
+  public void shouldUseLiteralMessageWhenNoArguments() {
+    thrown.expectMessage("2 Error(s): (this is a %s error, this is a %d error)");
+    errors.record("this is a %s error");
+    errors.record("this is a %d error");
+    errors.assertNone();
+  }
+
+  @Test
   public void shouldBuildAssertionErrorMessageWithRecordedErrors() {
     thrown.expectMessage("2 Error(s): (this is a first error, this is a second error)");
     errors.record("this is a %s error", "first");

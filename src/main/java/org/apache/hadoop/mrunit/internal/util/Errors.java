@@ -44,6 +44,14 @@ public class Errors {
   /**
    * Log a new error message and keep it for later.
    */
+  public void record(String message) {
+    log.error(message);
+    messages.add(message);
+  }
+
+  /**
+   * Log a new error message and keep it for later.
+   */
   public void record(String format, Object... args) {
     final String message = String.format(format, args);
     log.error(message);
