@@ -26,7 +26,6 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -393,24 +392,9 @@ public class TestMapDriver {
   
 
 
-  private static class InputPathStoringMapper extends
-      Mapper<Text, Text, Text, Text> {
-    private Path mapInputPath;
-
-    @Override
-    public void map(Text key, Text value, Context context) throws IOException {
-      if (context.getInputSplit() instanceof FileSplit) {
-        mapInputPath = ((FileSplit) context.getInputSplit()).getPath();
-      }
-    }
-
-    private Path getMapInputPath() {
-      return mapInputPath;
-    }
-  }
   @Test
   public void testMapInputFile() throws IOException {
-    InputPathStoringMapper mapper = new InputPathStoringMapper();
+    InputPathStoringMapper<Text, Text> mapper = new InputPathStoringMapper<Text, Text>();
     Path mapInputPath = new Path("myfile");
     driver = MapDriver.newMapDriver(mapper);
     driver.setMapInputPath(mapInputPath);

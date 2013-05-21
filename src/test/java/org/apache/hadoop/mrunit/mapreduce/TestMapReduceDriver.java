@@ -33,7 +33,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.serializer.JavaSerializationComparator;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.map.InverseMapper;
@@ -495,26 +494,9 @@ public class TestMapReduceDriver {
     driver.runTest();
   }
 
-  private static class InputPathStoringMapper extends
-      Mapper<Text, LongWritable, Text, LongWritable> {
-    private Path mapInputPath;
-
-    @Override
-    public void map(Text key, LongWritable value, Context context)
-        throws IOException {
-      if (context.getInputSplit() instanceof FileSplit) {
-        mapInputPath = ((FileSplit) context.getInputSplit()).getPath();
-      }
-    }
-
-    private Path getMapInputPath() {
-      return mapInputPath;
-    }
-  }
-
   @Test
   public void testMapInputFile() throws IOException {
-    InputPathStoringMapper mapper = new InputPathStoringMapper();
+    InputPathStoringMapper<LongWritable, LongWritable> mapper = new InputPathStoringMapper<LongWritable, LongWritable>();
     Path mapInputPath = new Path("myfile");
     driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
     driver.setMapInputPath(mapInputPath);
