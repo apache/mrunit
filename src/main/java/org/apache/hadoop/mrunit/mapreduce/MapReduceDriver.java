@@ -21,10 +21,12 @@ import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNu
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -32,6 +34,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.MapReduceDriverBase;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
+import org.apache.hadoop.mrunit.types.KeyValueReuseList;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -207,7 +210,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
    */
   private class ReducePhaseRunner<OUTKEY, OUTVAL> {
     private List<Pair<OUTKEY, OUTVAL>> runReduce(
-        final List<Pair<K2, List<V2>>> inputs,
+        final List<KeyValueReuseList<K2, V2>> inputs,
         final Reducer<K2, V2, OUTKEY, OUTVAL> reducer) throws IOException {
 
       final List<Pair<OUTKEY, OUTVAL>> reduceOutputs = new ArrayList<Pair<OUTKEY, OUTVAL>>();
@@ -215,16 +218,16 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
       if (!inputs.isEmpty()) {
         if (LOG.isDebugEnabled()) {
           final StringBuilder sb = new StringBuilder();
-          for (Pair<K2, List<V2>> input : inputs) {
-            formatValueList(input.getSecond(), sb);
-            LOG.debug("Reducing input (" + input.getFirst() + ", " + sb + ")");
+          for (List<Pair<K2, V2>> input : inputs) {
+            formatPairList(input, sb);
+            LOG.debug("Reducing input " + sb);
             sb.delete(0, sb.length());
           }
         }
 
         final ReduceDriver<K2, V2, OUTKEY, OUTVAL> reduceDriver = ReduceDriver
             .newReduceDriver(reducer).withCounters(getCounters())
-            .withConfiguration(getConfiguration()).withAll(inputs);
+            .withConfiguration(getConfiguration()).withAllElements(inputs);
 
         if (getOutputSerializationConfiguration() != null) {
           reduceDriver
@@ -240,6 +243,25 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
       return reduceOutputs;
     }
+  }
+
+  protected List<KeyValueReuseList<K2,V2>> sortAndGroup(final List<Pair<K2, V2>> mapOutputs){
+    if(mapOutputs.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    if (keyValueOrderComparator == null || keyGroupComparator == null){
+      JobConf conf = new JobConf(getConfiguration());
+      conf.setMapOutputKeyClass(mapOutputs.get(0).getFirst().getClass());
+      if (keyGroupComparator == null){
+        keyGroupComparator = conf.getOutputValueGroupingComparator();
+      }
+      if (keyValueOrderComparator == null) {
+        keyValueOrderComparator = conf.getOutputKeyComparator();
+      }
+    }
+    ReduceFeeder<K2,V2> reduceFeeder = new ReduceFeeder<K2,V2>(getConfiguration());
+    return reduceFeeder.sortAndGroup(mapOutputs, keyValueOrderComparator, keyGroupComparator);
   }
 
   @Override
@@ -258,11 +280,11 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
         // with the result of the combiner.
         LOG.debug("Starting combine phase with combiner: " + myCombiner);
         mapOutputs = new ReducePhaseRunner<K2, V2>().runReduce(
-            shuffle(mapOutputs), myCombiner);
+            sortAndGroup(mapOutputs), myCombiner);
       }
       // Run the reduce phase.
       LOG.debug("Starting reduce phase with reducer: " + myReducer);
-      return new ReducePhaseRunner<K3, V3>().runReduce(shuffle(mapOutputs),
+      return new ReducePhaseRunner<K3, V3>().runReduce(sortAndGroup(mapOutputs),
           myReducer);
     } finally {
       cleanupDistributedCache();

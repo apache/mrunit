@@ -224,4 +224,35 @@ public class TestStringUtils {
     StringUtils.formatValueList(Arrays.asList("first", "second", "third"), stringBuilder);
     assertEquals("previous message (first, second, third)", stringBuilder.toString());
   }
+
+  /**
+   * Test method for {@link StringUtils#formatPairList(List, StringBuilder)}
+   */
+  @Test
+  public void shouldFormatPairListWhenEmpty() {
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("previous message ");
+    List<Pair<String, String>> list = new ArrayList<Pair<String, String>>();
+    StringUtils.formatPairList(list, stringBuilder);
+    assertEquals("previous message []", stringBuilder.toString());
+  }
+
+  @Test
+  public void shouldFormatPairListWithSingleElement() {
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("previous message ");
+    StringUtils.formatPairList(Arrays.asList(new Pair<String, String>("key", "value")), stringBuilder);
+    assertEquals("previous message [(key, value)]", stringBuilder.toString());
+  }
+
+  @Test
+  public void shouldFormatPairListWithManyElement() {
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("previous message ");
+    StringUtils.formatPairList(Arrays.asList(
+            new Pair<String, String>("first_key", "first_value"),
+            new Pair<String, String>("second_key", "second_value"),
+            new Pair<String, String>("third_key", "third_value")), stringBuilder);
+    assertEquals("previous message [(first_key, first_value), (second_key, second_value), (third_key, third_value)]", stringBuilder.toString());
+  }
 }

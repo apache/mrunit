@@ -29,10 +29,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
-import org.apache.hadoop.mapreduce.TaskID;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
-import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.mrunit.types.KeyValueReuseList;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -51,14 +50,24 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
 
   protected static final Log LOG = LogFactory
       .getLog(MockReduceContextWrapper.class);
-  protected final List<Pair<KEYIN, List<VALUEIN>>> inputs;
+
+  protected final List<KeyValueReuseList<KEYIN, VALUEIN>> inputs;
+
   protected final ReduceDriver<KEYIN, VALUEIN, KEYOUT, VALUEOUT> driver;
-  
-  protected Pair<KEYIN, List<VALUEIN>> currentKeyValue;
-  
+
+  protected KeyValueReuseList<KEYIN, VALUEIN> currentKeyValue;
+
+  /**
+   * New constructor with new input format.
+   * @param configuration
+   * @param inputs
+   * @param mockOutputCreator
+   * @param driver
+   * @param unused this parameter is here only to avoid erasure collision with deprecated constructor.
+   */
   public MockReduceContextWrapper(
       final Configuration configuration,
-      final List<Pair<KEYIN, List<VALUEIN>>> inputs, 
+      final List<KeyValueReuseList<KEYIN, VALUEIN>> inputs,
       final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator,
       final ReduceDriver<KEYIN, VALUEIN, KEYOUT, VALUEOUT> driver) {
     super(configuration, mockOutputCreator);
@@ -72,7 +81,7 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
   protected Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create() {
 
     final Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Reducer.Context.class);
-    
+
     createCommon(context, driver, mockOutputCreator);
     try {
       /*
@@ -94,13 +103,13 @@ public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
       when(context.getCurrentKey()).thenAnswer(new Answer<KEYIN>() {
         @Override
         public KEYIN answer(final InvocationOnMock invocation) {
-          return currentKeyValue.getFirst();
+          return currentKeyValue.getCurrentKey();
         }
       });
       when(context.getValues()).thenAnswer(new Answer<Iterable<VALUEIN>>() {
         @Override
         public Iterable<VALUEIN> answer(final InvocationOnMock invocation) {
-          return makeOneUseIterator(currentKeyValue.getSecond().iterator());
+          return makeOneUseIterator(currentKeyValue.valueIterator());
         }
       });
       when(context.getTaskAttemptID()).thenAnswer(new Answer<TaskAttemptID>(){
