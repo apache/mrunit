@@ -21,6 +21,7 @@ package org.apache.hadoop.mrunit.mapreduce;
 import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +34,7 @@ import org.apache.hadoop.mrunit.ReduceDriverBase;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.mapreduce.ContextDriver;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockReduceContextWrapper;
+import org.apache.hadoop.mrunit.types.KeyValueReuseList;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -47,9 +49,11 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     ReduceDriverBase<K1, V1, K2, V2, ReduceDriver<K1, V1, K2, V2>> implements
     ContextDriver {
 
+  protected List<KeyValueReuseList<K1, V1>> groupedInputs = new ArrayList<KeyValueReuseList<K1, V1>>();
+
   public static final Log LOG = LogFactory.getLog(ReduceDriver.class);
 
-  private Reducer<K1, V1, K2, V2> myReducer;
+  protected Reducer<K1, V1, K2, V2> myReducer;
   private Counters counters;
   /**
    * Context creator, do not use directly, always use the 
@@ -58,6 +62,82 @@ public class ReduceDriver<K1, V1, K2, V2> extends
    */
   private MockReduceContextWrapper<K1, V1, K2, V2> wrapper;
 
+  public List<Pair<K1,V1>> getInputs(final K1 firstKey) {
+	for (KeyValueReuseList<K1, V1> p : groupedInputs) {
+      if(p.getCurrentKey().equals(firstKey)){
+        return p;
+      }
+	}
+    return null;
+  }
+
+  /**
+   * Clears the input to be sent to the Reducer
+   */
+  @Override
+  public void clearInput() {
+    super.clearInput();
+    groupedInputs.clear();
+  }
+
+  /**
+   * Add input (K*, V*) to send to the Reducer
+   *
+   * @param key
+   *          The key too add
+   * @param values
+   *          The value to add
+   */
+  public void addInput(final KeyValueReuseList<K1, V1> input) {
+    groupedInputs.add(input.clone(getConfiguration()));
+  }
+
+  /**
+   * Identical to addInput() but returns self for fluent programming style
+   *
+   * @param input
+   * @return this
+   */
+  public ReduceDriver<K1, V1, K2, V2> withInput(final KeyValueReuseList<K1, V1> input) {
+    addInput(input);
+    return this;
+  }
+
+  /**
+   * Identical to addAllElements() but returns self for fluent programming style
+   *
+   * @param inputs
+   * @return this
+   */
+  public ReduceDriver<K1, V1, K2, V2> withAllElements(
+    // This method is called withAllElements to avoid erasure conflict with withAll method from ReduceDriverBase.
+      final List<KeyValueReuseList<K1, V1>> inputs) {
+    addAllElements(inputs);
+    return this;
+  }
+
+  /**
+   * Adds input to send to the Reducer
+   *
+   * @param inputs
+   *          list of (K*, V*) pairs
+   */
+  public void addAllElements(final List<KeyValueReuseList<K1, V1>> inputs) {
+    // This method is called addAllElements to avoid erasure conflict with addAll method from ReduceDriverBase.
+	for (KeyValueReuseList<K1, V1> input : inputs) {
+		addInput(input);
+	}
+  }
+
+  @Override
+  protected void printPreTestDebugLog() {
+    final StringBuilder sb = new StringBuilder();
+    for (List<Pair<K1, V1>> input : groupedInputs) {
+      formatPairList(input, sb);
+      LOG.debug("Reducing input " + sb);
+      sb.delete(0, sb.length());
+    }
+  }
 
   public ReduceDriver(final Reducer<K1, V1, K2, V2> r) {
     this();
@@ -134,6 +214,30 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 
+  /**
+   * Handle inputKey and inputValues and inputs for backwards compatibility.
+   */
+  @Override
+  protected void preRunChecks(Object reducer) {
+    if (inputKey != null && !getInputValues().isEmpty()) {
+      clearInput();
+      addInput(new ReduceFeeder<K1, V1>(getConfiguration()).updateInput(inputKey, getInputValues()));
+    }
+
+    if (inputs != null && !inputs.isEmpty()){
+      groupedInputs.clear();
+      groupedInputs = new ReduceFeeder<K1, V1>(getConfiguration()).updateAll(inputs);
+    }
+
+    if (groupedInputs == null || groupedInputs.isEmpty()) {
+      throw new IllegalStateException("No input was provided");
+    }
+
+    if (reducer == null) {
+      throw new IllegalStateException("No Reducer class was provided");
+    }
+  }
+
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
     try {
@@ -157,11 +261,11 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   private MockReduceContextWrapper<K1, V1, K2, V2> getContextWrapper() {
     if(wrapper == null) {
       wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>(
-          getConfiguration(), inputs, mockOutputCreator, this);
+          getConfiguration(), groupedInputs, mockOutputCreator, this);
     }
     return wrapper;
   }
-  
+
   /**
    * <p>Obtain Context object for furthering mocking with Mockito.
    * For example, causing write() to throw an exception:</p>

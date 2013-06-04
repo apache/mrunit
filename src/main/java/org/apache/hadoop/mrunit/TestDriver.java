@@ -923,4 +923,9 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
       final StringBuilder sb) {
     StringUtils.formatValueList(values, sb);
   }
+
+  protected static <KEYIN, VALUEIN> void formatPairList(final List<Pair<KEYIN,VALUEIN>> pairs,
+      final StringBuilder sb) {
+    StringUtils.formatPairList(pairs, sb);
+  }
 }

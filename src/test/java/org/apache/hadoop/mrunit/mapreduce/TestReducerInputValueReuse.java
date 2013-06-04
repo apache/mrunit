@@ -65,17 +65,17 @@ public class TestReducerInputValueReuse {
     final TestReducer reducer = new TestReducer();
     final ReduceDriver<Text, LongWritable, Text, LongWritable> driver = ReduceDriver
         .newReduceDriver();
+    final ReduceFeeder<Text, LongWritable> feeder = new ReduceFeeder<Text, LongWritable>(driver.getConfiguration());
     driver.setReducer(reducer);
     final List<LongWritable> values = new ArrayList<LongWritable>();
     values.add(new LongWritable(1));
     values.add(new LongWritable(1));
     values.add(new LongWritable(1));
     values.add(new LongWritable(1));
-    driver.withInput(new Text("foo"), values);
+    driver.withInput(feeder.updateInput(new Text("foo"), values));
     driver.withOutput(new Text("foo"), new LongWritable(4));
     driver.runTest();
     assertTrue(reducer.instanceCheckOccurred);
     assertFalse(reducer.instanceCheckFailed);
   }
-
 }

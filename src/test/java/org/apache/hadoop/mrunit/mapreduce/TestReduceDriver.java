@@ -58,11 +58,13 @@ public class TestReduceDriver {
       .none();
   private Reducer<Text, LongWritable, Text, LongWritable> reducer;
   private ReduceDriver<Text, LongWritable, Text, LongWritable> driver;
+  private ReduceFeeder<Text, LongWritable> reduceFeeder;
 
   @Before
   public void setUp() throws Exception {
     reducer = new LongSumReducer<Text>();
     driver = ReduceDriver.newReduceDriver(reducer);
+    reduceFeeder = new ReduceFeeder<Text, LongWritable>(driver.getConfiguration());
   }
 
   @Test
@@ -248,7 +250,20 @@ public class TestReduceDriver {
 
     driver.withAll(inputs).withAllOutput(expected).runTest();
   }
-  
+
+  @Test
+  public void testAddAllElements() throws IOException {
+    final List<Pair<Text, LongWritable>> input = new ArrayList<Pair<Text, LongWritable>>();
+    input.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(IN_A)));
+    input.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(IN_B)));
+
+    final List<Pair<Text, LongWritable>> expected = new ArrayList<Pair<Text, LongWritable>>();
+    expected.add(new Pair<Text, LongWritable>(new Text("foo"),
+        new LongWritable(OUT_VAL)));
+
+    driver.withAllElements(reduceFeeder.sortAndGroup(input)).withAllOutput(expected).runTest();
+  }
+
   @Test
   public void testNoInput() throws IOException {
     driver = ReduceDriver.newReduceDriver();
@@ -309,13 +324,14 @@ public class TestReduceDriver {
   public void testWithCounter() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
         .newReduceDriver();
+    ReduceFeeder<Text, Text> reduceFeeder = new ReduceFeeder<Text, Text>(driver.getConfiguration());
 
     final LinkedList<Text> values = new LinkedList<Text>();
     values.add(new Text("a"));
     values.add(new Text("b"));
 
     driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
-        .withInput(new Text("hie"), values)
+        .withInput(reduceFeeder.updateInput(new Text("hie"), values))
         .withCounter(ReducerWithCounters.Counters.COUNT, 1)
         .withCounter(ReducerWithCounters.Counters.SUM, 2)
         .withCounter("category", "count", 1).withCounter("category", "sum", 2)
@@ -326,13 +342,15 @@ public class TestReduceDriver {
   public void testWithCounterAndNoneMissing() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
         .newReduceDriver();
+    ReduceFeeder<Text, Text> reduceFeeder = new ReduceFeeder<Text, Text>(driver.getConfiguration());
 
     final LinkedList<Text> values = new LinkedList<Text>();
     values.add(new Text("a"));
     values.add(new Text("b"));
 
     driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
-        .withInput(new Text("hie"), values).withStrictCounterChecking()
+        .withInput(reduceFeeder.updateInput(new Text("hie"), values))
+        .withStrictCounterChecking()
         .withCounter(ReducerWithCounters.Counters.COUNT, 1)
         .withCounter(ReducerWithCounters.Counters.SUM, 2)
         .withCounter("category", "count", 1).withCounter("category", "sum", 2)
@@ -343,6 +361,7 @@ public class TestReduceDriver {
   public void testWithCounterAndEnumCounterMissing() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
         .newReduceDriver();
+    ReduceFeeder<Text, Text> reduceFeeder = new ReduceFeeder<Text, Text>(driver.getConfiguration());
 
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Actual counter ("
@@ -354,7 +373,8 @@ public class TestReduceDriver {
     values.add(new Text("b"));
 
     driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
-        .withInput(new Text("hie"), values).withStrictCounterChecking()
+        .withInput(reduceFeeder.updateInput(new Text("hie"), values))
+        .withStrictCounterChecking()
         .withCounter(ReducerWithCounters.Counters.SUM, 2)
         .withCounter("category", "count", 1).withCounter("category", "sum", 2)
         .runTest();
@@ -364,6 +384,7 @@ public class TestReduceDriver {
   public void testWithCounterAndStringCounterMissing() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
         .newReduceDriver();
+    ReduceFeeder<Text, Text> reduceFeeder = new ReduceFeeder<Text, Text>(driver.getConfiguration());
 
     thrown.expectAssertionErrorMessage("1 Error(s): (Actual counter ("
         + "\"category\",\"count\")" + " was not found in expected counters");
@@ -373,7 +394,8 @@ public class TestReduceDriver {
     values.add(new Text("b"));
 
     driver.withReducer(new ReducerWithCounters<Text, Text, Text, Text>())
-        .withInput(new Text("hie"), values).withStrictCounterChecking()
+        .withInput(reduceFeeder.updateInput(new Text("hie"), values))
+        .withStrictCounterChecking()
         .withCounter(ReducerWithCounters.Counters.COUNT, 1)
         .withCounter(ReducerWithCounters.Counters.SUM, 2)
         .withCounter("category", "sum", 2).runTest();
@@ -499,8 +521,9 @@ public class TestReduceDriver {
   public void testWithTaskAttemptUse() throws IOException {
     final ReduceDriver<Text,NullWritable,Text,NullWritable> driver 
       = ReduceDriver.newReduceDriver(new TaskAttemptReducer());
-    driver.withInput(new Text("anything"), Arrays.asList(NullWritable.get())).withOutput(
+    ReduceFeeder<Text, NullWritable> reduceFeeder = new ReduceFeeder<Text, NullWritable>(driver.getConfiguration());
+
+    driver.withInput(reduceFeeder.updateInput(new Text("anything"), Arrays.asList(NullWritable.get()))).withOutput(
         new Text("attempt__0000_r_000000_0"), NullWritable.get()).runTest();
   }
-
 }

@@ -88,4 +88,22 @@ public class StringUtils {
     sb.append(")");
   }
 
+  /**
+   * Transform a list with elements (a1,a2) and (b1,b2) into a string "[(a1,a2),(b1,b2)]".
+   */
+  public static <K, V> void formatPairList(final List<Pair<K, V>> pairs,
+      final StringBuilder sb) {
+    sb.append("[");
+
+    boolean first = true;
+    for (final Pair<K, V> p : pairs) {
+      if (!first) {
+        sb.append(", ");
+      }
+      first = false;
+      sb.append("(" + p.getFirst() + ", " + p.getSecond() + ")");
+    }
+
+    sb.append("]");
+  }
 }
