@@ -199,8 +199,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   }
 
   /**
-   * Identical to setInput() but returns self for fluent programming style
-   * 
+   * Similar to setInput() but uses addInput() instead so accumulates values, and returns
+   * the class instance, conforming to the fluent programming style
+   *
    * @return this
    */
   public T withInput(final K1 key, final V1 val) {
