@@ -236,6 +236,12 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     if (reducer == null) {
       throw new IllegalStateException("No Reducer class was provided");
     }
+    if (driverReused()) {
+      throw new IllegalStateException("Driver reuse not allowed");
+    }
+    else {
+      setUsedOnceStatus();
+    }
   }
 
   @Override

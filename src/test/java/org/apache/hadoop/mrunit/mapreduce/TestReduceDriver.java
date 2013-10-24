@@ -271,6 +271,24 @@ public class TestReduceDriver {
     driver.runTest();
   }
 
+  @Test
+  public void testRepeatRun() throws IOException {
+    final List<LongWritable> vals = new ArrayList<LongWritable>();
+    vals.add(new LongWritable(IN_A));
+    vals.add(new LongWritable(IN_B));
+
+    final List<Pair<Text, List<LongWritable>>> inputs = new ArrayList<Pair<Text, List<LongWritable>>>();
+    inputs.add(new Pair<Text, List<LongWritable>>(new Text("foo"), vals));
+
+    final List<Pair<Text, LongWritable>> expected = new ArrayList<Pair<Text, LongWritable>>();
+    expected.add(new Pair<Text, LongWritable>(new Text("foo"),
+            new LongWritable(OUT_VAL)));
+
+    driver.withAll(inputs).withAllOutput(expected).runTest();
+    thrown.expectMessage(IllegalStateException.class, "Driver reuse not allowed");
+    driver.withAll(inputs).withAllOutput(expected).runTest();
+  }
+
   /**
    * Reducer that counts its values twice; the second iteration according to
    * mapreduce semantics should be empty.

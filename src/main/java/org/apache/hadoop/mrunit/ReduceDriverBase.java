@@ -325,6 +325,12 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
     if (reducer == null) {
       throw new IllegalStateException("No Reducer class was provided");
     }
+    if (driverReused()) {
+      throw new IllegalStateException("Driver reuse not allowed");
+    }
+    else {
+      setUsedOnceStatus();
+    }
   }
 
   @Override
