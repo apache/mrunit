@@ -295,6 +295,12 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     if (mapReducePipeline.isEmpty()) {
       throw new IllegalStateException("No Mappers or Reducers in pipeline");
     }
+    if (driverReused()) {
+      throw new IllegalStateException("Driver reuse not allowed");
+    }
+    else {
+      setUsedOnceStatus();
+    }
 
     for (final Pair<Mapper, Reducer> job : mapReducePipeline) {
       // Create a MapReduceDriver to run this phase of the pipeline.

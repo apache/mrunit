@@ -71,6 +71,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   private Comparator<V2> valueComparator;
   private File tmpDistCacheDir;
   protected CounterWrapper counterWrapper;
+  private boolean hasRun = false;
 
 
   public TestDriver() {
@@ -79,6 +80,20 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     expectedStringCounters = new ArrayList<Pair<Pair<String, String>, Long>>();
   }
 
+  /**
+   * Check to see if this driver is being reused
+   * @return  boolean - true if run() has been called more than once
+   */
+  protected boolean driverReused() {
+    return this.hasRun;
+  }
+
+  /**
+   * Set to true when run() is called to prevent driver reuse
+   */
+  protected void setUsedOnceStatus() {
+    this.hasRun = true;
+  }
   /**
    * Adds output (k, v)* pairs we expect
    * 

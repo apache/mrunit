@@ -286,6 +286,13 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
     if (mapper == null) {
       throw new IllegalStateException("No Mapper class was provided");
     }
+
+    if (driverReused()) {
+      throw new IllegalStateException("Driver reuse not allowed");
+    }
+    else {
+     setUsedOnceStatus();
+    }
   }
 
   @Override

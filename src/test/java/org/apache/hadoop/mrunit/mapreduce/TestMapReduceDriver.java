@@ -657,4 +657,16 @@ public class TestMapReduceDriver {
       .runTest(true); //ordering is important
   }
 
+  @Test
+  public void testRepeatRun() throws IOException {
+    driver.withCombiner(new Reducer<Text, LongWritable, Text, LongWritable>())
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+            .withInput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+    thrown.expectMessage(IllegalStateException.class, "Driver reuse not allowed");
+    driver.runTest();
+  }
+
 }

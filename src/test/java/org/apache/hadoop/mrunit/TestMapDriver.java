@@ -622,4 +622,18 @@ public class TestMapDriver {
         .withOutput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("bar"), new Text("baz")).runTest(false);
   }
+
+  @Test
+  public void testRepeatRun() throws IOException {
+    final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
+    inputs.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
+    inputs.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
+
+    final List<Pair<Text, Text>> outputs = new ArrayList<Pair<Text, Text>>();
+    outputs.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
+    outputs.add(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
+    driver.withAll(inputs).withAllOutput(outputs).runTest();
+    thrown.expectMessage(IllegalStateException.class, "Driver reuse not allowed");
+    driver.withAll(inputs).withAllOutput(outputs).runTest();
+  }
 }
