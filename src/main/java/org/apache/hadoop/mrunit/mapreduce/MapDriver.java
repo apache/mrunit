@@ -29,11 +29,17 @@ import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mrunit.MapDriverBase;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.mapreduce.ContextDriver;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockMapContextWrapper;
+import org.apache.hadoop.mrunit.internal.output.MockMultipleOutputs;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Harness that allows you to test a Mapper instance. You provide the input
@@ -42,15 +48,17 @@ import org.apache.hadoop.mrunit.types.Pair;
  * the harness will deliver the input to the Mapper and will check its outputs
  * against the expected results.
  */
-public class MapDriver<K1, V1, K2, V2> 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(MultipleOutputs.class)
+public class MapDriver<K1, V1, K2, V2>
 extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements ContextDriver {
-  
+
   public static final Log LOG = LogFactory.getLog(MapDriver.class);
 
   private Mapper<K1, V1, K2, V2> myMapper;
   private Counters counters;
   /**
-   * Context creator, do not use directly, always use the 
+   * Context creator, do not use directly, always use the
    * the getter as it lazily creates the object in the case
    * the setConfiguration() method will be used by the user.
    */
@@ -68,7 +76,7 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
 
   /**
    * Set the Mapper instance to use with this test driver
-   * 
+   *
    * @param m
    *          the Mapper instance to use
    */
@@ -97,7 +105,7 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
 
   /**
    * Sets the counters object to use for this test.
-   * 
+   *
    * @param ctrs
    *          The counters object to use.
    */
@@ -115,7 +123,7 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
   /**
    * Configure {@link Mapper} to output with a real {@link OutputFormat}. Set
    * {@link InputFormat} to read output back in for use with run* methods
-   * 
+   *
    * @param outputFormatClass
    * @param inputFormatClass
    * @return this for fluent style
@@ -134,6 +142,12 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
       preRunChecks(myMapper);
       initDistributedCache();
       MockMapContextWrapper<K1, V1, K2, V2> wrapper = getContextWrapper();
+      mos = new MockMultipleOutputs(wrapper.getMockContext());
+      try {
+        PowerMockito.whenNew(MultipleOutputs.class).withArguments(wrapper.getMockContext()).thenReturn(mos);
+      } catch (Exception e) {
+          throw new RuntimeException(e);
+      }
       myMapper.run(wrapper.getMockContext());
       return wrapper.getOutputs();
     } catch (final InterruptedException ie) {
@@ -147,7 +161,7 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
   public String toString() {
     return "MapDriver (0.20+) (" + myMapper + ")";
   }
-  
+
   private MockMapContextWrapper<K1, V1, K2, V2> getContextWrapper() {
     if(wrapper == null) {
       wrapper = new MockMapContextWrapper<K1, V1, K2, V2>(getConfiguration(),
@@ -155,19 +169,19 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
     }
     return wrapper;
   }
-  
+
   /**
    * <p>Obtain Context object for furthering mocking with Mockito.
    * For example, causing write() to throw an exception:</p>
-   * 
+   *
    * <pre>
    * import static org.mockito.Matchers.*;
    * import static org.mockito.Mockito.*;
    * doThrow(new IOException()).when(context).write(any(), any());
    * </pre>
-   * 
+   *
    * <p>Or implement other logic:</p>
-   * 
+   *
    * <pre>
    * import static org.mockito.Matchers.*;
    * import static org.mockito.Mockito.*;
@@ -187,7 +201,7 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
   /**
    * Returns a new MapDriver without having to specify the generic types on the
    * right hand side of the object create statement.
-   * 
+   *
    * @return new MapDriver
    */
   public static <K1, V1, K2, V2> MapDriver<K1, V1, K2, V2> newMapDriver() {
@@ -197,7 +211,7 @@ extends MapDriverBase<K1, V1, K2, V2, MapDriver<K1, V1, K2, V2> > implements Con
   /**
    * Returns a new MapDriver without having to specify the generic types on the
    * right hand side of the object create statement.
-   * 
+   *
    * @param mapper
    *          passed to MapDriver constructor
    * @return new MapDriver

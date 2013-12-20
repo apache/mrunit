@@ -25,6 +25,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.io.Serialization;
+import org.apache.hadoop.mrunit.internal.output.MockMultipleOutputs;
 import org.apache.hadoop.mrunit.internal.util.DistCacheUtils;
 import org.apache.hadoop.mrunit.internal.util.Errors;
 import org.apache.hadoop.mrunit.internal.util.PairComparator;
@@ -54,23 +56,25 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   protected List<Pair<Enum<?>, Long>> expectedEnumCounters;
   protected List<Pair<Pair<String, String>, Long>> expectedStringCounters;
   /**
-   * Configuration object, do not use directly, always use the 
+   * Configuration object, do not use directly, always use the
    * the getter as it lazily creates the object in the case
    * the setConfiguration() method will be used by the user.
    */
   private Configuration configuration;
   /**
-   * Serialization object, do not use directly, always use the 
+   * Serialization object, do not use directly, always use the
    * the getter as it lazily creates the object in the case
    * the setConfiguration() method will be used by the user.
    */
   private Serialization serialization;
-  
+
   private Configuration outputSerializationConfiguration;
   private Comparator<K2> keyComparator;
   private Comparator<V2> valueComparator;
   private File tmpDistCacheDir;
   protected CounterWrapper counterWrapper;
+  protected MockMultipleOutputs mos;
+  protected Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> expectedMultipleOutputs;
   private boolean hasRun = false;
 
 
@@ -78,6 +82,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     expectedOutputs = new ArrayList<Pair<K2, V2>>();
     expectedEnumCounters = new ArrayList<Pair<Enum<?>, Long>>();
     expectedStringCounters = new ArrayList<Pair<Pair<String, String>, Long>>();
+    expectedMultipleOutputs = new HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>>();
   }
 
   /**
@@ -96,7 +101,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
   /**
    * Adds output (k, v)* pairs we expect
-   * 
+   *
    * @param outputRecords
    *          The (k, v)* pairs to add
    */
@@ -108,7 +113,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Functions like addAllOutput() but returns self for fluent programming style
-   * 
+   *
    * @param outputRecords
    * @return this
    */
@@ -120,7 +125,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Adds an output (k, v) pair we expect
-   * 
+   *
    * @param outputRecord
    *          The (k, v) pair to add
    */
@@ -139,7 +144,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   * 
+   *
    * @param outputRecord
    * @return this
    */
@@ -150,7 +155,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Works like addOutput() but returns self for fluent programming style
-   * 
+   *
    * @return this
    */
   public T withOutput(final K2 key, final V2 val) {
@@ -161,7 +166,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   /**
    * Expects an input of the form "key \t val" Forces the output types to
    * Text.
-   * 
+   *
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    * @deprecated No replacement due to lack of type safety and incompatibility
@@ -175,7 +180,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Identical to addOutputFromString, but with a fluent programming style
-   * 
+   *
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -223,7 +228,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     expectedEnumCounters.clear();
     expectedStringCounters.clear();
   }
-  
+
   @SuppressWarnings("unchecked")
   protected T thisAsTestDriver() {
     return (T) this;
@@ -231,7 +236,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Register expected enumeration based counter value
-   * 
+   *
    * @param e
    *          Enumeration based counter
    * @param expectedValue
@@ -246,7 +251,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Register expected name based counter value
-   * 
+   *
    * @param group
    *          Counter group
    * @param name
@@ -266,7 +271,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * Change counter checking. After this method is called, the test will fail if
    * an actual counter is not matched by an expected counter. By default, the
    * test only check that every expected counter is there.
-   * 
+   *
    * This mode allows you to ensure that no unexpected counters has been
    * declared.
    */
@@ -318,8 +323,8 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   /**
    * @param configuration
    *          The configuration object that will given to the mapper associated
-   *          with the driver. This method should only be called directly after 
-   *          the constructor as the internal state of the driver depends on the 
+   *          with the driver. This method should only be called directly after
+   *          the constructor as the internal state of the driver depends on the
    *          configuration object
    * @deprecated
    *          Use getConfiguration() to set configuration items as opposed to
@@ -337,7 +342,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * Get the {@link Configuration} to use when copying output for use with run*
    * methods or for the InputFormat when reading output back in when setting a
    * real OutputFormat.
-   * 
+   *
    * @return outputSerializationConfiguration, null when no
    *         outputSerializationConfiguration is set
    */
@@ -351,7 +356,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * real OutputFormat. When this configuration is not set, MRUnit will use the
    * configuration set with {@link #withConfiguration(Configuration)} or
    * {@link #setConfiguration(Configuration)}
-   * 
+   *
    * @param configuration
    */
   public void setOutputSerializationConfiguration(
@@ -365,7 +370,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * real OutputFormat. When this configuration is not set, MRUnit will use the
    * configuration set with {@link #withConfiguration(Configuration)} or
    * {@link #setConfiguration(Configuration)}
-   * 
+   *
    * @param configuration
    * @return this for fluent style
    */
@@ -376,10 +381,10 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
 
   /**
-   * Adds a file to be put on the distributed cache. 
+   * Adds a file to be put on the distributed cache.
    * The path may be relative and will try to be resolved from
-   * the classpath of the test. 
-   *  
+   * the classpath of the test.
+   *
    * @param path path to the file
    */
   public void addCacheFile(String path) {
@@ -419,10 +424,10 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
 
   /**
-   * Adds an archive to be put on the distributed cache. 
+   * Adds an archive to be put on the distributed cache.
    * The path may be relative and will try to be resolved from
-   * the classpath of the test. 
-   *  
+   * the classpath of the test.
+   *
    * @param path path to the archive
    */
   public void addCacheArchive(String path) {
@@ -446,10 +451,10 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
 
   /**
-   * Adds a file to be put on the distributed cache. 
+   * Adds a file to be put on the distributed cache.
    * The path may be relative and will try to be resolved from
-   * the classpath of the test. 
-   *  
+   * the classpath of the test.
+   *
    * @param file path to the file
    * @return the driver
    */
@@ -469,10 +474,10 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   }
 
   /**
-   * Adds an archive to be put on the distributed cache. 
+   * Adds an archive to be put on the distributed cache.
    * The path may be relative and will try to be resolved from
-   * the classpath of the test. 
-   *  
+   * the classpath of the test.
+   *
    * @param archive path to the archive
    * @return the driver
    */
@@ -493,10 +498,10 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Runs the test but returns the result set instead of validating it (ignores
-   * any addOutput(), etc calls made before this). 
-   * 
-   * Also optionally performs counter validation. 
-   * 
+   * any addOutput(), etc calls made before this).
+   *
+   * Also optionally performs counter validation.
+   *
    * @param validateCounters whether to run automatic counter validation
    * @return the list of (k, v) pairs returned as output from the test
    */
@@ -514,15 +519,15 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     }
     return serialization;
   }
-  
+
   /**
    * Initialises the test distributed cache if required. This
    * process is referred to as "localizing" by Hadoop, but since
-   * this is a unit test all files/archives are already local. 
-   * 
-   * Cached files are not moved but cached archives are extracted 
-   * into a temporary directory. 
-   * 
+   * this is a unit test all files/archives are already local.
+   *
+   * Cached files are not moved but cached archives are extracted
+   * into a temporary directory.
+   *
    * @throws IOException
    */
   protected void initDistributedCache() throws IOException {
@@ -542,7 +547,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
         localFiles.add(filePath);
       }
       if (!localFiles.isEmpty()) {
-        DistCacheUtils.addLocalFiles(conf, 
+        DistCacheUtils.addLocalFiles(conf,
             DistCacheUtils.stringifyPathList(localFiles));
       }
     }
@@ -556,7 +561,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
             archivePath, tmpDistCacheDir));
       }
       if (!localArchives.isEmpty()) {
-        DistCacheUtils.addLocalArchives(conf, 
+        DistCacheUtils.addLocalArchives(conf,
             DistCacheUtils.stringifyPathList(localArchives));
       }
     }
@@ -565,26 +570,26 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   /**
    * Checks whether the distributed cache has been "localized", i.e.
    * archives extracted and paths moved so that they can be accessed
-   * through {@link DistributedCache#getLocalCacheArchives()} and 
+   * through {@link DistributedCache#getLocalCacheArchives()} and
    * {@link DistributedCache#getLocalCacheFiles()}
-   * 
+   *
    * @param conf the configuration
    * @return true if the cache is initialised
    * @throws IOException
    */
-  private boolean isDistributedCacheInitialised(Configuration conf) 
+  private boolean isDistributedCacheInitialised(Configuration conf)
       throws IOException {
     return DistributedCache.getLocalCacheArchives(conf) != null ||
         DistributedCache.getLocalCacheFiles(conf) != null;
   }
 
   /**
-   * Cleans up the distributed cache test by deleting the 
+   * Cleans up the distributed cache test by deleting the
    * temporary directory and any extracted cache archives
    * contained within
-   * 
-   * @throws IOException 
-   *  if the local fs handle cannot be retrieved 
+   *
+   * @throws IOException
+   *  if the local fs handle cannot be retrieved
    */
   protected void cleanupDistributedCache() throws IOException {
     if (tmpDistCacheDir != null) {
@@ -598,7 +603,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   /**
    * Runs the test but returns the result set instead of validating it (ignores
    * any addOutput(), etc calls made before this)
-   * 
+   *
    * @return the list of (k, v) pairs returned as output from the test
    */
   public abstract List<Pair<K2, V2>> run() throws IOException;
@@ -612,7 +617,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Runs the test and validates the results
-   * 
+   *
    * @param orderMatters
    *          Whether or not output ordering is important
    */
@@ -623,6 +628,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     final List<Pair<K2, V2>> outputs = run();
     validate(outputs, orderMatters);
     validate(counterWrapper);
+    validate(mos);
   }
 
   /**
@@ -634,7 +640,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Split "key \t val" into Pair(Text(key), Text(val))
-   * 
+   *
    * @param tabSeparatedPair
    * @return
    */
@@ -644,7 +650,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Split "val,val,val,val..." into a List of Text(val) objects.
-   * 
+   *
    * @param commaDelimList
    *          A list of values separated by commas
    */
@@ -663,7 +669,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * check the outputs against the expected inputs in record
-   * 
+   *
    * @param outputs
    *          The actual output (k, v) pairs
    * @param orderMatters
@@ -760,7 +766,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
       checkTypesAndLogError(outputs, output, actualPositions.get(output),
           orderMatters, errors, "Received unexpected output");
     }
-    
+
     errors.assertNone();
   }
 
@@ -844,13 +850,89 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     return valuePositions;
   }
 
-  
+
   /**
    * Check counters.
    */
   protected void validate(final CounterWrapper counterWrapper) {
     validateExpectedAgainstActual(counterWrapper);
     validateActualAgainstExpected(counterWrapper);
+  }
+  /**
+   * Check Multiple Outputs.
+   */
+  protected void validate(final MockMultipleOutputs mos) {
+    final Errors errors = new Errors(LOG);
+
+    if (mos!=null && !mos.isEmpty() && expectedMultipleOutputs.isEmpty()) {
+        errors.record("Expected no multiple outputs; got %d named multipleOutputs.", mos.getMultipleOutputsCount());
+    }
+
+    Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> actuals = buildActualMultipleOutputs(mos);
+    Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> expects = buildExpectedMultipleOutputs();
+
+
+    for (String namedOutput : expectedMultipleOutputs.keySet()) {
+        List<Pair<? extends Comparable, ? extends Comparable>> expectedValues = expects.remove(namedOutput);
+        List<Pair<? extends Comparable, ? extends Comparable>> actualValues = actuals.remove(namedOutput);
+        if (actualValues == null) {
+            errors.record("Missing expected outputs for namedOutput '%s'", namedOutput);
+            actualValues = new ArrayList();
+        }
+
+        int expectedSize = expectedValues.size();
+        int actualSize = actualValues.size();
+        int i = 0;
+
+        while (expectedSize > i || actualSize > i) {
+            if (expectedSize > i && actualSize > i) {
+                Pair<? extends Comparable, ? extends Comparable> expected = expectedValues.get(i);
+                Pair<? extends Comparable, ? extends Comparable> actual = actualValues.get(i);
+
+                if (!expected.equals(actual)) {
+                    errors.record("Expected output %s for namedOutput '%s' at position %d, but found $s",
+                            expected.toString(), namedOutput, i, actual.toString());
+                }
+            } else if (expectedSize >i) {
+                Pair<? extends Comparable, ? extends Comparable> expected = expectedValues.get(i);
+                errors.record("Missing expected output %s for namedOutput '%s' at position %d.",
+                        expected.toString(), namedOutput, i);
+            } else {
+                Pair<? extends Comparable, ? extends Comparable> actual = actualValues.get(i);
+                errors.record("Received unexpected output %s for namedOutput '%s' at position %d.",
+                        actual.toString(), namedOutput, i);
+            }
+            i++;
+        }
+    }
+
+    //The rest of values in mos, if any
+    for (String namedOutput : actuals.keySet()) {
+        List<Pair<? extends Comparable, ? extends Comparable>> actualValues = actuals.remove(namedOutput);
+        for (Pair pair : actualValues) {
+            errors.record("Received unexpected output %s for unexpected namedOutput '%s'", pair.toString(), namedOutput);
+        }
+    }
+    errors.assertNone();
+  }
+
+  private Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> buildActualMultipleOutputs(MockMultipleOutputs mos) {
+      HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>> actuals = new HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>>();
+      if (mos != null) {
+        List<String> multipleOutputsNames = mos.getMultipleOutputsNames();
+        for (String name : multipleOutputsNames) {
+          actuals.put(name, mos.getMultipleOutputs(name));
+        }
+      }
+      return actuals;
+  }
+
+  private Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> buildExpectedMultipleOutputs() {
+      HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>> result = new HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>>();
+        for (String name : expectedMultipleOutputs.keySet()) {
+          result.put(name, expectedMultipleOutputs.get(name));
+        }
+      return result;
   }
 
   /**
@@ -873,32 +955,32 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   /**
    * Check that provided actual counters contain all expected counters with proper
    * values.
-   * 
+   *
    * @param counterWrapper
    */
   private void validateExpectedAgainstActual(
       final CounterWrapper counterWrapper) {
     final Errors errors = new Errors(LOG);
-  
+
     // Firstly check enumeration based counters
     for (final Pair<Enum<?>, Long> expected : expectedEnumCounters) {
       final long actualValue = counterWrapper.findCounterValue(expected
           .getFirst());
-  
+
       if (actualValue != expected.getSecond()) {
         errors.record("Counter %s.%s has value %d instead of expected %d",
             expected.getFirst().getDeclaringClass().getCanonicalName(),
             expected.getFirst().toString(), actualValue, expected.getSecond());
       }
     }
-  
+
     // Second string based counters
     for (final Pair<Pair<String, String>, Long> expected : expectedStringCounters) {
       final Pair<String, String> counter = expected.getFirst();
-  
+
       final long actualValue = counterWrapper.findCounterValue(
           counter.getFirst(), counter.getSecond());
-  
+
       if (actualValue != expected.getSecond()) {
         errors
             .record(
@@ -907,13 +989,13 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
                 expected.getSecond());
       }
     }
-    
+
     errors.assertNone();
   }
 
   /**
    * Check that provided actual counters are all expected.
-   * 
+   *
    * @param counterWrapper
    */
   private void validateActualAgainstExpected(final CounterWrapper counterWrapper) {
@@ -942,5 +1024,56 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   protected static <KEYIN, VALUEIN> void formatPairList(final List<Pair<KEYIN,VALUEIN>> pairs,
       final StringBuilder sb) {
     StringUtils.formatPairList(pairs, sb);
+  }
+
+  /**
+   * Adds an output (k, v) pair we expect as Multiple output
+   *
+   * @param namedOutput
+   * @param outputRecord
+   */
+  public <K extends Comparable, V extends Comparable> void addMultiOutput(String namedOutput, final Pair<K, V> outputRecord) {
+    addMultiOutput(namedOutput, outputRecord.getFirst(), outputRecord.getSecond());
+  }
+
+  /**
+   * add a (k, v) pair we expect as Multiple output
+   *
+   * @param namedOutput
+   * @param key
+   * @param val
+   */
+  public <K extends Comparable, V extends Comparable> void addMultiOutput(final String namedOutput, final K key, final V val) {
+    List<Pair<? extends Comparable, ? extends Comparable>> outputs = expectedMultipleOutputs.get(namedOutput);
+    if (outputs == null) {
+      outputs = new ArrayList<Pair<? extends Comparable, ? extends Comparable>>();
+      expectedMultipleOutputs.put(namedOutput, outputs);
+    }
+    outputs.add(new Pair<K, V>(key, val));
+  }
+
+  /**
+   * works like addMultiOutput() but returns self for fluent programming style
+   *
+   * @param namedOutput
+   * @param key
+   * @param value
+   * @return
+   */
+  public <K extends Comparable, V extends Comparable> T withMultiOutput(final String namedOutput, final K key, final V value) {
+    addMultiOutput(namedOutput, key, value);
+    return thisAsTestDriver();
+  }
+
+  /**
+   * Works like addMultiOutput(), but returns self for fluent programming style
+   *
+   * @param namedOutput
+   * @param outputRecord
+   * @return
+   */
+  public <K extends Comparable, V extends Comparable> T withMultiOutput(String namedOutput, final Pair<K, V> outputRecord) {
+    addMultiOutput(namedOutput, outputRecord);
+    return thisAsTestDriver();
   }
 }
