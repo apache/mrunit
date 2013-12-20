@@ -30,12 +30,18 @@ import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mrunit.ReduceDriverBase;
 import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
 import org.apache.hadoop.mrunit.internal.mapreduce.ContextDriver;
 import org.apache.hadoop.mrunit.internal.mapreduce.MockReduceContextWrapper;
+import org.apache.hadoop.mrunit.internal.output.MockMultipleOutputs;
 import org.apache.hadoop.mrunit.types.KeyValueReuseList;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Harness that allows you to test a Reducer instance. You provide a key and a
@@ -45,6 +51,8 @@ import org.apache.hadoop.mrunit.types.Pair;
  * will deliver the input to the Reducer and will check its outputs against the
  * expected results.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(MultipleOutputs.class)
 public class ReduceDriver<K1, V1, K2, V2> extends
     ReduceDriverBase<K1, V1, K2, V2, ReduceDriver<K1, V1, K2, V2>> implements
     ContextDriver {
@@ -56,7 +64,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   protected Reducer<K1, V1, K2, V2> myReducer;
   private Counters counters;
   /**
-   * Context creator, do not use directly, always use the 
+   * Context creator, do not use directly, always use the
    * the getter as it lazily creates the object in the case
    * the setConfiguration() method will be used by the user.
    */
@@ -150,7 +158,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Sets the reducer object to use for this test
-   * 
+   *
    * @param r
    *          The reducer object to use
    */
@@ -160,7 +168,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to setReducer(), but with fluent programming style
-   * 
+   *
    * @param r
    *          The Reducer to use
    * @return this
@@ -183,7 +191,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Sets the counters object to use for this test.
-   * 
+   *
    * @param ctrs
    *          The counters object to use.
    */
@@ -201,7 +209,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   /**
    * Configure {@link Reducer} to output with a real {@link OutputFormat}. Set
    * {@link InputFormat} to read output back in for use with run* methods
-   * 
+   *
    * @param outputFormatClass
    * @param inputFormatClass
    * @return this for fluent style
@@ -250,6 +258,13 @@ public class ReduceDriver<K1, V1, K2, V2> extends
       preRunChecks(myReducer);
       initDistributedCache();
       MockReduceContextWrapper<K1, V1, K2, V2> wrapper = getContextWrapper();
+      mos = new MockMultipleOutputs(wrapper.getMockContext());
+      try {
+        PowerMockito.whenNew(MultipleOutputs.class).withArguments(wrapper.getMockContext()).thenReturn(mos);
+      } catch(Exception ex) {
+          //Wrap the exception to avoid changing the method signature
+          throw new IOException(ex);
+      }
       myReducer.run(wrapper.getMockContext());
       return wrapper.getOutputs();
     } catch (final InterruptedException ie) {
@@ -275,15 +290,15 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   /**
    * <p>Obtain Context object for furthering mocking with Mockito.
    * For example, causing write() to throw an exception:</p>
-   * 
+   *
    * <pre>
    * import static org.mockito.Matchers.*;
    * import static org.mockito.Mockito.*;
    * doThrow(new IOException()).when(context).write(any(), any());
    * </pre>
-   * 
+   *
    * <p>Or implement other logic:</p>
-   * 
+   *
    * <pre>
    * import static org.mockito.Matchers.*;
    * import static org.mockito.Mockito.*;
@@ -303,7 +318,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   /**
    * Returns a new ReduceDriver without having to specify the generic types on
    * the right hand side of the object create statement.
-   * 
+   *
    * @return new ReduceDriver
    */
   public static <K1, V1, K2, V2> ReduceDriver<K1, V1, K2, V2> newReduceDriver() {
@@ -313,8 +328,8 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   /**
    * Returns a new ReduceDriver without having to specify the generic types on
    * the right hand side of the object create statement.
-   * 
-   * 
+   *
+   *
    * @param reducer
    *          passed to ReduceDriver constructor
    * @return new ReduceDriver
