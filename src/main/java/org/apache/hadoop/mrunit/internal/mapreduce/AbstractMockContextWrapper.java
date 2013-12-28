@@ -131,6 +131,13 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
           return DistributedCache.getLocalCacheFiles(configuration);
         }      
       });
+      when(context.getNumReduceTasks()).thenAnswer(new Answer<Integer>() {
+        @Override
+        @SuppressWarnings("deprecation")
+        public Integer answer(InvocationOnMock invocation) throws Throwable {
+          return configuration.getInt("mapred.reduce.tasks", 1);
+        }
+      });
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (InterruptedException e) {
