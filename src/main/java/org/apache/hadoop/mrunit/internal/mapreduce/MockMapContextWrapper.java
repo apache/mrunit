@@ -33,6 +33,7 @@ import org.apache.hadoop.mapreduce.TaskID;
 import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -71,7 +72,7 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
   @Override
   @SuppressWarnings({ "unchecked" })
   protected Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context create() {
-    final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Mapper.Context.class);
+    final Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context context = mock(org.apache.hadoop.mapreduce.Mapper.Context.class, Mockito.RETURNS_DEEP_STUBS);
 
     createCommon(context, driver, mockOutputCreator);
 
