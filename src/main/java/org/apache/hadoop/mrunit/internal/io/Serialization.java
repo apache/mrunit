@@ -17,6 +17,8 @@
  */
 package org.apache.hadoop.mrunit.internal.io;
 
+import com.google.common.base.Preconditions;
+
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -58,16 +60,20 @@ public class Serialization {
     final Class<?> clazz = orig.getClass();
     final Serializer<Object> serializer;
     final Deserializer<Object> deserializer;
+    String errorMsg = "No applicable class implementing Serialization in conf "
+                      + "at io.serializations: " + clazz;
     try {
       serializer = (Serializer<Object>) serializationFactory
           .getSerializer(clazz);
       deserializer = (Deserializer<Object>) serializationFactory
           .getDeserializer(clazz);
+    // hadoop 1.x will throw
     } catch (NullPointerException e) {
-      throw new IllegalStateException(
-          "No applicable class implementing Serialization in conf at io.serializations for "
-              + orig.getClass(), e);
+      throw new IllegalStateException(errorMsg, e);
     }
+    // hadoop 2.x will return a null
+    Preconditions.checkState(serializer != null, errorMsg);
+    Preconditions.checkState(deserializer != null, errorMsg);
     try {
       final DataOutputBuffer outputBuffer = new DataOutputBuffer();
       serializer.open(outputBuffer);

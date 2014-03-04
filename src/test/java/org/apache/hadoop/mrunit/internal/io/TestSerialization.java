@@ -17,12 +17,13 @@
  */
 package org.apache.hadoop.mrunit.internal.io;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mrunit.internal.io.Serialization;
+import org.apache.hadoop.io.Writable;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 public class TestSerialization {
 
@@ -56,6 +57,14 @@ public class TestSerialization {
     final Integer copy = (Integer) serialization.copy(int1, int2);
     assertEquals(int1, copy);
     assertEquals(new Integer(2), int2);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void testCopyExceptionIfNoSerializer() {
+    final Configuration conf = new Configuration();
+    Serialization serialization = new Serialization(conf);
+    // there's no implicit serializer for Integer, so it should throw ISE
+    serialization.copy(1, 1);
   }
 
 }
