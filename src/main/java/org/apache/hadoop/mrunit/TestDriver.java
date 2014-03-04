@@ -22,14 +22,9 @@ import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNu
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -74,7 +69,8 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   private File tmpDistCacheDir;
   protected CounterWrapper counterWrapper;
   protected MockMultipleOutputs mos;
-  protected Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> expectedMultipleOutputs;
+  protected Map<String, List<Pair<?, ?>>> expectedMultipleOutputs;
+  protected Map<String, List<Pair<?, ?>>> expectedPathOutputs;
   private boolean hasRun = false;
 
 
@@ -82,7 +78,8 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
     expectedOutputs = new ArrayList<Pair<K2, V2>>();
     expectedEnumCounters = new ArrayList<Pair<Enum<?>, Long>>();
     expectedStringCounters = new ArrayList<Pair<Pair<String, String>, Long>>();
-    expectedMultipleOutputs = new HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>>();
+    expectedMultipleOutputs = new HashMap<String, List<Pair<?, ? >>>();
+	expectedPathOutputs = new HashMap<String, List<Pair<?, ?>>>();
   }
 
   /**
@@ -861,78 +858,136 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
   /**
    * Check Multiple Outputs.
    */
+
+  protected void validateOutputList(String name, Errors errors,
+      Map<String, List<Pair<?, ?>>> actuals,
+      Map<String, List<Pair<?, ?>>> expects) {
+
+    List<String> removeList = new ArrayList<String>();
+
+    for (String key : expects.keySet()) {
+      removeList.add(key);
+      List<Pair<?, ?>> expectedValues = expects.get(key);
+      List<Pair<?, ?>> actualValues = actuals.get(key);
+
+      if (actualValues == null) {
+        errors.record("Missing expected outputs for %s '%s'", name, key);
+        actualValues = new ArrayList();
+      }
+
+      int expectedSize = expectedValues.size();
+      int actualSize = actualValues.size();
+      int i = 0;
+
+      while (expectedSize > i || actualSize > i) {
+        if (expectedSize > i && actualSize > i) {
+          Pair<?, ?> expected = expectedValues.get(i);
+          Pair<?, ?> actual = actualValues.get(i);
+
+          if (!expected.equals(actual)) {
+            errors.record(
+                "Expected output %s for %s '%s' at position %d, but found %s",
+                expected.toString(), name, key, i, actual.toString());
+          }
+        } else if (expectedSize > i) {
+          Pair<?, ?> expected = expectedValues.get(i);
+          errors.record(
+              "Missing expected output %s for %s '%s' at position %d.",
+              expected.toString(), name, key, i);
+        } else {
+          Pair<?, ?> actual = actualValues.get(i);
+          errors.record(
+              "Received unexpected output %s for %s '%s' at position %d.",
+              actual.toString(), name, key, i);
+        }
+        i++;
+      }
+    }
+
+    for (String processedOutput : removeList) {
+      actuals.remove(processedOutput);
+    }
+
+    // The rest of values in actuals, if any
+    for (String key : actuals.keySet()) {
+      List<Pair<?, ?>> actualValues = actuals.get(key);
+      for (Pair pair : actualValues) {
+        errors.record("Received unexpected output %s for unexpected %s '%s'",
+            pair.toString(), name, key);
+      }
+    }
+  }
+
   protected void validate(final MockMultipleOutputs mos) {
     final Errors errors = new Errors(LOG);
 
-    if (mos!=null && !mos.isEmpty() && expectedMultipleOutputs.isEmpty()) {
-        errors.record("Expected no multiple outputs; got %d named multipleOutputs.", mos.getMultipleOutputsCount());
+    if (mos != null && !mos.isNamedOutputsEmpty()
+        && expectedMultipleOutputs.isEmpty()) {
+      errors.record(
+          "Expected no multiple outputs; got %d named MultipleOutputs.",
+          mos.getMultipleOutputsCount());
     }
 
-    Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> actuals = buildActualMultipleOutputs(mos);
-    Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> expects = buildExpectedMultipleOutputs();
+    Map<String, List<Pair<?, ?>>> actuals = buildActualMultipleOutputs(mos);
+    Map<String, List<Pair<?, ?>>> expects = buildExpectedMultipleOutputs();
 
+    validateOutputList("namedOutput", errors, actuals, expects);
 
-    for (String namedOutput : expectedMultipleOutputs.keySet()) {
-        List<Pair<? extends Comparable, ? extends Comparable>> expectedValues = expects.remove(namedOutput);
-        List<Pair<? extends Comparable, ? extends Comparable>> actualValues = actuals.remove(namedOutput);
-        if (actualValues == null) {
-            errors.record("Missing expected outputs for namedOutput '%s'", namedOutput);
-            actualValues = new ArrayList();
-        }
+    actuals.clear();
+    expects.clear();
 
-        int expectedSize = expectedValues.size();
-        int actualSize = actualValues.size();
-        int i = 0;
-
-        while (expectedSize > i || actualSize > i) {
-            if (expectedSize > i && actualSize > i) {
-                Pair<? extends Comparable, ? extends Comparable> expected = expectedValues.get(i);
-                Pair<? extends Comparable, ? extends Comparable> actual = actualValues.get(i);
-
-                if (!expected.equals(actual)) {
-                    errors.record("Expected output %s for namedOutput '%s' at position %d, but found $s",
-                            expected.toString(), namedOutput, i, actual.toString());
-                }
-            } else if (expectedSize >i) {
-                Pair<? extends Comparable, ? extends Comparable> expected = expectedValues.get(i);
-                errors.record("Missing expected output %s for namedOutput '%s' at position %d.",
-                        expected.toString(), namedOutput, i);
-            } else {
-                Pair<? extends Comparable, ? extends Comparable> actual = actualValues.get(i);
-                errors.record("Received unexpected output %s for namedOutput '%s' at position %d.",
-                        actual.toString(), namedOutput, i);
-            }
-            i++;
-        }
+    if (mos != null && !mos.isPathOutputsEmpty()
+        && expectedPathOutputs.isEmpty()) {
+      errors.record("Expected no pathOutputs; got %d pathOutputs.",
+          mos.getPathOutputsCount());
     }
 
-    //The rest of values in mos, if any
-    for (String namedOutput : actuals.keySet()) {
-        List<Pair<? extends Comparable, ? extends Comparable>> actualValues = actuals.remove(namedOutput);
-        for (Pair pair : actualValues) {
-            errors.record("Received unexpected output %s for unexpected namedOutput '%s'", pair.toString(), namedOutput);
-        }
-    }
+    actuals = buildActualPathOutputs(mos);
+    expects = buildExpectedPathOutputs();
+
+    validateOutputList("PathOutput", errors, actuals, expects);
+
     errors.assertNone();
   }
 
-  private Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> buildActualMultipleOutputs(MockMultipleOutputs mos) {
-      HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>> actuals = new HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>>();
-      if (mos != null) {
-        List<String> multipleOutputsNames = mos.getMultipleOutputsNames();
-        for (String name : multipleOutputsNames) {
-          actuals.put(name, mos.getMultipleOutputs(name));
-        }
+  private Map<String, List<Pair<?, ?>>> buildActualMultipleOutputs(
+      MockMultipleOutputs mos) {
+    HashMap<String, List<Pair<?, ?>>> actuals = new HashMap<String, List<Pair<?, ?>>>();
+    if (mos != null) {
+      List<String> multipleOutputsNames = mos.getMultipleOutputsNames();
+      for (String name : multipleOutputsNames) {
+        actuals.put(name, mos.getMultipleOutputs(name));
       }
-      return actuals;
+    }
+    return actuals;
   }
 
-  private Map<String, List<Pair<? extends Comparable, ? extends Comparable>>> buildExpectedMultipleOutputs() {
-      HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>> result = new HashMap<String, List<Pair<? extends Comparable, ? extends Comparable>>>();
-        for (String name : expectedMultipleOutputs.keySet()) {
-          result.put(name, expectedMultipleOutputs.get(name));
-        }
-      return result;
+  private Map<String, List<Pair<?, ?>>> buildExpectedMultipleOutputs() {
+    HashMap<String, List<Pair<?, ?>>> result = new HashMap<String, List<Pair<?, ?>>>();
+    for (String name : expectedMultipleOutputs.keySet()) {
+      result.put(name, expectedMultipleOutputs.get(name));
+    }
+    return result;
+  }
+
+  private Map<String, List<Pair<?, ?>>> buildActualPathOutputs(
+      MockMultipleOutputs mos) {
+    HashMap<String, List<Pair<?, ?>>> actuals = new HashMap<String, List<Pair<?, ?>>>();
+    if (mos != null) {
+      List<String> outputPaths = mos.getOutputPaths();
+      for (String path : outputPaths) {
+        actuals.put(path, mos.getPathOutputs(path));
+      }
+    }
+    return actuals;
+  }
+
+  private Map<String, List<Pair<?, ?>>> buildExpectedPathOutputs() {
+    HashMap<String, List<Pair<?, ?>>> result = new HashMap<String, List<Pair<?, ?>>>();
+    for (String name : expectedPathOutputs.keySet()) {
+      result.put(name, expectedPathOutputs.get(name));
+    }
+    return result;
   }
 
   /**
@@ -1032,7 +1087,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * @param namedOutput
    * @param outputRecord
    */
-  public <K extends Comparable, V extends Comparable> void addMultiOutput(String namedOutput, final Pair<K, V> outputRecord) {
+  public <K, V> void addMultiOutput(String namedOutput, final Pair<K, V> outputRecord) {
     addMultiOutput(namedOutput, outputRecord.getFirst(), outputRecord.getSecond());
   }
 
@@ -1043,10 +1098,10 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * @param key
    * @param val
    */
-  public <K extends Comparable, V extends Comparable> void addMultiOutput(final String namedOutput, final K key, final V val) {
-    List<Pair<? extends Comparable, ? extends Comparable>> outputs = expectedMultipleOutputs.get(namedOutput);
+  public <K, V> void addMultiOutput(final String namedOutput, final K key, final V val) {
+    List<Pair<?, ?>> outputs = expectedMultipleOutputs.get(namedOutput);
     if (outputs == null) {
-      outputs = new ArrayList<Pair<? extends Comparable, ? extends Comparable>>();
+      outputs = new ArrayList<Pair<?, ?>>();
       expectedMultipleOutputs.put(namedOutput, outputs);
     }
     outputs.add(new Pair<K, V>(key, val));
@@ -1072,8 +1127,23 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * @param outputRecord
    * @return
    */
-  public <K extends Comparable, V extends Comparable> T withMultiOutput(String namedOutput, final Pair<K, V> outputRecord) {
+  public <K, V> T withMultiOutput(String namedOutput,
+      final Pair<K, V> outputRecord) {
     addMultiOutput(namedOutput, outputRecord);
+    return thisAsTestDriver();
+  }
+
+  public <K, V> T withPathOutput(final K key, final V value, final String path) {
+    return withPathOutput(new Pair<K, V>(key, value), path);
+  }
+
+  public <K, V> T withPathOutput(final Pair<K, V> outputRecord, String path) {
+    List<Pair<?, ?>> list = expectedPathOutputs.get(path);
+    if (list == null) {
+      list = new ArrayList<Pair<?, ?>>();
+      expectedPathOutputs.put(path, list);
+    }
+    list.add(outputRecord);
     return thisAsTestDriver();
   }
 }
