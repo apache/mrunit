@@ -72,6 +72,24 @@ public class TestMultipleOutput {
   }
 
   @Test
+  public void TestMapDriverWithPathOutput() throws IOException {
+    mapDriver = MapDriver.newMapDriver(new PathOutputMapper("path1", "path2"));
+    mapDriver.withInput(new LongWritable(0), new Text("first"))
+        .withInput(new LongWritable(0), new Text("second"))
+        .withInput(new LongWritable(0), new Text("third"))
+        .withOutput(new Text("first"), new IntWritable(1))
+        .withOutput(new Text("second"), new IntWritable(1))
+        .withOutput(new Text("third"), new IntWritable(1))
+        .withPathOutput(new Text("first"), new IntWritable(1), "path1")
+        .withPathOutput(new Text("second"), new IntWritable(1), "path1")
+        .withPathOutput(new Text("third"), new IntWritable(1), "path1")
+        .withPathOutput(new Text("first"), new IntWritable(1), "path2")
+        .withPathOutput(new Text("second"), new IntWritable(1), "path2")
+        .withPathOutput(new Text("third"), new IntWritable(1), "path2")
+        .runTest();
+  }
+
+  @Test
   public void TestMapDriverNullKey() throws IOException {
     mapDriver = MapDriver.newMapDriver(new NullKeyMap());
     mapDriver.withInput(new LongWritable(0), new Text("this"))
@@ -130,11 +148,62 @@ public class TestMultipleOutput {
             .runTest();
   }
 
+  @Test
+  public void TestReduceDriverWithPathOutput() throws IOException {
+    reduceDriver = ReduceDriver.newReduceDriver(new PathOutputReducer("path"));
+    List<IntWritable> inputs = new ArrayList<IntWritable>();
+    inputs.add(new IntWritable(1));
+    inputs.add(new IntWritable(2));
+    reduceDriver.withInput(new Text("abc"), inputs)
+        .withOutput(new Text("hello"), new IntWritable(1))
+        .withPathOutput(new Text("key"), new IntWritable(2), "path").runTest();
+  }
+
+  @Test
+  public void TestObjectReuese() throws IOException {
+    mapDriver = MapDriver.newMapDriver(new ValueReuseMapper());
+    mapDriver.withInput(new LongWritable(0), new Text("first"))
+        .withInput(new LongWritable(1), new Text("second"))
+        .withInput(new LongWritable(2), new Text("third"))
+        .withMultiOutput("test", new Text("first"), new IntWritable(2))
+        .withMultiOutput("test", new Text("second"), new IntWritable(3))
+        .withMultiOutput("test", new Text("third"), new IntWritable(4))
+        .runTest();
+  }
+
+  public class ValueReuseMapper extends MyMap {
+    @Override
+    public void map(LongWritable key, Text value, Context context)
+        throws IOException, InterruptedException {
+      word.set(value);
+      number.set(number.get() + 1);
+      mos.write("test", word, number);
+    }
+  }
+
+  public class PathOutputMapper extends MyMap {
+    private List<String> paths = new ArrayList<String>();
+
+    public PathOutputMapper(String... paths) {
+      for (String path : paths) {
+        this.paths.add(path);
+      }
+    }
+
+    @Override
+    public void map(LongWritable key, Text value, Context context)
+        throws IOException, InterruptedException {
+      for (String path : paths) {
+        mos.write(value, number, path);
+      }
+      context.write(value, number);
+    }
+  }
   public class MyMap extends Mapper<LongWritable, Text, Text, IntWritable> {
 
-    private final IntWritable one = new IntWritable(1);
-    private Text word = new Text();
-    private MultipleOutputs<Text, IntWritable> mos = null;
+    protected final IntWritable number = new IntWritable(1);
+    protected Text word = new Text();
+    protected MultipleOutputs<Text, IntWritable> mos = null;
 
     @Override
     public void setup(Context context) throws IOException, InterruptedException {
@@ -150,6 +219,7 @@ public class TestMultipleOutput {
       super.cleanup(context);
     }
 
+	@Override
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
       String line = value.toString();
       //The first word before a "dash" used to create a named output
@@ -166,7 +236,7 @@ public class TestMultipleOutput {
       } else {
         while (tokenizer.hasMoreTokens()) {
           word.set(tokenizer.nextToken());
-          context.write(word, one);
+          context.write(word, number);
         }
       }
     }
@@ -194,7 +264,7 @@ public class TestMultipleOutput {
 
   public class MyReduce extends Reducer<Text, IntWritable, Text, IntWritable> {
 
-    private MultipleOutputs<Text, IntWritable> mos = null;
+    protected MultipleOutputs<Text, IntWritable> mos = null;
 
     @Override
     public void setup(Context context) throws IOException, InterruptedException {
@@ -217,4 +287,22 @@ public class TestMultipleOutput {
     }
   }
 
+  public class PathOutputReducer extends MyReduce {
+    private List<String> paths = new ArrayList<String>();
+
+    public PathOutputReducer(String... paths) {
+      for (String path : paths) {
+        this.paths.add(path);
+      }
+    }
+
+    @Override
+    protected void reduce(Text key, Iterable<IntWritable> values,
+        Context context) throws IOException, InterruptedException {
+      for (String path : paths) {
+        mos.write(new Text("key"), new IntWritable(2), path);
+      }
+      context.write(new Text("hello"), new IntWritable(1));
+    }
+  }
 }
