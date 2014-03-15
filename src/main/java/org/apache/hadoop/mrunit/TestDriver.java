@@ -238,7 +238,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    *          Enumeration based counter
    * @param expectedValue
    *          Expected value
-   * @return
+   * @return this
    */
   public T withCounter(final Enum<?> e,
       final long expectedValue) {
@@ -255,7 +255,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    *          Counter name
    * @param expectedValue
    *          Expected value
-   * @return
+   * @return this
    */
   public T withCounter(final String group,
       final String name, final long expectedValue) {
@@ -485,7 +485,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
 
   /**
    * Adds an archive to be put on the distributed cache.
-   * @param file uri of the archive
+   * @param archive uri of the archive
    * @return the driver
    */
   public T withCacheArchive(URI archive) {
@@ -639,7 +639,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * Split "key \t val" into Pair(Text(key), Text(val))
    *
    * @param tabSeparatedPair
-   * @return
+   * @return (k,v)
    */
   public static Pair<Text, Text> parseTabbedPair(final String tabSeparatedPair) {
     return StringUtils.parseTabbedPair(tabSeparatedPair);
@@ -1113,7 +1113,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    * @param namedOutput
    * @param key
    * @param value
-   * @return
+   * @return this
    */
   public <K extends Comparable, V extends Comparable> T withMultiOutput(final String namedOutput, final K key, final V value) {
     addMultiOutput(namedOutput, key, value);
@@ -1125,7 +1125,7 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    *
    * @param namedOutput
    * @param outputRecord
-   * @return
+   * @return this
    */
   public <K, V> T withMultiOutput(String namedOutput,
       final Pair<K, V> outputRecord) {

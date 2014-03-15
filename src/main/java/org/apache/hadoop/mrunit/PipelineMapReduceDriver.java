@@ -276,7 +276,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   /**
    * @param mapInputPath
    *       The Path object which will be given to the mapper
-   * @return
+   * @return this
    */
   public final PipelineMapReduceDriver<K1, V1, K2, V2> withMapInputPath(Path mapInputPath) {
     setMapInputPath(mapInputPath);

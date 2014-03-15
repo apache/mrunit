@@ -56,8 +56,8 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    * 
    * @param key
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v)*. Replaced by {@link #setInput()},
-   *             {@link #addInput()}, and {@link #addAll()}
+   *             input (k, v)*. Replaced by {@link #setInput},
+   *             {@link #addInput}, and {@link #addAll}
    */
   @Deprecated
   public void setInputKey(final K1 key) {
@@ -73,8 +73,8 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    * 
    * @param val
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v)*. Replaced by {@link #setInput()},
-   *             {@link #addInput()}, and {@link #addAll()}
+   *             input (k, v)*. Replaced by {@link #setInput},
+   *             {@link #addInput}, and {@link #addAll}
    */
   @Deprecated
   public void setInputValue(final V1 val) {
@@ -174,8 +174,8 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    * 
    * @return this
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v)*. Replaced by {@link #withInput()} and
-   *             {@link #withAll()}
+   *             input (k, v)*. Replaced by {@link #withInput} and
+   *             {@link #withAll}
    */
   @Deprecated
   public T withInputKey(final K1 key) {
@@ -189,8 +189,8 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
    * @param val
    * @return this
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v)*. Replaced by {@link #withInput()} and
-   *             {@link #withAll()}
+   *             input (k, v)*. Replaced by {@link #withInput} and
+   *             {@link #withAll}
    */
   @Deprecated
   public T withInputValue(final V1 val) {
