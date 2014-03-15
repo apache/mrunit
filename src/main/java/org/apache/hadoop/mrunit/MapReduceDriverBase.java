@@ -184,7 +184,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   /**
    * @param mapInputPath
    *       The Path object which will be given to the mapper
-   * @return
+   * @return this
    */
   public final T withMapInputPath(Path mapInputPath) {
     setMapInputPath(mapInputPath);

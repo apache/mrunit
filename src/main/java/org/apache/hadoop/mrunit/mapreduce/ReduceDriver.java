@@ -91,10 +91,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   /**
    * Add input (K*, V*) to send to the Reducer
    *
-   * @param key
-   *          The key too add
-   * @param values
-   *          The value to add
+   * @param input
    */
   public void addInput(final KeyValueReuseList<K1, V1> input) {
     groupedInputs.add(input.clone(getConfiguration()));

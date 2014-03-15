@@ -153,7 +153,8 @@ public class ReduceFeeder<K, V> {
   /**
    * This method takes a (k, v*) input and return a (k*, v*) where k have been duplicated.
    *
-   * @param input The key values pair with one key for multiple values
+   * @param key the key for all the values
+   * @param values multiples values for the same key
    * @return Reducer input compatible with the new API
    */
   public KeyValueReuseList<K, V> updateInput(final K key, List<V> values){

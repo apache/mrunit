@@ -82,8 +82,8 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    * Sets the input key to send to the Reducer
    * 
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v*)*. Replaced by {@link #setInput()},
-   *             {@link #addInput()}, and {@link #addAll()}
+   *             input (k, v*)*. Replaced by {@link #setInput},
+   *             {@link #addInput}, and {@link #addAll}
    */
   @Deprecated
   public void setInputKey(final K1 key) {
@@ -95,8 +95,8 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    * 
    * @param val
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v*)*. Replaced by {@link #setInput()},
-   *             {@link #addInput()}, and {@link #addAll()}
+   *             input (k, v*)*. Replaced by {@link #setInput},
+   *             {@link #addInput}, and {@link #addAll}
    */
   @Deprecated
   public void addInputValue(final V1 val) {
@@ -108,8 +108,8 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    * 
    * @param values
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v*)*. Replaced by {@link #setInput()},
-   *             {@link #addInput()}, and {@link #addAll()}
+   *             input (k, v*)*. Replaced by {@link #setInput},
+   *             {@link #addInput}, and {@link #addAll}
    */
   @Deprecated
   public void setInputValues(final List<V1> values) {
@@ -122,8 +122,8 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
    * 
    * @param values
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v*)*. Replaced by {@link #setInput()},
-   *             {@link #addInput()}, and {@link #addAll()}
+   *             input (k, v*)*. Replaced by {@link #setInput},
+   *             {@link #addInput}, and {@link #addAll}
    */
   @Deprecated
   public void addInputValues(final List<V1> values) {
