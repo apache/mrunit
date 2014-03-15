@@ -263,7 +263,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   /**
    * @param mapInputPath
    *       The Path object which will be given to the mapper
-   * @return
+   * @return this
    */
   public final T withMapInputPath(Path mapInputPath) {
     setMapInputPath(mapInputPath);
