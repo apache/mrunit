@@ -37,7 +37,7 @@ import org.apache.hadoop.mrunit.internal.io.Serialization;
 import org.apache.hadoop.mrunit.internal.output.MockMultipleOutputs;
 import org.apache.hadoop.mrunit.internal.util.DistCacheUtils;
 import org.apache.hadoop.mrunit.internal.util.Errors;
-import org.apache.hadoop.mrunit.internal.util.PairComparator;
+import org.apache.hadoop.mrunit.internal.util.PairEquality;
 import org.apache.hadoop.mrunit.internal.util.StringUtils;
 import org.apache.hadoop.mrunit.types.Pair;
 
@@ -675,104 +675,169 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
    */
   protected void validate(final List<Pair<K2, V2>> outputs,
       final boolean orderMatters) {
+    // expected nothing and got nothing, everything is fine
+    if (outputs.isEmpty() && expectedOutputs.isEmpty()) {
+        return;
+    }
 
     final Errors errors = new Errors(LOG);
-
-    if (!outputs.isEmpty()) {
-      // were we supposed to get output in the first place?
-      if (expectedOutputs.isEmpty()) {
-        errors.record("Expected no outputs; got %d outputs.", outputs.size());
-      }
-      // check that user's key and value writables implement equals, hashCode, toString
-      checkOverrides(outputs.get(0));
+    // expected nothing but got something
+    if (!outputs.isEmpty() && expectedOutputs.isEmpty()) {
+        errors.record("Expected no output; got %d output(s).", outputs.size());
+        errors.assertNone();
+    }
+    // expected something but got nothing
+    if (outputs.isEmpty() && !expectedOutputs.isEmpty()) {
+        errors.record("Expected %d output(s); got no output.", expectedOutputs.size());
+        errors.assertNone();
     }
 
-    final Comparator<Pair<K2, V2>> pairComparator = new PairComparator<K2, V2>(
-      keyComparator, valueComparator);
-    final Map<Pair<K2, V2>, List<Integer>> expectedPositions = buildPositionMap(
-      expectedOutputs, pairComparator);
-    final Map<Pair<K2, V2>, List<Integer>> actualPositions = buildPositionMap(
-      outputs, pairComparator);
+    // now, the smart test needs to be done
+    // check that user's key and value writables implement equals, hashCode, toString
+    checkOverrides(outputs, expectedOutputs);
 
-    for (final Pair<K2, V2> output : expectedPositions.keySet()) {
-      final List<Integer> expectedPositionList = expectedPositions.get(output);
-      final List<Integer> actualPositionList = actualPositions.get(output);
-      if (actualPositionList != null) {
-        // the expected value has been seen - check positions
-        final int expectedPositionsCount = expectedPositionList.size();
-        final int actualPositionsCount = actualPositionList.size();
-        if (orderMatters) {
-          // order is important, so the positions must match exactly
-          if (expectedPositionList.equals(actualPositionList)) {
-            LOG.debug(String.format("Matched expected output %s at "
-                + "positions %s", output, expectedPositionList.toString()));
-          } else {
-            int i = 0;
-            while (expectedPositionsCount > i || actualPositionsCount > i) {
-              if (expectedPositionsCount > i && actualPositionsCount > i) {
-                final int expectedPosition = expectedPositionList.get(i);
-                final int actualPosition = actualPositionList.get(i);
-                if (expectedPosition == actualPosition) {
-                  LOG.debug(String.format("Matched expected output %s at "
-                      + "position %d", output, expectedPosition));
-                } else {
-                  errors.record("Matched expected output %s but at "
-                      + "incorrect position %d (expected position %d)", output,
-                      actualPosition, expectedPosition);
-                }
-              } else if (expectedPositionsCount > i) {
-                // not ok, value wasn't seen enough times
-                errors.record("Missing expected output %s at position %d.",
-                    output, expectedPositionList.get(i));
-              } else {
-                // not ok, value seen too many times
-                errors.record("Received unexpected output %s at position %d.",
-                    output, actualPositionList.get(i));
-              }
-              i++;
-            }
-          }
-        } else {
-          // order is unimportant, just check that the count of times seen match
-          if (expectedPositionsCount == actualPositionsCount) {
-            // ok, counts match
-            LOG.debug(String.format("Matched expected output %s in "
-                + "%d positions", output, expectedPositionsCount));
-          } else if (expectedPositionsCount > actualPositionsCount) {
-            // not ok, value wasn't seen enough times
-            for (int i = 0; i < expectedPositionsCount - actualPositionsCount; i++) {
-              errors.record("Missing expected output %s", output);
-            }
-          } else {
-            // not ok, value seen too many times
-            for (int i = 0; i < actualPositionsCount - expectedPositionsCount; i++) {
-              errors.record("Received unexpected output %s", output);
-            }
-          }
+    final PairEquality<K2, V2> equality = new PairEquality<K2, V2>(
+            keyComparator, valueComparator);
+    if (orderMatters) {
+        validateWithOrder(outputs, errors, equality);
+    } else {
+        validateWithoutOrder(outputs, errors, equality);
+    }
+
+    // if there are errors, it might be due to types and not clear from the message
+    if(!errors.isEmpty()) {
+      Class<?> outputKeyClass = null;
+      Class<?> outputValueClass = null;
+      Class<?> expectedKeyClass = null;
+      Class<?> expectedValueClass = null;
+
+      for (Pair<K2, V2> output : outputs) {
+        if (output.getFirst() != null) {
+          outputKeyClass = output.getFirst().getClass();
         }
-        actualPositions.remove(output);
-      } else {
-        // the expected value was not found anywhere - output errors
-        checkTypesAndLogError(outputs, output, expectedPositionList,
-            orderMatters, errors, "Missing expected output");
+        if (output.getSecond() != null) {
+          outputValueClass = output.getSecond().getClass();
+        }
+        if (outputKeyClass != null && outputValueClass != null) {
+          break;
+        }
+      }
+
+      for (Pair<K2, V2> expected : expectedOutputs) {
+        if (expected.getFirst() != null) {
+          expectedKeyClass = expected.getFirst().getClass();
+        }
+        if (expected.getSecond() != null) {
+          expectedValueClass = expected.getSecond().getClass();
+        }
+        if (expectedKeyClass != null && expectedValueClass != null) {
+          break;
+        }
+      }
+
+      if (outputKeyClass != null && expectedKeyClass !=null
+          && !outputKeyClass.equals(expectedKeyClass)) {
+        errors.record("Mismatch in key class: expected: %s actual: %s",
+            expectedKeyClass, outputKeyClass);
+      }
+
+      if (outputValueClass != null && expectedValueClass !=null
+          && !outputValueClass.equals(expectedValueClass)) {
+        errors.record("Mismatch in value class: expected: %s actual: %s",
+            expectedValueClass, outputValueClass);
       }
     }
-
-    for (final Pair<K2, V2> output : actualPositions.keySet()) {
-      // anything left in actual set is unexpected
-      checkTypesAndLogError(outputs, output, actualPositions.get(output),
-          orderMatters, errors, "Received unexpected output");
-    }
-
     errors.assertNone();
   }
 
-  private void checkOverrides(final Pair<K2,V2> outputPair) {
-    checkOverride(outputPair.getFirst().getClass());
-    checkOverride(outputPair.getSecond().getClass());
+  private void validateWithoutOrder(final List<Pair<K2, V2>> outputs,
+      final Errors errors, final PairEquality<K2, V2> equality) {
+    Set<Integer> verifiedExpecteds = new HashSet<Integer>();
+    Set<Integer> unverifiedOutputs = new HashSet<Integer>();
+    for (int i = 0; i < outputs.size(); i++) {
+        Pair<K2, V2> output = outputs.get(i);
+        boolean found = false;
+        for (int j = 0; j < expectedOutputs.size(); j++) {
+            if (verifiedExpecteds.contains(j)) {
+                continue;
+            }
+            Pair<K2, V2> expected = expectedOutputs.get(j);
+            if (equality.isTrueFor(output, expected)) {
+                found = true;
+                verifiedExpecteds.add(j);
+                LOG.debug(String.format("Matched expected output %s no %d at "
+                        + "position %d", output, j, i));
+                break;
+            }
+        }
+        if (!found) {
+            unverifiedOutputs.add(i);
+        }
+    }
+    for (int j = 0; j < expectedOutputs.size(); j++) {
+        if (!verifiedExpecteds.contains(j)) {
+            errors.record("Missing expected output %s", expectedOutputs.get(j));
+        }
+    }
+    for (int i = 0; i < outputs.size(); i++) {
+        if (unverifiedOutputs.contains(i)) {
+            errors.record("Received unexpected output %s", outputs.get(i));
+        }
+    }
+  }
+
+  private void validateWithOrder(final List<Pair<K2, V2>> outputs,
+      final Errors errors, final PairEquality<K2, V2> equality) {
+    int i = 0;
+    for (i = 0; i < Math.min(outputs.size(),expectedOutputs.size()); i++) {
+        Pair<K2, V2> output = outputs.get(i);
+        Pair<K2, V2> expected = expectedOutputs.get(i);
+        if (equality.isTrueFor(output, expected)) {
+            LOG.debug(String.format("Matched expected output %s at "
+                    + "position %d", expected, i));
+        } else {
+            errors.record("Missing expected output %s at position %d, got %s.",
+                    expected, i, output);
+        }
+    }
+    for(int j=i; j < outputs.size(); j++) {
+        errors.record("Received unexpected output %s at position %d.",
+                outputs.get(j), j);
+    }
+    for(int j=i; j < expectedOutputs.size(); j++) {
+        errors.record("Missing expected output %s at position %d.",
+                expectedOutputs.get(j), j);
+    }
+  }
+
+  private void checkOverrides(final List<Pair<K2,V2>> outputPairs, final List<Pair<K2,V2>> expectedOutputPairs) {
+    Class<?> keyClass = null;
+    Class<?> valueClass = null;
+    // key or value could be null, try to find a class
+    for (Pair<K2,V2> pair : outputPairs) {
+        if (keyClass == null && pair.getFirst() != null) {
+            keyClass = pair.getFirst().getClass();
+        }
+        if (valueClass == null && pair.getSecond() != null) {
+        	valueClass = pair.getSecond().getClass();
+        }
+    }
+    for (Pair<K2,V2> pair : expectedOutputPairs) {
+        if (keyClass == null && pair.getFirst() != null) {
+            keyClass = pair.getFirst().getClass();
+        }
+        if (valueClass == null && pair.getSecond() != null) {
+        	valueClass = pair.getSecond().getClass();
+        }
+    }
+    checkOverride(keyClass);
+    checkOverride(valueClass);
   }
 
   private void checkOverride(final Class<?> clazz) {
+    if (clazz == null) {
+        return;
+    }
     try {
       if (clazz.getMethod("equals", Object.class).getDeclaringClass() != clazz) {
         LOG.warn(clazz.getCanonicalName() + ".equals(Object) " +
@@ -791,41 +856,6 @@ public abstract class TestDriver<K1, V1, K2, V2, T extends TestDriver<K1, V1, K2
       LOG.error(e);
     } catch (NoSuchMethodException e) {
       LOG.error(e);
-    }
-  }
-
-  private void checkTypesAndLogError(final List<Pair<K2, V2>> outputs,
-      final Pair<K2, V2> output, final List<Integer> positions,
-      final boolean orderMatters, final Errors errors,
-      final String errorString) {
-    for (final int pos : positions) {
-      String msg = null;
-      if (expectedOutputs.size() > pos && outputs.size() > pos) {
-        final Pair<K2, V2> actual = outputs.get(pos);
-        final Pair<K2, V2> expected = expectedOutputs.get(pos);
-        final Class<?> actualKeyClass = actual.getFirst().getClass();
-        final Class<?> actualValueClass = actual.getSecond().getClass();
-        final Class<?> expectedKeyClass = expected.getFirst().getClass();
-        final Class<?> expectedValueClass = expected.getSecond().getClass();
-        if (actualKeyClass != expectedKeyClass) {
-          msg = String.format(
-              "%s %s: Mismatch in key class: expected: %s actual: %s",
-              errorString, output, expectedKeyClass, actualKeyClass);
-        } else if (actualValueClass != expectedValueClass) {
-          msg = String.format(
-              "%s %s: Mismatch in value class: expected: %s actual: %s",
-              errorString, output, expectedValueClass, actualValueClass);
-        }
-      }
-      if (msg == null) {
-        if (orderMatters) {
-          msg = String
-              .format("%s %s at position %d.", errorString, output, pos);
-        } else {
-          msg = String.format("%s %s", errorString, output);
-        }
-      }
-      errors.record(msg);
     }
   }
 

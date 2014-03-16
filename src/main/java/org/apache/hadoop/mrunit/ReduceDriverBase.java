@@ -34,7 +34,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * sent to the Reducer (as if they came from a Mapper), and outputs you expect
  * to be sent by the Reducer to the collector. By calling runTest(), the harness
  * will deliver the input to the Reducer and will check its outputs against the
- * expected results. 
+ * expected results.
  */
 public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBase<K1, V1, K2, V2, T>>
     extends TestDriver<K1, V1, K2, V2, T> {
@@ -53,7 +53,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Returns a list of values.
-   * 
+   *
    * @return List of values
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v*)*. Replaced by {@link #getInputValues(Object)}
@@ -65,7 +65,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Returns a list of values for the given key
-   * 
+   *
    * @param key
    * @return List for the given key, or null if key does not exist
    */
@@ -80,7 +80,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Sets the input key to send to the Reducer
-   * 
+   *
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v*)*. Replaced by {@link #setInput},
    *             {@link #addInput}, and {@link #addAll}
@@ -92,7 +92,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * adds an input value to send to the reducer
-   * 
+   *
    * @param val
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v*)*. Replaced by {@link #setInput},
@@ -105,7 +105,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Sets the input values to send to the reducer; overwrites existing ones
-   * 
+   *
    * @param values
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v*)*. Replaced by {@link #setInput},
@@ -119,7 +119,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Adds a set of input values to send to the reducer
-   * 
+   *
    * @param values
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v*)*. Replaced by {@link #setInput},
@@ -134,14 +134,14 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Sets the input to send to the reducer
-   * 
+   *
    * @param key
    * @param values
    */
   public void setInput(final K1 key, final List<V1> values) {
     setInputKey(key);
     setInputValues(values);
-    
+
     clearInput();
     addInput(key, values);
   }
@@ -155,7 +155,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Add input (K, V*) to send to the Reducer
-   * 
+   *
    * @param key
    *          The key too add
    * @param values
@@ -173,7 +173,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Add input (K, V*) to send to the Reducer
-   * 
+   *
    * @param input
    *          input pair
    */
@@ -183,7 +183,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Adds input to send to the Reducer
-   * 
+   *
    * @param inputs
    *          list of (K, V*) pairs
    */
@@ -196,7 +196,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
   /**
    * Expects an input of the form "key \t val, val, val..." Forces the Reducer
    * input types to Text.
-   * 
+   *
    * @param input
    *          A string of the form "key \t val,val,val". Trims any whitespace.
    * @deprecated No replacement due to lack of type safety and incompatibility
@@ -218,7 +218,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Identical to setInputKey() but with fluent programming style
-   * 
+   *
    * @return this
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v*)*. Replaced by {@link #withInput(Object, List)},
@@ -232,7 +232,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Identical to addInputValue() but with fluent programming style
-   * 
+   *
    * @param val
    * @return this
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
@@ -247,7 +247,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Identical to addInputValues() but with fluent programming style
-   * 
+   *
    * @param values
    * @return this
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
@@ -262,7 +262,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   * 
+   *
    * @return this
    */
   public T withInput(final K1 key,
@@ -273,7 +273,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Identical to setInput, but with a fluent programming style
-   * 
+   *
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -288,7 +288,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   * 
+   *
    * @param input
    * @return this
    */
@@ -299,7 +299,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
 
   /**
    * Identical to addAll() but returns self for fluent programming style
-   * 
+   *
    * @param inputs
    * @return this
    */
@@ -321,7 +321,7 @@ public abstract class ReduceDriverBase<K1, V1, K2, V2, T extends ReduceDriverBas
     if (inputs == null || inputs.isEmpty()) {
       throw new IllegalStateException("No input was provided");
     }
-    
+
     if (reducer == null) {
       throw new IllegalStateException("No Reducer class was provided");
     }

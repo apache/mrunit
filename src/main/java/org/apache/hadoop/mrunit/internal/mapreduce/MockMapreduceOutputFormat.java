@@ -76,9 +76,9 @@ public class MockMapreduceOutputFormat<K, V> implements OutputCollectable<K, V> 
     if (!outputPath.mkdir()) {
       throw new IOException("Failed to create output dir " + outputPath);
     }
-    taskAttemptContext.getConfiguration().set("mapred.output.dir", 
+    taskAttemptContext.getConfiguration().set("mapred.output.dir",
         new Path(outputPath.toString()).toString());
-    taskAttemptContext.getConfiguration().set("mapred.input.dir", 
+    taskAttemptContext.getConfiguration().set("mapred.input.dir",
         new Path((outputPath + "/*/*/*/*")).toString());
   }
   @SuppressWarnings({ "unchecked", "rawtypes" })

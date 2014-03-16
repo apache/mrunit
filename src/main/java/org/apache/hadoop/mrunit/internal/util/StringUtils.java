@@ -24,10 +24,10 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.types.Pair;
 
 public class StringUtils {
-  
+
   /**
    * Split "key \t val" into Pair(Text(key), Text(val))
-   * 
+   *
    * @param tabSeparatedPair
    * @return
    */
@@ -42,7 +42,7 @@ public class StringUtils {
 
   /**
    * Split "val,val,val,val..." into a List of Text(val) objects.
-   * 
+   *
    * @param commaDelimList
    *          A list of values separated by commas
    */
@@ -68,7 +68,7 @@ public class StringUtils {
 
     return outList;
   }
-  
+
   /**
    * Transform a list with elements a and b into a string "(a,b)".
    */

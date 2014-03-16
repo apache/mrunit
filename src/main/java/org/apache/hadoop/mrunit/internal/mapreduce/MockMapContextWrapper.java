@@ -43,7 +43,7 @@ import org.mockito.stubbing.Answer;
  * it send the results back to us, etc. But since Mapper.Context is an inner
  * class of Mapper, we need to put any subclasses of Mapper.Context in a
  * subclass of Mapper.
- * 
+ *
  * This wrapper class exists for that purpose.
  */
 public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
@@ -54,9 +54,9 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
 
   protected final List<Pair<KEYIN, VALUEIN>> inputs;
   protected final MapDriver<KEYIN, VALUEIN, KEYOUT, VALUEOUT> driver;
-  
+
   protected Pair<KEYIN, VALUEIN> currentKeyValue;
-  
+
   public MockMapContextWrapper(
       final Configuration configuration,
       final List<Pair<KEYIN, VALUEIN>> inputs,

@@ -48,11 +48,11 @@ public class TestDistributedCache {
   private Mapper<Text,Text,Text,Text> mapper = new TestDistributedCacheMapperAndReducer();
   private Reducer<Text,Text,Text,Text> reducer = new TestDistributedCacheMapperAndReducer();
 
-  private MapDriver<Text,Text,Text,Text> mapDriver = 
+  private MapDriver<Text,Text,Text,Text> mapDriver =
       MapDriver.newMapDriver(mapper);
-  private ReduceDriver<Text,Text,Text,Text> reduceDriver = 
+  private ReduceDriver<Text,Text,Text,Text> reduceDriver =
       ReduceDriver.newReduceDriver(reducer);
-  private MapReduceDriver<Text,Text,Text,Text,Text,Text> mapReduceDriver = 
+  private MapReduceDriver<Text,Text,Text,Text,Text,Text> mapReduceDriver =
       MapReduceDriver.newMapReduceDriver();
 
   /**
@@ -60,7 +60,7 @@ public class TestDistributedCache {
    * cache and outputs the filenames as keys, and whether the cache item is a file
    * or directory ("file" or "dir") as value
    */
-  private static class TestDistributedCacheMapperAndReducer extends MapReduceBase 
+  private static class TestDistributedCacheMapperAndReducer extends MapReduceBase
     implements Mapper<Text,Text,Text,Text>, Reducer<Text,Text,Text,Text> {
 
     private static final Text DIR = new Text("dir");
@@ -109,7 +109,7 @@ public class TestDistributedCache {
       }
     }
 
-    private void outputPath(String parentPath, Path path, 
+    private void outputPath(String parentPath, Path path,
         OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
       FileStatus fstat = fs.getFileStatus(path);
       boolean isDir = fstat.isDir();
@@ -184,7 +184,7 @@ public class TestDistributedCache {
     reduceDriver.withCacheFile("testfile")
       .withOutput(new Text("testfile"), new Text("file")).runTest(false);
   }
-  
+
   @Test
   public void testAddCacheFileToReducerUsingStaticMethod() throws Exception
   {
@@ -221,7 +221,7 @@ public class TestDistributedCache {
       .withOutput(new Text("testarchive.tar/d"), new Text("file"))
       .runTest(false);
   }
-  
+
   @Test
   public void testAddCacheArchiveToMapReduceUsingDriverMethod2() throws IOException
   {

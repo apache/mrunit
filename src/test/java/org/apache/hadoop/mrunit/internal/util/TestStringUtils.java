@@ -216,7 +216,7 @@ public class TestStringUtils {
     StringUtils.formatValueList(Arrays.asList("single"), stringBuilder);
     assertEquals("previous message (single)", stringBuilder.toString());
   }
-  
+
   @Test
   public void shouldFormatValueListWithManyElement() {
     StringBuilder stringBuilder = new StringBuilder();

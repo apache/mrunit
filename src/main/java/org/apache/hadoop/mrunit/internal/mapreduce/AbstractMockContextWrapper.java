@@ -36,7 +36,7 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-abstract class AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, CONTEXT 
+abstract class AbstractMockContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT, CONTEXT
 extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
 
   protected CONTEXT context;
@@ -44,7 +44,7 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
   protected final Configuration configuration;
   protected OutputCollectable<KEYOUT, VALUEOUT> outputCollectable;
 
-  public AbstractMockContextWrapper(final Configuration configuration, 
+  public AbstractMockContextWrapper(final Configuration configuration,
       final MockOutputCreator<KEYOUT, VALUEOUT> mockOutputCreator) {
     this.mockOutputCreator = mockOutputCreator;
     this.configuration = configuration;
@@ -55,7 +55,7 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
       final TaskInputOutputContext context,
       final ContextDriver contextDriver,
       final MockOutputCreator mockOutputCreator) {
-        
+
     when(context.getCounter((Enum) any())).thenAnswer(new Answer<Counter>() {
       @Override
       public Counter answer(final InvocationOnMock invocation) {
@@ -84,7 +84,7 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
           final Object[] args = invocation.getArguments();
           try {
             if(outputCollectable == null) {
-              outputCollectable = mockOutputCreator.createMapReduceOutputCollectable(contextDriver.getConfiguration(), 
+              outputCollectable = mockOutputCreator.createMapReduceOutputCollectable(contextDriver.getConfiguration(),
                   contextDriver.getOutputSerializationConfiguration(), context);
             }
             outputCollectable.collect((KEYOUT)args[0], (VALUEOUT)args[1]);
@@ -109,7 +109,7 @@ extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>> {
     }
     return outputCollectable.getOutputs();
   }
-  
+
   public CONTEXT getMockContext() {
     return context;
   }

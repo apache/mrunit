@@ -37,7 +37,7 @@ public class MockReporter implements Reporter {
   public MockReporter(final ReporterType kind, final Counters ctrs) {
     this(kind, ctrs, null);
   }
-  
+
   public MockReporter(final ReporterType kind, final Counters ctrs,
       final Path mapInputPath) {
     typ = kind;

@@ -82,7 +82,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
   /**
    * Set the Mapper instance to use with this test driver
-   * 
+   *
    * @param m
    *          the Mapper instance to use
    */
@@ -106,7 +106,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
   /**
    * Sets the reducer object to use for this test
-   * 
+   *
    * @param r
    *          The reducer object to use
    */
@@ -116,7 +116,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
   /**
    * Identical to setReducer(), but with fluent programming style
-   * 
+   *
    * @param r
    *          The Reducer to use
    * @return this
@@ -136,7 +136,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
   /**
    * Sets the reducer object to use as a combiner for this test
-   * 
+   *
    * @param c
    *          The combiner object to use
    */
@@ -146,7 +146,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
   /**
    * Identical to setCombiner(), but with fluent programming style
-   * 
+   *
    * @param c
    *          The Combiner to use
    * @return this
@@ -171,7 +171,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
 
   /**
    * Sets the counters object to use for this test.
-   * 
+   *
    * @param ctrs
    *          The counters object to use.
    */
@@ -190,7 +190,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   /**
    * Configure {@link Reducer} to output with a real {@link OutputFormat}. Set
    * {@link InputFormat} to read output back in for use with run* methods
-   * 
+   *
    * @param outputFormatClass
    * @param inputFormatClass
    * @return this for fluent style
@@ -299,7 +299,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   /**
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.
-   * 
+   *
    * @return new MapReduceDriver
    */
   public static <K1, V1, K2, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver() {
@@ -309,7 +309,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   /**
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.
-   * 
+   *
    * @param mapper
    *          passed to MapReduceDriver constructor
    * @param reducer
@@ -324,7 +324,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3> extends
   /**
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.
-   * 
+   *
    * @param mapper
    *          passed to MapReduceDriver constructor
    * @param reducer

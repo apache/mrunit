@@ -43,9 +43,9 @@ public class DistCacheUtils {
   }
 
   /**
-   * Attempt to create a URI from a string path. First tries to load as a 
+   * Attempt to create a URI from a string path. First tries to load as a
    * class resource, and failing that, loads as a File.
-   *  
+   *
    * @param path path to resource
    * @return the uri of the resource
    */
@@ -68,7 +68,7 @@ public class DistCacheUtils {
   }
 
   /**
-   * Creates a comma separated list from a list of Path objects. 
+   * Creates a comma separated list from a list of Path objects.
    * Method borrowed from Hadoop's TaskDistributedCacheManager
    */
   public static String stringifyPathList(List<Path> p){
@@ -85,12 +85,12 @@ public class DistCacheUtils {
 
   /**
    * Create a randomly named temporary directory
-   * 
+   *
    * @return the file handle of the directory
    * @throws IOException
    */
   public static File createTempDirectory() throws IOException {
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"), 
+    File tmpDir = new File(System.getProperty("java.io.tmpdir"),
         "mrunit-" + UUID.randomUUID().toString());
     LOG.debug("Creating temp directory " + tmpDir);
     tmpDir.mkdirs();
@@ -100,7 +100,7 @@ public class DistCacheUtils {
   /**
    * Extract an archive to the temp directory.
    * Code borrowed from Hadoop's TrackerDistributedCacheManager
-   * 
+   *
    * @param cacheArchive the cache archive to extract
    * @param tmpDir root location of temp directory
    * @return the path to the extracted archive

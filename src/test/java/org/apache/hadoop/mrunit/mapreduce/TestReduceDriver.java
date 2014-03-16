@@ -18,10 +18,10 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.apache.hadoop.mrunit.ExtendedAssert.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,10 +42,14 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
+import org.apache.hadoop.mrunit.mapreduce.TestWordCount.Reduce;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.mrunit.types.UncomparableWritable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 public class TestReduceDriver {
 
@@ -82,6 +86,14 @@ public class TestReduceDriver {
   }
 
   @Test
+  public void testUncomparable() throws IOException {
+    Object k = new UncomparableWritable(1);
+    Object v = new UncomparableWritable(2);
+    ReduceDriver.newReduceDriver(new Reducer<Object, Object, Object, Object>())
+        .withInput(k, Lists.newArrayList(v)).withOutput(k, v).runTest();
+  }
+
+  @Test
   public void testTestRun1() throws IOException {
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
@@ -91,8 +103,7 @@ public class TestReduceDriver {
   @Test
   public void testTestRun2() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (bar, 10) at position 0., "
-            + "Received unexpected output (foo, 10) at position 0.)");
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (bar, 10) at position 0, got (foo, 10).)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("bar"), new LongWritable(OUT_VAL)).runTest(true);
@@ -111,8 +122,7 @@ public class TestReduceDriver {
   @Test
   public void testTestRun3() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 12) at position 0., "
-            + "Received unexpected output (foo, 10) at position 0.)");
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 12) at position 0, got (foo, 10).)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT))
@@ -133,8 +143,7 @@ public class TestReduceDriver {
   @Test
   public void testTestRun4() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, 4) at position 0., "
-            + "Received unexpected output (foo, 10) at position 0.)");
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, 4) at position 0, got (foo, 10).)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(IN_A)).runTest(true);
@@ -152,10 +161,9 @@ public class TestReduceDriver {
 
   @Test
   public void testTestRun5() throws IOException {
-    thrown.expectAssertionErrorMessage("3 Error(s)");
+    thrown.expectAssertionErrorMessage("2 Error(s)");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 4) at position 0, got (foo, 10).");
     thrown.expectAssertionErrorMessage("Missing expected output (foo, 6) at position 1.");
-    thrown.expectAssertionErrorMessage("Missing expected output (foo, 4) at position 0.");
-    thrown.expectAssertionErrorMessage("Received unexpected output (foo, 10) at position 0.");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(IN_A))
@@ -197,8 +205,8 @@ public class TestReduceDriver {
   @Test
   public void testTestRun7() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (bar, 10) at position 0., "
-            + "Matched expected output (foo, 10) but at incorrect position 0 (expected position 1))");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (bar, 10)" +
+        		" at position 0, got (foo, 10)., Missing expected output (foo, 10) at position 1.)");
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
@@ -355,7 +363,7 @@ public class TestReduceDriver {
         .withCounter("category", "count", 1).withCounter("category", "sum", 2)
         .runTest();
   }
-  
+
   @Test
   public void testWithCounterAndNoneMissing() throws IOException {
     final ReduceDriver<Text, Text, Text, Text> driver = ReduceDriver
@@ -490,7 +498,7 @@ public class TestReduceDriver {
     driver.withInputKey(1).withInputValue(new IntWritable(2))
         .withOutput(1, new IntWritable(2)).runTest();
   }
-  
+
   @Test
   public void testOutputFormat() throws IOException {
     driver.withOutputFormat(SequenceFileOutputFormat.class,
@@ -513,7 +521,7 @@ public class TestReduceDriver {
     driver.withOutput(new LongWritable(), new Text("a\t3"));
     driver.runTest();
   }
-  
+
   @Test
   public void textMockContext() throws IOException, InterruptedException {
     thrown.expectMessage(RuntimeException.class, "Injected!");
@@ -529,7 +537,7 @@ public class TestReduceDriver {
 
   static class TaskAttemptReducer extends Reducer<Text,NullWritable,Text,NullWritable> {
     @Override
-    protected void reduce(Text key, Iterable<NullWritable> values, Context context) 
+    protected void reduce(Text key, Iterable<NullWritable> values, Context context)
         throws IOException,InterruptedException {
       context.write(new Text(context.getTaskAttemptID().toString()), NullWritable.get());
     }
@@ -537,7 +545,7 @@ public class TestReduceDriver {
 
   @Test
   public void testWithTaskAttemptUse() throws IOException {
-    final ReduceDriver<Text,NullWritable,Text,NullWritable> driver 
+    final ReduceDriver<Text,NullWritable,Text,NullWritable> driver
       = ReduceDriver.newReduceDriver(new TaskAttemptReducer());
     ReduceFeeder<Text, NullWritable> reduceFeeder = new ReduceFeeder<Text, NullWritable>(driver.getConfiguration());
 

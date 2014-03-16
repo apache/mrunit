@@ -62,7 +62,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Adds an input to send to the mapper
-   * 
+   *
    * @param key
    * @param val
    */
@@ -72,7 +72,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Adds an input to send to the Mapper
-   * 
+   *
    * @param input
    *          The (k, v) pair to add to the input list.
    */
@@ -82,7 +82,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Adds input to send to the mapper
-   * 
+   *
    * @param inputs
    *          List of (k, v) pairs to add to the input list
    */
@@ -95,7 +95,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   /**
    * Expects an input of the form "key \t val" Forces the Mapper input types to
    * Text.
-   * 
+   *
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @deprecated No replacement due to lack of type safety and incompatibility
@@ -114,7 +114,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   * 
+   *
    * @param key
    * @param val
    * @return this
@@ -127,7 +127,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   * 
+   *
    * @param input
    *          The (k, v) pair to add
    * @return this
@@ -140,7 +140,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Identical to addInputFromString, but with a fluent programming style
-   * 
+   *
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -156,7 +156,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Identical to addAll() but returns self for fluent programming style
-   * 
+   *
    * @param inputs
    *          List of (k, v) pairs to add
    * @return this
@@ -215,16 +215,16 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   /**
    * Take the outputs from the Mapper, combine all values for the same key, and
    * sort them by key.
-   * 
+   *
    * @param mapOutputs
    *          An unordered list of (key, val) pairs from the mapper
    * @return the sorted list of (key, list(val))'s to present to the reducer
    */
   public List<Pair<K2, List<V2>>> shuffle(final List<Pair<K2, V2>> mapOutputs) {
-    
+
     final Comparator<K2> keyOrderComparator;
     final Comparator<K2> keyGroupComparator;
-    
+
     if (mapOutputs.isEmpty()) {
       return Collections.emptyList();
     }
@@ -241,7 +241,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
     } else {
       keyOrderComparator = this.keyValueOrderComparator;
     }
-    
+
     // get the grouping comparator or work out from conf
     if (this.keyGroupComparator == null) {
       keyGroupComparator = conf.getOutputValueGroupingComparator();
@@ -257,12 +257,12 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
     });
 
     // apply grouping comparator to create groups
-    final Map<K2, List<Pair<K2, V2>>> groupedByKey = 
+    final Map<K2, List<Pair<K2, V2>>> groupedByKey =
         new LinkedHashMap<K2, List<Pair<K2, V2>>>();
-    
+
     List<Pair<K2, V2>> groupedKeyList = null;
     Pair<K2,V2> previous = null;
-    
+
     for (final Pair<K2, V2> mapOutput : mapOutputs) {
       if (previous == null || keyGroupComparator
           .compare(previous.getFirst(), mapOutput.getFirst()) != 0) {
@@ -275,7 +275,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
     // populate output list
     final List<Pair<K2, List<V2>>> outputKeyValuesList = new ArrayList<Pair<K2, List<V2>>>();
-    for (final Entry<K2, List<Pair<K2, V2>>> groupedByKeyEntry : 
+    for (final Entry<K2, List<Pair<K2, V2>>> groupedByKeyEntry :
             groupedByKey.entrySet()) {
 
       // create list to hold values for the grouped key
@@ -299,7 +299,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
    * <LI>pre 0.20.1 API: {@link JobConf#setOutputValueGroupingComparator(Class)}
    * <LI>0.20.1+ API: {@link Job#setGroupingComparatorClass(Class)}
    * </UL>
-   * 
+   *
    * @param groupingComparator
    */
   public void setKeyGroupingComparator(
@@ -315,7 +315,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
    * <LI>pre 0.20.1 API: {@link JobConf#setOutputKeyComparatorClass(Class)}
    * <LI>0.20.1+ API: {@link Job#setSortComparatorClass(Class)}
    * </UL>
-   * 
+   *
    * @param orderComparator
    */
   public void setKeyOrderComparator(final RawComparator<K2> orderComparator) {
@@ -326,7 +326,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   /**
    * Identical to {@link #setKeyGroupingComparator(RawComparator)}, but with a
    * fluent programming style
-   * 
+   *
    * @param groupingComparator
    *          Comparator to use in the shuffle stage for key grouping
    * @return this
@@ -339,7 +339,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   /**
    * Identical to {@link #setKeyOrderComparator(RawComparator)}, but with a
    * fluent programming style
-   * 
+   *
    * @param orderComparator
    *          Comparator to use in the shuffle stage for key value ordering
    * @return this

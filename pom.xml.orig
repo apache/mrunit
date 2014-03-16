@@ -164,7 +164,6 @@
                 <exclude>BUILD.txt</exclude>
                 <exclude>CHANGES.txt</exclude>
                 <exclude>BIN-NOTICE.txt</exclude>
-                <exclude>src/test/resources/log4j.properties</exclude>
                 <exclude>.idea/</exclude>
                 <exclude>.git/</exclude>
                 <exclude>.gitignore</exclude>

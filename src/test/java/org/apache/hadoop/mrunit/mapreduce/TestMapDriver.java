@@ -46,6 +46,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.mrunit.types.UncomparableWritable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -77,6 +78,14 @@ public class TestMapDriver {
   }
 
   @Test
+  public void testUncomparable() throws IOException {
+    Object k = new UncomparableWritable(1);
+    Object v = new UncomparableWritable(2);
+    MapDriver.newMapDriver(new Mapper<Object, Object, Object, Object>())
+        .withInput(k, v).withOutput(k, v).runTest();
+  }
+
+  @Test
   public void testTestRun1() throws IOException {
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar")).runTest();
@@ -85,8 +94,7 @@ public class TestMapDriver {
   @Test
   public void testTestRun2() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., "
-            + "Received unexpected output (foo, bar) at position 0.)");
+        .expectAssertionErrorMessage("1 Error(s): (Expected no output; got 1 output(s).)");
     driver.withInput(new Text("foo"), new Text("bar")).runTest();
   }
 
@@ -130,8 +138,8 @@ public class TestMapDriver {
   @Test
   public void testTestRun5() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, somethingelse) at position 0.," 
-            + " Received unexpected output (foo, bar) at position 0.)");
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, somethingelse)"
+            + " at position 0, got (foo, bar).)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("somethingelse")).runTest(true);
   }
@@ -148,8 +156,8 @@ public class TestMapDriver {
   @Test
   public void testTestRun6() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar) at position 0.,"
-            + " Received unexpected output (foo, bar) at position 0.)");
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (someotherkey, bar)" +
+        		" at position 0, got (foo, bar).)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("someotherkey"), new Text("bar")).runTest(true);
   }
@@ -166,8 +174,8 @@ public class TestMapDriver {
   @Test
   public void testTestRun7() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Matched expected output (foo, bar) but at "
-            + "incorrect position 0 (expected position 1), Missing expected output (someotherkey, bar) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar)" +
+        		" at position 0, got (foo, bar)., Missing expected output (foo, bar) at position 1.)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("someotherkey"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar")).runTest(true);
@@ -194,7 +202,7 @@ public class TestMapDriver {
 
     driver.withAll(inputs).withAllOutput(outputs).runTest();
   }
-  
+
   @Test
   public void testSetInput() {
     driver.setInput(new Pair<Text, Text>(new Text("foo"), new Text("bar")));
@@ -226,7 +234,7 @@ public class TestMapDriver {
         .withCounter(MapperWithCounters.Counters.X, 1)
         .withCounter("category", "name", 1).runTest();
   }
-  
+
   @Test
   public void testWithCounterAndNoneMissing() throws IOException {
     MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
@@ -242,7 +250,7 @@ public class TestMapDriver {
   @Test
   public void testWithCounterAndEnumCounterMissing() throws IOException {
     MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
-    
+
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Actual counter ("
             + "\"org.apache.hadoop.mrunit.mapreduce.TestMapDriver$MapperWithCounters$Counters\",\"X\")"
@@ -258,7 +266,7 @@ public class TestMapDriver {
   @Test
   public void testWithCounterAndStringCounterMissing() throws IOException {
     MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
-    
+
     thrown
     .expectAssertionErrorMessage("1 Error(s): (Actual counter ("
         + "\"category\",\"name\")"
@@ -316,19 +324,19 @@ public class TestMapDriver {
 
   @Test
   public void testInputSplitDetails() throws IOException {
-    final MapDriver<NullWritable, NullWritable, Text, LongWritable> driver = 
+    final MapDriver<NullWritable, NullWritable, Text, LongWritable> driver =
         MapDriver.newMapDriver(new InputSplitDetailMapper());
     driver.withInput(NullWritable.get(), NullWritable.get())
       .withOutput(new Text("somefile"), new LongWritable(0L)).runTest();
   }
-  
+
   public static class InputSplitDetailMapper
     extends Mapper<NullWritable, NullWritable, Text, LongWritable> {
     @Override
-    protected void map(NullWritable key, NullWritable value, Context context) 
+    protected void map(NullWritable key, NullWritable value, Context context)
         throws IOException, InterruptedException {
       FileSplit split = (FileSplit)context.getInputSplit();
-      context.write(new Text(split.getPath().toString()), 
+      context.write(new Text(split.getPath().toString()),
           new LongWritable(split.getLength()));
     }
   }
@@ -389,7 +397,7 @@ public class TestMapDriver {
     driver.withOutput(new LongWritable(), new Text("a\t1"));
     driver.runTest();
   }
-  
+
 
 
   @Test
@@ -404,7 +412,7 @@ public class TestMapDriver {
     assertNotNull(mapper.getMapInputPath());
     assertEquals(mapInputPath.getName(), mapper.getMapInputPath().getName());
   }
-  
+
   @Test
   public void textMockContext() throws IOException, InterruptedException {
     thrown.expectMessage(RuntimeException.class, "Injected!");
@@ -416,10 +424,10 @@ public class TestMapDriver {
     driver.withOutput(new Text("a"), new Text("1"));
     driver.runTest();
   }
-  
+
   static class TaskAttemptMapper extends Mapper<Text,NullWritable,Text,NullWritable> {
     @Override
-    protected void map(Text key, NullWritable value, Context context) 
+    protected void map(Text key, NullWritable value, Context context)
         throws IOException,InterruptedException {
       context.write(new Text(context.getTaskAttemptID().toString()), NullWritable.get());
     }
@@ -427,7 +435,7 @@ public class TestMapDriver {
 
   @Test
   public void testWithTaskAttemptUse() throws IOException {
-    final MapDriver<Text,NullWritable,Text,NullWritable> driver 
+    final MapDriver<Text,NullWritable,Text,NullWritable> driver
       = MapDriver.newMapDriver(new TaskAttemptMapper());
     driver.withInput(new Text("anything"), NullWritable.get()).withOutput(
         new Text("attempt__0000_m_000000_0"), NullWritable.get()).runTest();
@@ -446,5 +454,5 @@ public class TestMapDriver {
     thrown.expectMessage(IllegalStateException.class, "Driver reuse not allowed");
     driver.withAll(inputs).withAllOutput(outputs).runTest();
   }
-  
+
 }

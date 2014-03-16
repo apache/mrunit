@@ -40,7 +40,9 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.hadoop.mrunit.MapDriver;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.mrunit.types.UncomparableWritable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,7 +61,7 @@ public class TestMapDriver {
     mapper = new IdentityMapper<Text, Text>();
     driver = MapDriver.newMapDriver(mapper);
   }
-  
+
   @Test
   public void testRun() throws IOException {
     final List<Pair<Text, Text>> out = driver.withInput(new Text("foo"),
@@ -72,6 +74,14 @@ public class TestMapDriver {
   }
 
   @Test
+  public void testUncomparable() throws IOException {
+    Object k = new UncomparableWritable(1);
+    Object v = new UncomparableWritable(2);
+    MapDriver.newMapDriver(new IdentityMapper<Object, Object>())
+        .withInput(k, v).withOutput(k, v).runTest();
+  }
+
+  @Test
   public void testTestRun1() throws IOException {
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar")).runTest();
@@ -80,8 +90,7 @@ public class TestMapDriver {
   @Test
   public void testTestRun2() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Expected no outputs; got 1 outputs., "
-            + "Received unexpected output (foo, bar) at position 0.)");
+        .expectAssertionErrorMessage("1 Error(s): (Expected no output; got 1 output(s).)");
     driver.withInput(new Text("foo"), new Text("bar")).runTest();
   }
 
@@ -124,8 +133,8 @@ public class TestMapDriver {
   @Test
   public void testTestRun5() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (foo, somethingelse) at position 0., "
-            + "Received unexpected output (foo, bar) at position 0.)");
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (foo, somethingelse)" +
+        		" at position 0, got (foo, bar).)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("somethingelse")).runTest(true);
   }
@@ -157,8 +166,8 @@ public class TestMapDriver {
   @Test
   public void testTestRun6() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar) at position 0., "
-            + "Received unexpected output (foo, bar) at position 0.)");
+        .expectAssertionErrorMessage("1 Error(s): (Missing expected output (someotherkey, bar)" +
+        		" at position 0, got (foo, bar).)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("someotherkey"), new Text("bar")).runTest(true);
   }
@@ -172,6 +181,9 @@ public class TestMapDriver {
         if (o2.toString().equals("foo") && o1.toString().equals("someotherkey")) {
             return 0;
         }
+        if (o2.toString().equals("someotherkey") && o1.toString().equals("foo")) {
+          return 0;
+      }
         return o1.compareTo(o2);
       }
     };
@@ -193,9 +205,8 @@ public class TestMapDriver {
   @Test
   public void testTestRun7() throws IOException {
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Matched expected output (foo, bar) but at "
-            + "incorrect position 0 (expected position 1), "
-            + "Missing expected output (someotherkey, bar) at position 0.)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (someotherkey, bar)" +
+        		" at position 0, got (foo, bar)., Missing expected output (foo, bar) at position 1.)");
     driver.withInput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("someotherkey"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar")).runTest(true);
@@ -209,7 +220,7 @@ public class TestMapDriver {
         .withOutput(new Text("someotherkey"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar")).runTest(false);
   }
-  
+
   @Test
   public void testTestRun8OrderInsensitive() throws IOException {
     thrown
@@ -222,7 +233,7 @@ public class TestMapDriver {
         .withOutput(new Text("foo"), new Text("bar"))
         .withOutput(new Text("foo"), new Text("bar")).runTest(false);
   }
-  
+
   @Test
   public void testAddAll() throws IOException {
     final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
@@ -235,7 +246,7 @@ public class TestMapDriver {
 
     driver.withAll(inputs).withAllOutput(outputs).runTest();
   }
-  
+
   @Test
   public void testUnexpectedOutput() throws IOException {
     thrown
@@ -244,7 +255,7 @@ public class TestMapDriver {
         .withOutput(new Text("foo"),new Text("bar"))
         .runTest(true);
   }
-  
+
   @Test
   public void testUnexpectedOutputMultiple() throws IOException {
     thrown
@@ -255,7 +266,7 @@ public class TestMapDriver {
         .withOutput(new Text("foo"),new Text("bar"))
         .runTest(true);
   }
-  
+
   @Test
   public void testUnexpectedOutputMultipleComparator() throws IOException {
     Comparator<Text> comparatorAlwaysEqual = new Comparator<Text>() {
@@ -288,7 +299,7 @@ public class TestMapDriver {
         .withOutput(new Text("foo"),new Text("bar"))
         .runTest(false);
   }
-  
+
   @Test
   public void testUnexpectedOutputMultipleOrderInsensitive() throws IOException {
     thrown
@@ -400,7 +411,7 @@ public class TestMapDriver {
   @Test
   public void testWithCounterAndEnumCounterMissing() throws IOException {
     MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
-    
+
     thrown
         .expectAssertionErrorMessage("1 Error(s): (Actual counter ("
             + "\"org.apache.hadoop.mrunit.TestMapDriver$MapperWithCounters$Counters\",\"X\")"
@@ -416,7 +427,7 @@ public class TestMapDriver {
   @Test
   public void testWithCounterAndStringCounterMissing() throws IOException {
     MapDriver<Text, Text, Text, Text> driver = MapDriver.newMapDriver();
-    
+
     thrown
     .expectAssertionErrorMessage("1 Error(s): (Actual counter ("
         + "\"category\",\"name\")"
@@ -498,12 +509,9 @@ public class TestMapDriver {
     driver.withInputFromString("a\tb");
     driver.withOutputFromString("1\ta");
     thrown.expectAssertionErrorMessage("2 Error(s)");
-    thrown.expectAssertionErrorMessage("Missing expected output (1, a): "
-        + "Mismatch in key class: expected: class org.apache.hadoop.io.Text "
-        + "actual: class org.apache.hadoop.io.LongWritable");
-    thrown.expectAssertionErrorMessage("Received unexpected output (1, a): "
-        + "Mismatch in key class: expected: class org.apache.hadoop.io.Text "
-        + "actual: class org.apache.hadoop.io.LongWritable");
+    thrown.expectAssertionErrorMessage("Missing expected output (1, a) at position 0, got (1, a).");
+    thrown.expectAssertionErrorMessage("Mismatch in key class: expected:" +
+    		" class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable");
     driver.runTest();
   }
 
@@ -526,7 +534,7 @@ public class TestMapDriver {
     implements Mapper<Text, Text, Text, Text> {
     private int duplicationFactor = 2;
     public DuplicatingMapper() {
-     
+
     }
     public DuplicatingMapper(int factor) {
       duplicationFactor = factor;
@@ -546,10 +554,10 @@ public class TestMapDriver {
     driver.withInputFromString("a\tb");
     driver.withOutputFromString("a\t1");
     thrown
-        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (a, 1): Mismatch in value class: "
-            + "expected: class org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable, "
-            + "Received unexpected output (a, 1): Mismatch in value class: expected: class "
-            + "org.apache.hadoop.io.Text actual: class org.apache.hadoop.io.LongWritable)");
+        .expectAssertionErrorMessage("2 Error(s): (Missing expected output (a, 1)" +
+        		" at position 0, got (a, 1)., Mismatch in value class:" +
+        		" expected: class org.apache.hadoop.io.Text" +
+        		" actual: class org.apache.hadoop.io.LongWritable)");
     driver.runTest();
   }
 

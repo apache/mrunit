@@ -53,7 +53,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Sets the input key to send to the mapper
-   * 
+   *
    * @param key
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v)*. Replaced by {@link #setInput},
@@ -70,7 +70,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Sets the input value to send to the mapper
-   * 
+   *
    * @param val
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v)*. Replaced by {@link #setInput},
@@ -87,7 +87,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Sets the input to send to the mapper
-   * 
+   *
    */
   public void setInput(final K1 key, final V1 val) {
   	setInput(new Pair<K1, V1>(key, val));
@@ -95,7 +95,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Sets the input to send to the mapper
-   * 
+   *
    * @param inputRecord
    *          a (key, val) pair
    */
@@ -110,7 +110,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Adds an input to send to the mapper
-   * 
+   *
    * @param key
    * @param val
    */
@@ -120,7 +120,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Adds an input to send to the mapper
-   * 
+   *
    * @param input
    *          a (K, V) pair
    */
@@ -130,7 +130,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Adds list of inputs to send to the mapper
-   * 
+   *
    * @param inputs
    *          list of (K, V) pairs
    */
@@ -150,7 +150,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   /**
    * Expects an input of the form "key \t val" Forces the Mapper input types to
    * Text.
-   * 
+   *
    * @param input
    *          A string of the form "key \t val".
    * @deprecated No replacement due to lack of type safety and incompatibility
@@ -171,7 +171,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to setInputKey() but with fluent programming style
-   * 
+   *
    * @return this
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v)*. Replaced by {@link #withInput} and
@@ -185,7 +185,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to setInputValue() but with fluent programming style
-   * 
+   *
    * @param val
    * @return this
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
@@ -211,7 +211,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   * 
+   *
    * @param inputRecord
    * @return this
    */
@@ -222,7 +222,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to setInputFromString, but with a fluent programming style
-   * 
+   *
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -237,7 +237,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to addAll() but returns self for fluent programming style
-   * 
+   *
    * @param inputRecords
    * @return this
    */

@@ -38,29 +38,29 @@ import com.google.common.io.Resources;
  * destroys it afterwards. This works much like JUnit's {@link TemporaryFolder} but is
  * geared towards Hadoop applications. The temporary directory is deleted after each test
  * case, no matter if the test case succeeded or failed.
- * 
+ *
  * <p>This is how it works:</p>
  *
  * <pre><tt>
  * public class TestExample {
  *   {@literal @Rule}
  *   public TemporaryPath tmpDir = new TemporaryPath();
- *   
+ *
  *   {@literal @Test}
  *   public void testSomething() {
  *     Path input = tmpDir.copyResourcePath("my-test-data");
  *     Path output = tmpDir.getPath("output");
- *     
+ *
  *     // create and run a Hadoop job reading from input and writing to output
  *   }
  * }
  * </tt></pre>
- * 
+ *
  * <p>In some cases, the frameworks you use in your tests use temporary directories
  * internally. If those directories are configurable via Hadoop properties, you can
  * let {@link TemporaryPath#overridePathProperties(Configuration)} override them
  * so that they point to your managed temporary directory. You have to specify the
- * properties to override via the constructor.</p> 
+ * properties to override via the constructor.</p>
  */
 public final class TemporaryPath extends ExternalResource {
   private final TemporaryFolder tmp = new TemporaryFolder();
@@ -143,7 +143,7 @@ public final class TemporaryPath extends ExternalResource {
   public Path copyResourcePath(String resourceName) throws IOException {
     return toPath(copyResourceFile(resourceName));
   }
-  
+
 
   /**
    * Get a new {@link Configuration} instance.

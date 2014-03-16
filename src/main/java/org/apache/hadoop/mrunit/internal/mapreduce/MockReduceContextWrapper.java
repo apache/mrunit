@@ -42,7 +42,7 @@ import org.mockito.stubbing.Answer;
  * it send the results back to us, etc. But since Reducer.Context is an inner
  * class of Reducer, we need to put any subclasses of Reducer.Context in a
  * subclass of Reducer.
- * 
+ *
  * This wrapper class exists for that purpose.
  */
 public class MockReduceContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>

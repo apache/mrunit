@@ -33,10 +33,10 @@ public class TestStatefulMapReduce {
 
   @Test
   public void testClosedFormMapReduce() throws IOException {
-    
-    MapReduceDriver<LongWritable, Text, Text, IntWritable, Text, IntWritable> mapReduceDriver 
+
+    MapReduceDriver<LongWritable, Text, Text, IntWritable, Text, IntWritable> mapReduceDriver
       = MapReduceDriver.newMapReduceDriver(new StatefulMapper(), new Reducer());
-    
+
     mapReduceDriver.addInput(new LongWritable(1L), new Text("hello"));
     mapReduceDriver.addInput(new LongWritable(2L), new Text("schmo"));
     mapReduceDriver.withOutput(new Text("SomeKey"), new IntWritable(2));
