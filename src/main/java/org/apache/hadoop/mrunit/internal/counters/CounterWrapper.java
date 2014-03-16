@@ -46,7 +46,7 @@ public class CounterWrapper {
 
   /**
    * Wrap old counter object
-   * 
+   *
    * @param counters
    */
   public CounterWrapper(final org.apache.hadoop.mapred.Counters counters) {
@@ -55,7 +55,7 @@ public class CounterWrapper {
 
   /**
    * Wrap new counter object
-   * 
+   *
    * @param counters
    */
   public CounterWrapper(final org.apache.hadoop.mapreduce.Counters counters) {
@@ -64,7 +64,7 @@ public class CounterWrapper {
 
   /**
    * Get counter value based on Enumeration
-   * 
+   *
    * @param e
    * @return
    */
@@ -78,7 +78,7 @@ public class CounterWrapper {
 
   /**
    * Get counter value based on name
-   * 
+   *
    * @param group
    * @param name
    * @return

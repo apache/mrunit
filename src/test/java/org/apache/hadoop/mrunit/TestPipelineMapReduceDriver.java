@@ -35,6 +35,7 @@ import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.mrunit.types.UncomparableWritable;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -57,6 +58,16 @@ public class TestPipelineMapReduceDriver {
         "No Mappers or Reducers in pipeline");
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver.withInput(new Text("foo"), new Text("bar")).runTest();
+  }
+
+  @Test
+  public void testUncomparable() throws IOException {
+    Text k = new Text("test");
+    Object v = new UncomparableWritable(2);
+    PipelineMapReduceDriver.newPipelineMapReduceDriver().withMapReduce(
+        new IdentityMapper<Text, Object>(),
+        new IdentityReducer<Text, Object>())
+        .withInput(k, v).withOutput(k, v).runTest();
   }
 
   @Test
@@ -111,13 +122,13 @@ public class TestPipelineMapReduceDriver {
 
   @Test
   public void testSumAtEndWithInputAddAll() throws IOException {
-    
+
     final List<Pair<Text, LongWritable>> inputs = new ArrayList<Pair<Text, LongWritable>>();
     inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_IN_A)));
     inputs.add(new Pair<Text, LongWritable>(new Text("bar"), new LongWritable(BAR_IN)));
     inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_IN_B)));
-    
-    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver 
+
+    final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver
       = PipelineMapReduceDriver.newPipelineMapReduceDriver();
     driver
         .withMapReduce(new IdentityMapper<Text, LongWritable>(),
@@ -192,7 +203,7 @@ public class TestPipelineMapReduceDriver {
         .withCounter("category", "count", 2).withCounter("category", "sum", 2)
         .runTest();
   }
-  
+
   @Test
   public void testWithCounterAndNoneMissing() throws IOException {
     final PipelineMapReduceDriver<Text, Text, Text, Text> driver = PipelineMapReduceDriver.newPipelineMapReduceDriver();
@@ -331,10 +342,10 @@ public class TestPipelineMapReduceDriver {
     driver.addOutput(key, value);
     driver.runTest();
   }
-  
+
   @Test
   public void testMapInputFile() throws IOException {
-    InputPathStoringMapper<LongWritable,LongWritable> mapper = 
+    InputPathStoringMapper<LongWritable,LongWritable> mapper =
         new InputPathStoringMapper<LongWritable,LongWritable>();
     Path mapInputPath = new Path("myfile");
     final PipelineMapReduceDriver<Text, LongWritable, Text, LongWritable> driver = PipelineMapReduceDriver

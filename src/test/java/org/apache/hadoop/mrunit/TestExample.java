@@ -28,7 +28,7 @@ import org.junit.Test;
 /**
  * Example test of the IdentityMapper to demonstrate proper MapDriver usage in a
  * test case.
- * 
+ *
  * This example is reproduced in the overview for the MRUnit javadoc.
  */
 public class TestExample {

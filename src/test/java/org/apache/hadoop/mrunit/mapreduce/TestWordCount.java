@@ -36,14 +36,14 @@ public class TestWordCount {
   private static final String FILE02 = "Hello Hadoop Goodbye Hadoop";
   private static final int ONE = 1;
   private static final int TWO = 2;
-  
+
   private Mapper<LongWritable, Text, Text, IntWritable> mapper;
   private Reducer<Text, IntWritable, Text, IntWritable> reducer;
   private MapReduceDriver<LongWritable, Text, Text, IntWritable, Text, IntWritable> driver;
   private MapDriver<LongWritable, Text, Text, IntWritable> mapDriver;
   private ReduceDriver<Text, IntWritable, Text, IntWritable> reduceDriver;
   private List<Pair<Text, IntWritable>> expectedOutput;
-  
+
   @Before
   public void setup() {
     mapper = new Map();
@@ -51,7 +51,7 @@ public class TestWordCount {
     driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
     mapDriver = MapDriver.newMapDriver(mapper);
     reduceDriver = ReduceDriver.newReduceDriver(reducer);
-    
+
     expectedOutput = new ArrayList<Pair<Text, IntWritable>>();
     expectedOutput.add(new Pair<Text, IntWritable>(new Text("Bye"), new IntWritable(ONE)));
     expectedOutput.add(new Pair<Text, IntWritable>(new Text("Goodbye"), new IntWritable(ONE)));
@@ -83,21 +83,21 @@ public class TestWordCount {
   public void TestReduceDriver() throws IOException {
     final List<IntWritable> input1 = new ArrayList<IntWritable>();
     input1.add(new IntWritable(ONE));
-    
+
     final List<IntWritable> input2 = new ArrayList<IntWritable>();
     input2.add(new IntWritable(ONE));
     input2.add(new IntWritable(ONE));
-    
+
     final List<Pair<Text, List<IntWritable>>> inputs = new ArrayList<Pair<Text, List<IntWritable>>>();
     inputs.add(new Pair<Text, List<IntWritable>>(new Text("Bye"), input1));
     inputs.add(new Pair<Text, List<IntWritable>>(new Text("Goodbye"), input1));
     inputs.add(new Pair<Text, List<IntWritable>>(new Text("Hadoop"), input2));
-    inputs.add(new Pair<Text, List<IntWritable>>(new Text("Hello"), input2));    
+    inputs.add(new Pair<Text, List<IntWritable>>(new Text("Hello"), input2));
     inputs.add(new Pair<Text, List<IntWritable>>(new Text("World"), input2));
-    
+
     reduceDriver.withAll(inputs).withAllOutput(expectedOutput).runTest(true);
   }
-  
+
   @Test
   public void TestRun() throws IOException {
     final List<Pair<LongWritable, Text>> inputs = new ArrayList<Pair<LongWritable, Text>>();

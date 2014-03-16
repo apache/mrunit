@@ -59,15 +59,30 @@ public class Errors {
   }
 
   /**
+   * Not empty after first record.
+   */
+  public boolean isEmpty() {
+    return messages.isEmpty();
+  }
+
+  /**
    * Throw an validation exception if any message have been recorded before.
    */
   public void assertNone() {
-    if (!messages.isEmpty()) {
-      final StringBuilder buffer = new StringBuilder();
-      buffer.append(messages.size()).append(" Error(s): ");
-      StringUtils.formatValueList(messages, buffer);
-      fail(buffer.toString());
+    if (!isEmpty()) {
+      fail(toString());
     }
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    final StringBuilder buffer = new StringBuilder();
+    buffer.append(messages.size()).append(" Error(s): ");
+    StringUtils.formatValueList(messages, buffer);
+    return buffer.toString();
   }
 
 }

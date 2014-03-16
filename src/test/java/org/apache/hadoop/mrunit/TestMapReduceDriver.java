@@ -48,9 +48,12 @@ import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.apache.hadoop.mrunit.types.TestWritable;
+import org.apache.hadoop.mrunit.types.UncomparableWritable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 public class TestMapReduceDriver {
 
@@ -94,6 +97,16 @@ public class TestMapReduceDriver {
   }
 
   @Test
+  public void testUncomparable() throws IOException {
+    Text k = new Text("test");
+    Object v = new UncomparableWritable(2);
+    MapReduceDriver.newMapReduceDriver(
+        new IdentityMapper<Text, Object>(),
+        new IdentityReducer<Text, Object>())
+        .withInput(k, v).withOutput(k, v).runTest();
+  }
+
+  @Test
   public void testTestRun1() throws IOException {
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
@@ -114,10 +127,8 @@ public class TestMapReduceDriver {
   @Test
   public void testTestRun3() throws IOException {
     thrown.expectAssertionErrorMessage("2 Error(s)");
-    thrown.expectAssertionErrorMessage("Matched expected output (foo, 52) but "
-        + "at incorrect position 1 (expected position 0)");
-    thrown.expectAssertionErrorMessage("Matched expected output (bar, 12) but "
-        + "at incorrect position 0 (expected position 1)");
+    thrown.expectAssertionErrorMessage("Missing expected output (foo, 52) at position 0, got (bar, 12).");
+    thrown.expectAssertionErrorMessage("Missing expected output (bar, 12) at position 1, got (foo, 52).");
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("bar"), new LongWritable(BAR_IN))
         .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
@@ -138,7 +149,7 @@ public class TestMapReduceDriver {
 
     driver.withAll(inputs).withAllOutput(outputs).runTest();
   }
-  
+
   @Test
   public void testTestRun3OrderInsensitive() throws IOException {
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
@@ -419,7 +430,7 @@ public class TestMapReduceDriver {
         .withCounter("category", "count", 1).withCounter("category", "sum", 1)
         .runTest();
   }
-  
+
   @Test
   public void testWithCounterAndNoneMissing() throws IOException {
     MapReduceDriver<Text, Text, Text, Text, Text, Text> driver = MapReduceDriver
@@ -581,7 +592,7 @@ public class TestMapReduceDriver {
 
   @Test
   public void testMapInputFile() throws IOException {
-    InputPathStoringMapper<LongWritable,LongWritable> mapper = 
+    InputPathStoringMapper<LongWritable,LongWritable> mapper =
         new InputPathStoringMapper<LongWritable,LongWritable>();
     Path mapInputPath = new Path("myfile");
     driver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
@@ -609,10 +620,10 @@ public class TestMapReduceDriver {
 
   @Test
   public void testGroupingComparatorBehaviour2() throws IOException {
-    // this test fails pre-MRUNIT-127 because of the incorrect 
-    // grouping of reduce keys in "shuffle". 
+    // this test fails pre-MRUNIT-127 because of the incorrect
+    // grouping of reduce keys in "shuffle".
     // MapReduce doesn't group keys which aren't in a contiguous
-    // range when sorted by their sorting comparator. 
+    // range when sorted by their sorting comparator.
     driver.withInput(new Text("1A"),new LongWritable(1L))
       .withInput(new Text("2A"),new LongWritable(1L))
       .withInput(new Text("1B"),new LongWritable(1L))

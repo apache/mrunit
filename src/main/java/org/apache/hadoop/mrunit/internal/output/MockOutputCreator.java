@@ -72,7 +72,7 @@ public class MockOutputCreator<K, V> {
       Configuration configuration,
       Configuration outputCopyingOrInputFormatConfiguration) throws IOException {
     outputCopyingOrInputFormatConfiguration = outputCopyingOrInputFormatConfiguration == null ? configuration
-        : outputCopyingOrInputFormatConfiguration;    
+        : outputCopyingOrInputFormatConfiguration;
     if (mapredOutputFormatClass != null) {
       return new MockMapredOutputFormat<K, V>(new JobConf(configuration),
           mapredOutputFormatClass, mapredInputFormatClass, new JobConf(

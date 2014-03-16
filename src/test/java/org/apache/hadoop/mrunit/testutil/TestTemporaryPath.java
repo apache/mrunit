@@ -79,7 +79,7 @@ public class TestTemporaryPath {
     tmpDir.copyResourceFile("testdir/data.txt");
     assertThat(dest.exists(), is(true));
   }
-  
+
   @Test
   public void testGetDefaultConfiguration() {
     Configuration conf = tmpDir.getDefaultConfiguration();

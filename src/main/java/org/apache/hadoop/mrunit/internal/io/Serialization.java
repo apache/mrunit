@@ -44,7 +44,7 @@ public class Serialization {
    * the serialization class may or may not copy the orig object into the copy
    * object based on the contract on
    * org.apache.hadoop.io.serializer.Deserializer.deserialize
-   * 
+   *
    * @param orig
    * @param copy
    *          if null always returns a new object, if not null may or may not
@@ -89,7 +89,7 @@ public class Serialization {
 
   /**
    * Creates a new copy of the orig object
-   * 
+   *
    * @param orig
    * @return a new copy of the orig object
    */
@@ -99,7 +99,7 @@ public class Serialization {
 
   /**
    * Creates a new copy of the orig object
-   * 
+   *
    * @param orig
    * @param conf
    *          new Configuration object to use

@@ -34,7 +34,7 @@ public class StatefulMapper extends
 
   /**
    * Increment someState for each input.
-   * 
+   *
    * @param context
    *          the Hadoop job Map context
    * @throws java.io.IOException
@@ -48,7 +48,7 @@ public class StatefulMapper extends
   /**
    * Runs once after all maps have occurred. Dumps the accumulated state to the
    * output.
-   * 
+   *
    * @param context
    *          the Hadoop job Map context
    */

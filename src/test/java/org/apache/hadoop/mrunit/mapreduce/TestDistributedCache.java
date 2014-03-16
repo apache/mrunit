@@ -42,27 +42,27 @@ public class TestDistributedCache {
   private Mapper<Text,Text,Text,Text> mapper = new TestDistributedCacheMapper();
   private Reducer<Text,Text,Text,Text> reducer = new TestDistributedCacheReducer();
 
-  private MapDriver<Text,Text,Text,Text> mapDriver = 
+  private MapDriver<Text,Text,Text,Text> mapDriver =
       MapDriver.newMapDriver(mapper);
-  private ReduceDriver<Text,Text,Text,Text> reduceDriver = 
+  private ReduceDriver<Text,Text,Text,Text> reduceDriver =
       ReduceDriver.newReduceDriver(reducer);
-  private MapReduceDriver<Text,Text,Text,Text,Text,Text> mapReduceDriver = 
+  private MapReduceDriver<Text,Text,Text,Text,Text,Text> mapReduceDriver =
       MapReduceDriver.newMapReduceDriver();
 
   static final Text DIR = new Text("dir");
   static final Text FILE = new Text("file");
-  
+
   /**
    * A mapper class which loads files / archives from distributed
    * cache and outputs the filenames as keys, and whether the cache item is a file
    * or directory ("file" or "dir") as value
    */
-  private static class TestDistributedCacheMapper  
+  private static class TestDistributedCacheMapper
     extends Mapper<Text,Text,Text,Text> {
 
     private List<Path> cachePaths;
 
-    protected void setup(Context context) 
+    protected void setup(Context context)
         throws IOException, InterruptedException {
       cachePaths = TestDistributedCacheUtils.createCachePathList(context);
     }
@@ -79,16 +79,16 @@ public class TestDistributedCache {
    * cache and outputs the filenames as keys, and whether the cache item is a file
    * or directory ("file" or "dir") as value
    */
-  private static class TestDistributedCacheReducer  
+  private static class TestDistributedCacheReducer
     extends Reducer<Text,Text,Text,Text> {
-  
+
     private List<Path> cachePaths;
-  
-    protected void setup(Context context) 
+
+    protected void setup(Context context)
         throws IOException, InterruptedException {
       cachePaths = TestDistributedCacheUtils.createCachePathList(context);
     }
-  
+
     @Override
     public void reduce(Text key, Iterable<Text> value, Context context)
         throws IOException, InterruptedException {
@@ -113,16 +113,16 @@ public class TestDistributedCache {
       return cachePaths;
     }
 
-    private static void outputCachePaths(List<Path> cachePaths, 
-        TaskInputOutputContext<Text,Text,Text,Text> context) 
+    private static void outputCachePaths(List<Path> cachePaths,
+        TaskInputOutputContext<Text,Text,Text,Text> context)
         throws IOException, InterruptedException {
       for (Path path: cachePaths) {
         outputPath("", path, context);
       }
     }
 
-    private static void outputPath(String parentPath, Path path, 
-        TaskInputOutputContext<Text,Text,Text,Text> context) 
+    private static void outputPath(String parentPath, Path path,
+        TaskInputOutputContext<Text,Text,Text,Text> context)
             throws IOException, InterruptedException {
       FileSystem fs = FileSystem.get(context.getConfiguration());
       FileStatus fstat = fs.getFileStatus(path);
@@ -199,7 +199,7 @@ public class TestDistributedCache {
     reduceDriver.withCacheFile("testfile")
       .withOutput(new Text("testfile"), new Text("file")).runTest(false);
   }
-  
+
   @Test
   public void testAddCacheFileToReducerUsingStaticMethod() throws Exception
   {
@@ -236,7 +236,7 @@ public class TestDistributedCache {
       .withOutput(new Text("testarchive.tar/d"), new Text("file"))
       .runTest(false);
   }
-  
+
   @Test
   public void testAddCacheArchiveToMapReduceUsingDriverMethod2() throws IOException
   {

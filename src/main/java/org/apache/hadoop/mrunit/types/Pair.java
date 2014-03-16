@@ -23,7 +23,7 @@ import java.util.Comparator;
 
 /**
  * A very basic pair type that does not allow null values.
- * 
+ *
  * @param <S>
  * @param <T>
  */

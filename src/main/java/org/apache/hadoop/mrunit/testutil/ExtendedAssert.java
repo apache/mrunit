@@ -33,7 +33,7 @@ public final class ExtendedAssert {
 
   /**
    * Asserts that all the elements of the list are equivalent under equals()
-   * 
+   *
    * @param expected
    *          a list full of expected values
    * @param actual
@@ -65,7 +65,7 @@ public final class ExtendedAssert {
 
   /**
    * asserts x &gt; y
-   * 
+   *
    * @deprecated No replacement since extension methods to JUnit assert methods
    *             dont fit well with MRUnit's goals
    */
@@ -76,7 +76,7 @@ public final class ExtendedAssert {
 
   /**
    * asserts x &gt;= y)
-   * 
+   *
    * @deprecated No replacement since extension methods to JUnit assert methods
    *             dont fit well with MRUnit's goals
    */
@@ -87,7 +87,7 @@ public final class ExtendedAssert {
 
   /**
    * asserts x &lt; y
-   * 
+   *
    * @deprecated No replacement since extension methods to JUnit assert methods
    *             dont fit well with MRUnit's goals
    */
@@ -98,7 +98,7 @@ public final class ExtendedAssert {
 
   /**
    * asserts x &gt;= y)
-   * 
+   *
    * @deprecated No replacement since extension methods to JUnit assert methods
    *             dont fit well with MRUnit's goals
    * */

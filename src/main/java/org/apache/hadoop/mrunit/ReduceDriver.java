@@ -67,7 +67,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Sets the counters object to use for this test.
-   * 
+   *
    * @param ctrs
    *          The counters object to use.
    */
@@ -84,7 +84,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Sets the reducer object to use for this test
-   * 
+   *
    * @param r
    *          The reducer object to use
    */
@@ -94,7 +94,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to setReducer(), but with fluent programming style
-   * 
+   *
    * @param r
    *          The Reducer to use
    * @return this
@@ -112,7 +112,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   /**
    * Configure {@link Reducer} to output with a real {@link OutputFormat}. Set
    * {@link InputFormat} to read output back in for use with run* methods
-   * 
+   *
    * @param outputFormatClass
    * @param inputFormatClass
    * @return this for fluent style
@@ -145,7 +145,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
       myReducer.close();
       return outputCollectable.getOutputs();
     } finally {
-      cleanupDistributedCache();  
+      cleanupDistributedCache();
     }
   }
 
@@ -157,7 +157,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   /**
    * Returns a new ReduceDriver without having to specify the generic types on
    * the right hand side of the object create statement.
-   * 
+   *
    * @return new ReduceDriver
    */
   public static <K1, V1, K2, V2> ReduceDriver<K1, V1, K2, V2> newReduceDriver() {
@@ -167,8 +167,8 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   /**
    * Returns a new ReduceDriver without having to specify the generic types on
    * the right hand side of the object create statement.
-   * 
-   * 
+   *
+   *
    * @param reducer
    *          passed to ReduceDriver constructor
    * @return new ReduceDriver

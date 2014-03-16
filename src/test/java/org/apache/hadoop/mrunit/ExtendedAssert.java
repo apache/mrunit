@@ -28,7 +28,7 @@ public final class ExtendedAssert {
 
   /**
    * Asserts that all the elements of the list are equivalent under equals()
-   * 
+   *
    * @param expected
    *          a list full of expected values
    * @param actual
