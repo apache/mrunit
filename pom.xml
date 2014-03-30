@@ -113,6 +113,31 @@
       <email>dbeech@apache.org</email>
       <name>Dave Beech</name>
     </developer>
+    <developer>
+      <id>dechouxb.apache.org</id>
+      <email>dechouxb@apache.org</email>
+      <name>Bertrand Dechoux</name>
+    </developer>
+    <developer>
+      <id>kinley.apache.org</id>
+      <email>kinley@apache.org</email>
+      <name>James Robert Kinley</name>
+    </developer>
+    <developer>
+      <id>mattmann.apache.org</id>
+      <email>mattmann@apache.org</email>
+      <name>Chris Mattmann</name>
+    </developer>
+    <developer>
+      <id>nigel.apache.org</id>
+      <email>nigel@apache.org</email>
+      <name>Nigel Daley</name>
+    </developer>
+    <developer>
+      <id>phunt.apache.org</id>
+      <email>phunt@apache.org</email>
+      <name>Patrick D. Hunt</name>
+    </developer>
   </developers>
   <build>
     <plugins>
