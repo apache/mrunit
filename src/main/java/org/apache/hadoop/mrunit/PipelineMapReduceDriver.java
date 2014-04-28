@@ -38,23 +38,23 @@ import org.apache.hadoop.mrunit.types.Pair;
  * workflow, as well as a set of (key, value) pairs to pass in to the first
  * Mapper. You can also specify the outputs you expect to be sent to the final
  * Reducer in the pipeline.
- *
+ * 
  * By calling runTest(), the harness will deliver the input to the first Mapper,
  * feed the intermediate results to the first Reducer (without checking them),
  * and proceed to forward this data along to subsequent Mapper/Reducer jobs in
  * the pipeline until the final Reducer. The last Reducer's outputs are checked
  * against the expected results.
- *
+ * 
  * This is designed for slightly more complicated integration tests than the
  * MapReduceDriver, which is for smaller unit tests.
- *
+ * 
  * (K1, V1) in the type signature refer to the types associated with the inputs
  * to the first Mapper. (K2, V2) refer to the types associated with the final
  * Reducer's output. No intermediate types are specified.
  */
 @SuppressWarnings("rawtypes")
 public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
-    TestDriver<K1, V1, K2, V2, PipelineMapReduceDriver<K1, V1, K2, V2>> {
+    TestDriver<K2, V2, PipelineMapReduceDriver<K1, V1, K2, V2>> {
 
   public static final Log LOG = LogFactory
       .getLog(PipelineMapReduceDriver.class);
@@ -83,7 +83,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Sets the counters object to use for this test.
-   *
+   * 
    * @param ctrs
    *          The counters object to use.
    */
@@ -102,7 +102,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   /**
    * Add a Mapper and Reducer instance to the pipeline to use with this test
    * driver
-   *
+   * 
    * @param m
    *          The Mapper instance to add to the pipeline
    * @param r
@@ -115,7 +115,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   /**
    * Add a Mapper and Reducer instance to the pipeline to use with this test
    * driver
-   *
+   * 
    * @param p
    *          The Mapper and Reducer instances to add to the pipeline
    */
@@ -126,7 +126,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   /**
    * Add a Mapper and Reducer instance to the pipeline to use with this test
    * driver using fluent style
-   *
+   * 
    * @param m
    *          The Mapper instance to use
    * @param r
@@ -141,7 +141,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   /**
    * Add a Mapper and Reducer instance to the pipeline to use with this test
    * driver using fluent style
-   *
+   * 
    * @param p
    *          The Mapper and Reducer instances to add to the pipeline
    */
@@ -160,7 +160,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Adds an input to send to the mapper
-   *
+   * 
    * @param key
    * @param val
    */
@@ -170,7 +170,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Adds list of inputs to send to the mapper
-   *
+   * 
    * @param inputs
    *          list of (K, V) pairs
    */
@@ -182,7 +182,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   *
+   * 
    * @param key
    * @param val
    * @return this
@@ -195,7 +195,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Adds an input to send to the Mapper
-   *
+   * 
    * @param input
    *          The (k, v) pair to add to the input list.
    */
@@ -205,7 +205,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   *
+   * 
    * @param input
    *          The (k, v) pair to add
    * @return this
@@ -219,7 +219,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   /**
    * Expects an input of the form "key \t val" Forces the Mapper input types to
    * Text.
-   *
+   * 
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @deprecated No replacement due to lack of type safety and incompatibility
@@ -233,7 +233,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addInputFromString, but with a fluent programming style
-   *
+   * 
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -249,8 +249,9 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addAll() but returns self for fluent programming style
-   *
-   * @param inputRecords input key/value pairs
+   * 
+   * @param inputRecords
+   *          input key/value pairs
    * @return this
    */
   public PipelineMapReduceDriver<K1, V1, K2, V2> withAll(
@@ -267,7 +268,8 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   }
 
   /**
-   * @param mapInputPath Path which is to be passed to the mappers InputSplit
+   * @param mapInputPath
+   *          Path which is to be passed to the mappers InputSplit
    */
   public void setMapInputPath(Path mapInputPath) {
     this.mapInputPath = mapInputPath;
@@ -275,10 +277,11 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * @param mapInputPath
-   *       The Path object which will be given to the mapper
+   *          The Path object which will be given to the mapper
    * @return this
    */
-  public final PipelineMapReduceDriver<K1, V1, K2, V2> withMapInputPath(Path mapInputPath) {
+  public final PipelineMapReduceDriver<K1, V1, K2, V2> withMapInputPath(
+      Path mapInputPath) {
     setMapInputPath(mapInputPath);
     return this;
   }
@@ -297,8 +300,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     }
     if (driverReused()) {
       throw new IllegalStateException("Driver reuse not allowed");
-    }
-    else {
+    } else {
       setUsedOnceStatus();
     }
 
@@ -331,7 +333,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   /**
    * Returns a new PipelineMapReduceDriver without having to specify the generic
    * types on the right hand side of the object create statement.
-   *
+   * 
    * @return new PipelineMapReduceDriver
    */
   public static <K1, V1, K2, V2> PipelineMapReduceDriver<K1, V1, K2, V2> newPipelineMapReduceDriver() {
@@ -341,7 +343,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   /**
    * Returns a new PipelineMapReduceDriver without having to specify the generic
    * types on the right hand side of the object create statement.
-   *
+   * 
    * @param pipeline
    *          passed to PipelineMapReduceDriver constructor
    * @return new PipelineMapReduceDriver

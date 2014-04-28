@@ -29,14 +29,14 @@ import org.apache.hadoop.mrunit.internal.output.MockOutputCreator;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * Harness that allows you to test a Mapper instance. You provide the input
- * (k, v)* pairs that should be sent to the Mapper, and outputs you expect to be
+ * Harness that allows you to test a Mapper instance. You provide the input (k,
+ * v)* pairs that should be sent to the Mapper, and outputs you expect to be
  * sent by the Mapper to the collector for those inputs. By calling runTest(),
  * the harness will deliver the input to the Mapper and will check its outputs
  * against the expected results.
  */
 public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, V1, K2, V2, T>>
-    extends TestDriver<K1, V1, K2, V2, T> {
+    extends TestDriver<K2, V2, T> {
 
   public static final Log LOG = LogFactory.getLog(MapDriverBase.class);
 
@@ -53,16 +53,17 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Sets the input key to send to the mapper
-   *
+   * 
    * @param key
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v)*. Replaced by {@link #setInput},
-   *             {@link #addInput}, and {@link #addAll}
+   *             input (k, v)*. Replaced by {@link #setInput}, {@link #addInput}
+   *             , and {@link #addAll}
    */
   @Deprecated
   public void setInputKey(final K1 key) {
     inputKey = copy(key);
   }
+
   @Deprecated
   public K1 getInputKey() {
     return inputKey;
@@ -70,16 +71,17 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Sets the input value to send to the mapper
-   *
+   * 
    * @param val
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
-   *             input (k, v)*. Replaced by {@link #setInput},
-   *             {@link #addInput}, and {@link #addAll}
+   *             input (k, v)*. Replaced by {@link #setInput}, {@link #addInput}
+   *             , and {@link #addAll}
    */
   @Deprecated
   public void setInputValue(final V1 val) {
     inputVal = copy(val);
   }
+
   @Deprecated
   public V1 getInputValue() {
     return inputVal;
@@ -87,15 +89,15 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Sets the input to send to the mapper
-   *
+   * 
    */
   public void setInput(final K1 key, final V1 val) {
-  	setInput(new Pair<K1, V1>(key, val));
+    setInput(new Pair<K1, V1>(key, val));
   }
 
   /**
    * Sets the input to send to the mapper
-   *
+   * 
    * @param inputRecord
    *          a (key, val) pair
    */
@@ -110,7 +112,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Adds an input to send to the mapper
-   *
+   * 
    * @param key
    * @param val
    */
@@ -120,7 +122,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Adds an input to send to the mapper
-   *
+   * 
    * @param input
    *          a (K, V) pair
    */
@@ -130,7 +132,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Adds list of inputs to send to the mapper
-   *
+   * 
    * @param inputs
    *          list of (K, V) pairs
    */
@@ -150,7 +152,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   /**
    * Expects an input of the form "key \t val" Forces the Mapper input types to
    * Text.
-   *
+   * 
    * @param input
    *          A string of the form "key \t val".
    * @deprecated No replacement due to lack of type safety and incompatibility
@@ -171,7 +173,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to setInputKey() but with fluent programming style
-   *
+   * 
    * @return this
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
    *             input (k, v)*. Replaced by {@link #withInput} and
@@ -185,7 +187,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to setInputValue() but with fluent programming style
-   *
+   * 
    * @param val
    * @return this
    * @deprecated MRUNIT-64. Moved to list implementation to support multiple
@@ -199,9 +201,9 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   }
 
   /**
-   * Similar to setInput() but uses addInput() instead so accumulates values, and returns
-   * the class instance, conforming to the fluent programming style
-   *
+   * Similar to setInput() but uses addInput() instead so accumulates values,
+   * and returns the class instance, conforming to the fluent programming style
+   * 
    * @return this
    */
   public T withInput(final K1 key, final V1 val) {
@@ -211,7 +213,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   *
+   * 
    * @param inputRecord
    * @return this
    */
@@ -222,7 +224,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to setInputFromString, but with a fluent programming style
-   *
+   * 
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -237,7 +239,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * Identical to addAll() but returns self for fluent programming style
-   *
+   * 
    * @param inputRecords
    * @return this
    */
@@ -254,7 +256,8 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   }
 
   /**
-   * @param mapInputPath Path which is to be passed to the mappers InputSplit
+   * @param mapInputPath
+   *          Path which is to be passed to the mappers InputSplit
    */
   public void setMapInputPath(Path mapInputPath) {
     this.mapInputPath = mapInputPath;
@@ -262,7 +265,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
   /**
    * @param mapInputPath
-   *       The Path object which will be given to the mapper
+   *          The Path object which will be given to the mapper
    * @return this
    */
   public final T withMapInputPath(Path mapInputPath) {
@@ -289,9 +292,8 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
 
     if (driverReused()) {
       throw new IllegalStateException("Driver reuse not allowed");
-    }
-    else {
-     setUsedOnceStatus();
+    } else {
+      setUsedOnceStatus();
     }
   }
 
@@ -301,7 +303,8 @@ public abstract class MapDriverBase<K1, V1, K2, V2, T extends MapDriverBase<K1, 
   @Override
   protected void printPreTestDebugLog() {
     for (Pair<K1, V1> input : inputs) {
-      LOG.debug("Mapping input (" + input.getFirst() + ", " + input.getSecond() + ")");
+      LOG.debug("Mapping input (" + input.getFirst() + ", " + input.getSecond()
+          + ")");
     }
   }
 
