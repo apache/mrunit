@@ -12,16 +12,20 @@ Release Notes - MRUnit - Version 1.1.0
     * [MRUNIT-193] - Serialization.copy throws NPE instead of ISE (missing serilization impl) for Hadoop 2.x
     * [MRUNIT-198] - Serialization is missing in MockMultipleOutputs
     * [MRUNIT-199] - Mapper.Context and Reducer.Context are not fully mocked
+    * [MRUNIT-203] - tarballs should extract to dirs with the same name as tarball
+    * [MRUNIT-204] - Jira and Wiki tutorial are outdated
 
 ** Improvement
     * [MRUNIT-164] - Remove duplicated InputPathStoringMapper classes
     * [MRUNIT-180] - Being able to use a comparator on runTest
     * [MRUNIT-182] - TemporaryPath should support test data in subdirectories
+    * [MRUNIT-194] - Update versions of Hadoop we compile against
+
 
 ** New Feature
     * [MRUNIT-13] - Add support for MultipleOutputs
     * [MRUNIT-162] - MapReduce testing utilties
-
+    * [MRUNIT-205] - Add support for MultipleInputs
 
 Release Notes - MRUnit - Version 1.0.0
 
