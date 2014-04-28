@@ -17,21 +17,17 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.mapred.*;
+import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
+import org.apache.hadoop.mrunit.types.Pair;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputFormat;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mrunit.internal.counters.CounterWrapper;
-import org.apache.hadoop.mrunit.types.Pair;
+import static org.apache.hadoop.mrunit.internal.util.ArgumentChecker.returnNonNull;
 
 /**
  * Harness that allows you to test a Mapper and a Reducer instance together
@@ -42,7 +38,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * Reducer (without checking them), and will check the Reducer's outputs against
  * the expected results. This is designed to handle the (k, v)* -> (k, v)* case
  * from the Mapper/Reducer pair, representing a single unit test.
- *
+ * 
  * If a combiner is specified, then it will be run exactly once after the Mapper
  * and before the Reducer.
  */
@@ -86,7 +82,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
 
   /**
    * Sets the counters object to use for this test.
-   *
+   * 
    * @param ctrs
    *          The counters object to use.
    */
@@ -104,7 +100,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
 
   /**
    * Set the Mapper instance to use with this test driver
-   *
+   * 
    * @param m
    *          the Mapper instance to use
    */
@@ -128,7 +124,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
 
   /**
    * Sets the reducer object to use for this test
-   *
+   * 
    * @param r
    *          The reducer object to use
    */
@@ -138,7 +134,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
 
   /**
    * Identical to setReducer(), but with fluent programming style
-   *
+   * 
    * @param r
    *          The Reducer to use
    * @return this
@@ -158,7 +154,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
 
   /**
    * Sets the reducer object to use as a combiner for this test
-   *
+   * 
    * @param c
    *          The combiner object to use
    */
@@ -168,7 +164,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
 
   /**
    * Identical to setCombiner(), but with fluent programming style
-   *
+   * 
    * @param c
    *          The Combiner to use
    * @return this
@@ -189,7 +185,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
   /**
    * Configure {@link Reducer} to output with a real {@link OutputFormat}. Set
    * {@link InputFormat} to read output back in for use with run* methods
-   *
+   * 
    * @param outputFormatClass
    * @param inputFormatClass
    * @return this for fluent style
@@ -203,53 +199,15 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
     return this;
   }
 
-  /**
-   * The private class to manage starting the reduce phase is used for type
-   * genericity reasons. This class is used in the run() method.
-   */
-  private class ReducePhaseRunner<OUTKEY, OUTVAL> {
-    private List<Pair<OUTKEY, OUTVAL>> runReduce(
-        final List<Pair<K2, List<V2>>> inputs,
-        final Reducer<K2, V2, OUTKEY, OUTVAL> reducer) throws IOException {
-
-      final List<Pair<OUTKEY, OUTVAL>> reduceOutputs = new ArrayList<Pair<OUTKEY, OUTVAL>>();
-
-      if (!inputs.isEmpty()) {
-        if (LOG.isDebugEnabled()) {
-          final StringBuilder sb = new StringBuilder();
-          for (Pair<K2, List<V2>> input : inputs) {
-            formatValueList(input.getSecond(), sb);
-            LOG.debug("Reducing input (" + input.getFirst() + ", " + sb + ")");
-            sb.delete(0, sb.length());
-          }
-        }
-
-        final ReduceDriver<K2, V2, OUTKEY, OUTVAL> reduceDriver = ReduceDriver
-            .newReduceDriver(reducer).withCounters(getCounters())
-            .withConfiguration(getConfiguration()).withAll(inputs);
-
-        if (getOutputSerializationConfiguration() != null) {
-          reduceDriver
-              .withOutputSerializationConfiguration(getOutputSerializationConfiguration());
-        }
-
-        if (outputFormatClass != null) {
-          reduceDriver.withOutputFormat(outputFormatClass, inputFormatClass);
-        }
-
-        reduceOutputs.addAll(reduceDriver.run());
-      }
-
-      return reduceOutputs;
-    }
-  }
-
   @Override
   public List<Pair<K3, V3>> run() throws IOException {
     try {
       preRunChecks(myMapper, myReducer);
       initDistributedCache();
       List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
+
+      MapOutputShuffler<K2, V2> shuffler = new MapOutputShuffler<K2, V2>(
+          getConfiguration(), keyValueOrderComparator, keyGroupComparator);
 
       // run map component
       LOG.debug("Starting map phase with mapper: " + myMapper);
@@ -258,18 +216,22 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
           .withAll(inputList).withMapInputPath(getMapInputPath()).run());
 
       if (myCombiner != null) {
-        // User has specified a combiner. Run this and replace the mapper outputs
+        // User has specified a combiner. Run this and replace the mapper
+        // outputs
         // with the result of the combiner.
         LOG.debug("Starting combine phase with combiner: " + myCombiner);
-        mapOutputs = new ReducePhaseRunner<K2, V2>().runReduce(
-            shuffle(mapOutputs), myCombiner);
+        mapOutputs = new ReducePhaseRunner<K2, V2, K2, V2>(inputFormatClass,
+            getConfiguration(), counters,
+            getOutputSerializationConfiguration(), outputFormatClass)
+            .runReduce(shuffler.shuffle(mapOutputs), myCombiner);
       }
 
       // Run the reduce phase.
       LOG.debug("Starting reduce phase with reducer: " + myReducer);
 
-      return new ReducePhaseRunner<K3, V3>()
-          .runReduce(shuffle(mapOutputs),myReducer);
+      return new ReducePhaseRunner<K2, V2, K3, V3>(inputFormatClass,
+          getConfiguration(), counters, getOutputSerializationConfiguration(),
+          outputFormatClass).runReduce(shuffler.shuffle(mapOutputs), myReducer);
     } finally {
       cleanupDistributedCache();
     }
@@ -283,7 +245,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
   /**
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.
-   *
+   * 
    * @return new MapReduceDriver
    */
   public static <K1, V1, K2, V2, K3, V3> MapReduceDriver<K1, V1, K2, V2, K3, V3> newMapReduceDriver() {
@@ -293,7 +255,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
   /**
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.
-   *
+   * 
    * @param mapper
    *          passed to MapReduceDriver constructor
    * @param reducer
@@ -308,7 +270,7 @@ public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
   /**
    * Returns a new MapReduceDriver without having to specify the generic types
    * on the right hand side of the object create statement.
-   *
+   * 
    * @param mapper
    *          passed to MapReduceDriver constructor
    * @param reducer

@@ -17,15 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
@@ -34,6 +25,11 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.apache.hadoop.util.ReflectionUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Harness that allows you to test a Mapper and a Reducer instance together You
@@ -46,7 +42,7 @@ import org.apache.hadoop.util.ReflectionUtils;
  * pair, representing a single unit test.
  */
 public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T>>
-    extends TestDriver<K1, V1, K3, V3, T> {
+    extends TestDriver<K3, V3, T> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriverBase.class);
 
@@ -62,7 +58,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Adds an input to send to the mapper
-   *
+   * 
    * @param key
    * @param val
    */
@@ -72,7 +68,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Adds an input to send to the Mapper
-   *
+   * 
    * @param input
    *          The (k, v) pair to add to the input list.
    */
@@ -82,7 +78,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Adds input to send to the mapper
-   *
+   * 
    * @param inputs
    *          List of (k, v) pairs to add to the input list
    */
@@ -95,7 +91,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   /**
    * Expects an input of the form "key \t val" Forces the Mapper input types to
    * Text.
-   *
+   * 
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @deprecated No replacement due to lack of type safety and incompatibility
@@ -114,33 +110,31 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   *
+   * 
    * @param key
    * @param val
    * @return this
    */
-  public T withInput(final K1 key,
-      final V1 val) {
+  public T withInput(final K1 key, final V1 val) {
     addInput(key, val);
     return thisAsMapReduceDriver();
   }
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   *
+   * 
    * @param input
    *          The (k, v) pair to add
    * @return this
    */
-  public T withInput(
-      final Pair<K1, V1> input) {
+  public T withInput(final Pair<K1, V1> input) {
     addInput(input);
     return thisAsMapReduceDriver();
   }
 
   /**
    * Identical to addInputFromString, but with a fluent programming style
-   *
+   * 
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -148,21 +142,19 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
    *             with non Text Writables
    */
   @Deprecated
-  public T withInputFromString(
-      final String input) {
+  public T withInputFromString(final String input) {
     addInputFromString(input);
     return thisAsMapReduceDriver();
   }
 
   /**
    * Identical to addAll() but returns self for fluent programming style
-   *
+   * 
    * @param inputs
    *          List of (k, v) pairs to add
    * @return this
    */
-  public T withAll(
-      final List<Pair<K1, V1>> inputs) {
+  public T withAll(final List<Pair<K1, V1>> inputs) {
     addAll(inputs);
     return thisAsMapReduceDriver();
   }
@@ -175,7 +167,8 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   }
 
   /**
-   * @param mapInputPath Path which is to be passed to the mappers InputSplit
+   * @param mapInputPath
+   *          Path which is to be passed to the mappers InputSplit
    */
   public void setMapInputPath(Path mapInputPath) {
     this.mapInputPath = mapInputPath;
@@ -183,7 +176,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
 
   /**
    * @param mapInputPath
-   *       The Path object which will be given to the mapper
+   *          The Path object which will be given to the mapper
    * @return this
    */
   public final T withMapInputPath(Path mapInputPath) {
@@ -203,8 +196,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
     }
     if (driverReused()) {
       throw new IllegalStateException("Driver reuse not allowed");
-    }
-    else {
+    } else {
       setUsedOnceStatus();
     }
   }
@@ -213,93 +205,13 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   public abstract List<Pair<K3, V3>> run() throws IOException;
 
   /**
-   * Take the outputs from the Mapper, combine all values for the same key, and
-   * sort them by key.
-   *
-   * @param mapOutputs
-   *          An unordered list of (key, val) pairs from the mapper
-   * @return the sorted list of (key, list(val))'s to present to the reducer
-   */
-  public List<Pair<K2, List<V2>>> shuffle(final List<Pair<K2, V2>> mapOutputs) {
-
-    final Comparator<K2> keyOrderComparator;
-    final Comparator<K2> keyGroupComparator;
-
-    if (mapOutputs.isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    // JobConf needs the map output key class to work out the
-    // comparator to use
-    JobConf conf = new JobConf(getConfiguration());
-    K2 firstKey = mapOutputs.get(0).getFirst();
-    conf.setMapOutputKeyClass(firstKey.getClass());
-
-    // get the ordering comparator or work out from conf
-    if (keyValueOrderComparator == null) {
-      keyOrderComparator = conf.getOutputKeyComparator();
-    } else {
-      keyOrderComparator = this.keyValueOrderComparator;
-    }
-
-    // get the grouping comparator or work out from conf
-    if (this.keyGroupComparator == null) {
-      keyGroupComparator = conf.getOutputValueGroupingComparator();
-    } else {
-      keyGroupComparator = this.keyGroupComparator;
-    }
-
-    // sort the map outputs according to their keys
-    Collections.sort(mapOutputs, new Comparator<Pair<K2, V2>>() {
-      public int compare(final Pair<K2, V2> o1, final Pair<K2, V2> o2) {
-        return keyOrderComparator.compare(o1.getFirst(), o2.getFirst());
-      }
-    });
-
-    // apply grouping comparator to create groups
-    final Map<K2, List<Pair<K2, V2>>> groupedByKey =
-        new LinkedHashMap<K2, List<Pair<K2, V2>>>();
-
-    List<Pair<K2, V2>> groupedKeyList = null;
-    Pair<K2,V2> previous = null;
-
-    for (final Pair<K2, V2> mapOutput : mapOutputs) {
-      if (previous == null || keyGroupComparator
-          .compare(previous.getFirst(), mapOutput.getFirst()) != 0) {
-        groupedKeyList = new ArrayList<Pair<K2, V2>>();
-        groupedByKey.put(mapOutput.getFirst(), groupedKeyList);
-      }
-      groupedKeyList.add(mapOutput);
-      previous = mapOutput;
-    }
-
-    // populate output list
-    final List<Pair<K2, List<V2>>> outputKeyValuesList = new ArrayList<Pair<K2, List<V2>>>();
-    for (final Entry<K2, List<Pair<K2, V2>>> groupedByKeyEntry :
-            groupedByKey.entrySet()) {
-
-      // create list to hold values for the grouped key
-      final List<V2> valuesList = new ArrayList<V2>();
-      for (final Pair<K2, V2> pair : groupedByKeyEntry.getValue()) {
-        valuesList.add(pair.getSecond());
-      }
-
-      // add key and values to output list
-      outputKeyValuesList.add(new Pair<K2, List<V2>>(
-          groupedByKeyEntry.getKey(), valuesList));
-    }
-
-    return outputKeyValuesList;
-  }
-
-  /**
    * Set the key grouping comparator, similar to calling the following API calls
    * but passing a real instance rather than just the class:
    * <UL>
    * <LI>pre 0.20.1 API: {@link JobConf#setOutputValueGroupingComparator(Class)}
    * <LI>0.20.1+ API: {@link Job#setGroupingComparatorClass(Class)}
    * </UL>
-   *
+   * 
    * @param groupingComparator
    */
   public void setKeyGroupingComparator(
@@ -315,7 +227,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
    * <LI>pre 0.20.1 API: {@link JobConf#setOutputKeyComparatorClass(Class)}
    * <LI>0.20.1+ API: {@link Job#setSortComparatorClass(Class)}
    * </UL>
-   *
+   * 
    * @param orderComparator
    */
   public void setKeyOrderComparator(final RawComparator<K2> orderComparator) {
@@ -326,7 +238,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   /**
    * Identical to {@link #setKeyGroupingComparator(RawComparator)}, but with a
    * fluent programming style
-   *
+   * 
    * @param groupingComparator
    *          Comparator to use in the shuffle stage for key grouping
    * @return this
@@ -339,7 +251,7 @@ public abstract class MapReduceDriverBase<K1, V1, K2, V2, K3, V3, T extends MapR
   /**
    * Identical to {@link #setKeyOrderComparator(RawComparator)}, but with a
    * fluent programming style
-   *
+   * 
    * @param orderComparator
    *          Comparator to use in the shuffle stage for key value ordering
    * @return this

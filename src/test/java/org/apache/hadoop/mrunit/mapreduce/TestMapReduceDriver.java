@@ -17,13 +17,6 @@
  */
 package org.apache.hadoop.mrunit.mapreduce;
 
-import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -31,8 +24,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.serializer.JavaSerializationComparator;
-import org.apache.hadoop.mapred.lib.IdentityMapper;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -43,7 +34,6 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
 import org.apache.hadoop.mrunit.ExpectedSuppliedException;
-import org.apache.hadoop.mrunit.mapreduce.MapReduceDriver;
 import org.apache.hadoop.mrunit.TestMapReduceDriver.FirstCharComparator;
 import org.apache.hadoop.mrunit.TestMapReduceDriver.SecondCharComparator;
 import org.apache.hadoop.mrunit.mapreduce.TestMapDriver.ConfigurationMapper;
@@ -55,6 +45,14 @@ import org.apache.hadoop.mrunit.types.UncomparableWritable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.hadoop.mrunit.ExtendedAssert.assertListEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class TestMapReduceDriver {
 
@@ -103,10 +101,10 @@ public class TestMapReduceDriver {
   public void testUncomparable() throws IOException {
     Text k = new Text("test");
     Object v = new UncomparableWritable(2);
-    MapReduceDriver.newMapReduceDriver(
-        new Mapper<Text, Object,Text, Object>(),
-        new Reducer<Text, Object,Text, Object>())
-        .withInput(k, v).withOutput(k, v).runTest();
+    MapReduceDriver
+        .newMapReduceDriver(new Mapper<Text, Object, Text, Object>(),
+            new Reducer<Text, Object, Text, Object>()).withInput(k, v)
+        .withOutput(k, v).runTest();
   }
 
   @Test
@@ -130,8 +128,10 @@ public class TestMapReduceDriver {
   @Test
   public void testTestRun3() throws IOException {
     thrown.expectAssertionErrorMessage("2 Error(s)");
-    thrown.expectAssertionErrorMessage("Missing expected output (foo, 52) at position 0, got (bar, 12).");
-    thrown.expectAssertionErrorMessage("Missing expected output (bar, 12) at position 1, got (foo, 52).");
+    thrown
+        .expectAssertionErrorMessage("Missing expected output (foo, 52) at position 0, got (bar, 12).");
+    thrown
+        .expectAssertionErrorMessage("Missing expected output (bar, 12) at position 1, got (foo, 52).");
     driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
         .withInput(new Text("bar"), new LongWritable(BAR_IN))
         .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
@@ -142,13 +142,18 @@ public class TestMapReduceDriver {
   @Test
   public void testAddAll() throws IOException {
     final List<Pair<Text, LongWritable>> inputs = new ArrayList<Pair<Text, LongWritable>>();
-    inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_IN_A)));
-    inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_IN_B)));
-    inputs.add(new Pair<Text, LongWritable>(new Text("bar"), new LongWritable(BAR_IN)));
+    inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(
+        FOO_IN_A)));
+    inputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(
+        FOO_IN_B)));
+    inputs.add(new Pair<Text, LongWritable>(new Text("bar"), new LongWritable(
+        BAR_IN)));
 
     final List<Pair<Text, LongWritable>> outputs = new ArrayList<Pair<Text, LongWritable>>();
-    outputs.add(new Pair<Text, LongWritable>(new Text("bar"), new LongWritable(BAR_IN)));
-    outputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(FOO_OUT)));
+    outputs.add(new Pair<Text, LongWritable>(new Text("bar"), new LongWritable(
+        BAR_IN)));
+    outputs.add(new Pair<Text, LongWritable>(new Text("foo"), new LongWritable(
+        FOO_OUT)));
 
     driver.withAll(inputs).withAllOutput(outputs).runTest();
   }
@@ -170,100 +175,10 @@ public class TestMapReduceDriver {
   }
 
   @Test
-  public void testEmptyShuffle() {
-    final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
-    final List<Pair<Text, List<Text>>> outputs = driver2.shuffle(inputs);
-    assertEquals(0, outputs.size());
-  }
-
-  // just shuffle a single (k, v) pair
-  @Test
-  public void testSingleShuffle() {
-    final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
-    inputs.add(new Pair<Text, Text>(new Text("a"), new Text("b")));
-
-    final List<Pair<Text, List<Text>>> outputs = driver2.shuffle(inputs);
-
-    final List<Pair<Text, List<Text>>> expected = new ArrayList<Pair<Text, List<Text>>>();
-    final List<Text> sublist = new ArrayList<Text>();
-    sublist.add(new Text("b"));
-    expected.add(new Pair<Text, List<Text>>(new Text("a"), sublist));
-
-    assertListEquals(expected, outputs);
-  }
-
-  // shuffle multiple values from the same key.
-  @Test
-  public void testShuffleOneKey() {
-    final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
-    inputs.add(new Pair<Text, Text>(new Text("a"), new Text("b")));
-    inputs.add(new Pair<Text, Text>(new Text("a"), new Text("c")));
-
-    final List<Pair<Text, List<Text>>> outputs = driver2.shuffle(inputs);
-
-    final List<Pair<Text, List<Text>>> expected = new ArrayList<Pair<Text, List<Text>>>();
-    final List<Text> sublist = new ArrayList<Text>();
-    sublist.add(new Text("b"));
-    sublist.add(new Text("c"));
-    expected.add(new Pair<Text, List<Text>>(new Text("a"), sublist));
-
-    assertListEquals(expected, outputs);
-  }
-
-  // shuffle multiple keys
-  @Test
-  public void testMultiShuffle1() {
-    final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
-    inputs.add(new Pair<Text, Text>(new Text("a"), new Text("x")));
-    inputs.add(new Pair<Text, Text>(new Text("b"), new Text("z")));
-    inputs.add(new Pair<Text, Text>(new Text("b"), new Text("w")));
-    inputs.add(new Pair<Text, Text>(new Text("a"), new Text("y")));
-
-    final List<Pair<Text, List<Text>>> outputs = driver2.shuffle(inputs);
-
-    final List<Pair<Text, List<Text>>> expected = new ArrayList<Pair<Text, List<Text>>>();
-    final List<Text> sublist1 = new ArrayList<Text>();
-    sublist1.add(new Text("x"));
-    sublist1.add(new Text("y"));
-    expected.add(new Pair<Text, List<Text>>(new Text("a"), sublist1));
-
-    final List<Text> sublist2 = new ArrayList<Text>();
-    sublist2.add(new Text("z"));
-    sublist2.add(new Text("w"));
-    expected.add(new Pair<Text, List<Text>>(new Text("b"), sublist2));
-
-    assertListEquals(expected, outputs);
-  }
-
-  // shuffle multiple keys that are out-of-order to start.
-  @Test
-  public void testMultiShuffle2() {
-    final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
-    inputs.add(new Pair<Text, Text>(new Text("b"), new Text("z")));
-    inputs.add(new Pair<Text, Text>(new Text("a"), new Text("x")));
-    inputs.add(new Pair<Text, Text>(new Text("b"), new Text("w")));
-    inputs.add(new Pair<Text, Text>(new Text("a"), new Text("y")));
-
-    final List<Pair<Text, List<Text>>> outputs = driver2.shuffle(inputs);
-
-    final List<Pair<Text, List<Text>>> expected = new ArrayList<Pair<Text, List<Text>>>();
-    final List<Text> sublist1 = new ArrayList<Text>();
-    sublist1.add(new Text("x"));
-    sublist1.add(new Text("y"));
-    expected.add(new Pair<Text, List<Text>>(new Text("a"), sublist1));
-
-    final List<Text> sublist2 = new ArrayList<Text>();
-    sublist2.add(new Text("z"));
-    sublist2.add(new Text("w"));
-    expected.add(new Pair<Text, List<Text>>(new Text("b"), sublist2));
-
-    assertListEquals(expected, outputs);
-  }
-
-  @Test
   public void testEmptySortAndGroup() {
     final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
-    final List<KeyValueReuseList<Text, Text>> outputs = driver2.sortAndGroup(inputs);
+    final List<KeyValueReuseList<Text, Text>> outputs = driver2
+        .sortAndGroup(inputs);
     assertEquals(0, outputs.size());
   }
 
@@ -273,10 +188,12 @@ public class TestMapReduceDriver {
     final List<Pair<Text, Text>> inputs = new ArrayList<Pair<Text, Text>>();
     inputs.add(new Pair<Text, Text>(new Text("a"), new Text("b")));
 
-    final List<KeyValueReuseList<Text, Text>> outputs = driver2.sortAndGroup(inputs);
+    final List<KeyValueReuseList<Text, Text>> outputs = driver2
+        .sortAndGroup(inputs);
 
     final List<KeyValueReuseList<Text, Text>> expected = new ArrayList<KeyValueReuseList<Text, Text>>();
-    final KeyValueReuseList<Text, Text> sublist = new KeyValueReuseList<Text, Text>(new Text(), new Text(), driver2.getConfiguration());
+    final KeyValueReuseList<Text, Text> sublist = new KeyValueReuseList<Text, Text>(
+        new Text(), new Text(), driver2.getConfiguration());
     sublist.add(new Pair<Text, Text>(new Text("a"), new Text("b")));
     expected.add(sublist);
 
@@ -290,10 +207,12 @@ public class TestMapReduceDriver {
     inputs.add(new Pair<Text, Text>(new Text("a"), new Text("b")));
     inputs.add(new Pair<Text, Text>(new Text("a"), new Text("c")));
 
-    final List<KeyValueReuseList<Text, Text>> outputs = driver2.sortAndGroup(inputs);
+    final List<KeyValueReuseList<Text, Text>> outputs = driver2
+        .sortAndGroup(inputs);
 
     final List<KeyValueReuseList<Text, Text>> expected = new ArrayList<KeyValueReuseList<Text, Text>>();
-    final KeyValueReuseList<Text, Text> sublist = new KeyValueReuseList<Text, Text>(new Text(), new Text(), driver2.getConfiguration());
+    final KeyValueReuseList<Text, Text> sublist = new KeyValueReuseList<Text, Text>(
+        new Text(), new Text(), driver2.getConfiguration());
     sublist.add(new Pair<Text, Text>(new Text("a"), new Text("b")));
     sublist.add(new Pair<Text, Text>(new Text("a"), new Text("c")));
     expected.add(sublist);
@@ -310,15 +229,18 @@ public class TestMapReduceDriver {
     inputs.add(new Pair<Text, Text>(new Text("b"), new Text("w")));
     inputs.add(new Pair<Text, Text>(new Text("a"), new Text("y")));
 
-    final List<KeyValueReuseList<Text, Text>> outputs = driver2.sortAndGroup(inputs);
+    final List<KeyValueReuseList<Text, Text>> outputs = driver2
+        .sortAndGroup(inputs);
 
     final List<KeyValueReuseList<Text, Text>> expected = new ArrayList<KeyValueReuseList<Text, Text>>();
-    final KeyValueReuseList<Text, Text> sublist1 = new KeyValueReuseList<Text, Text>(new Text(), new Text(), driver2.getConfiguration());
+    final KeyValueReuseList<Text, Text> sublist1 = new KeyValueReuseList<Text, Text>(
+        new Text(), new Text(), driver2.getConfiguration());
     sublist1.add(new Pair<Text, Text>(new Text("a"), new Text("x")));
     sublist1.add(new Pair<Text, Text>(new Text("a"), new Text("y")));
     expected.add(sublist1);
 
-    final KeyValueReuseList<Text, Text> sublist2 = new KeyValueReuseList<Text, Text>(new Text(), new Text(), driver2.getConfiguration());
+    final KeyValueReuseList<Text, Text> sublist2 = new KeyValueReuseList<Text, Text>(
+        new Text(), new Text(), driver2.getConfiguration());
     sublist2.add(new Pair<Text, Text>(new Text("b"), new Text("z")));
     sublist2.add(new Pair<Text, Text>(new Text("b"), new Text("w")));
     expected.add(sublist2);
@@ -335,15 +257,18 @@ public class TestMapReduceDriver {
     inputs.add(new Pair<Text, Text>(new Text("b"), new Text("w")));
     inputs.add(new Pair<Text, Text>(new Text("a"), new Text("y")));
 
-    final List<KeyValueReuseList<Text, Text>> outputs = driver2.sortAndGroup(inputs);
+    final List<KeyValueReuseList<Text, Text>> outputs = driver2
+        .sortAndGroup(inputs);
 
     final List<KeyValueReuseList<Text, Text>> expected = new ArrayList<KeyValueReuseList<Text, Text>>();
-    final KeyValueReuseList<Text, Text> sublist1 = new KeyValueReuseList<Text, Text>(new Text(), new Text(), driver2.getConfiguration());
+    final KeyValueReuseList<Text, Text> sublist1 = new KeyValueReuseList<Text, Text>(
+        new Text(), new Text(), driver2.getConfiguration());
     sublist1.add(new Pair<Text, Text>(new Text("a"), new Text("x")));
     sublist1.add(new Pair<Text, Text>(new Text("a"), new Text("y")));
     expected.add(sublist1);
 
-    final KeyValueReuseList<Text, Text> sublist2 = new KeyValueReuseList<Text, Text>(new Text(), new Text(), driver2.getConfiguration());
+    final KeyValueReuseList<Text, Text> sublist2 = new KeyValueReuseList<Text, Text>(
+        new Text(), new Text(), driver2.getConfiguration());
     sublist2.add(new Pair<Text, Text>(new Text("b"), new Text("z")));
     sublist2.add(new Pair<Text, Text>(new Text("b"), new Text("w")));
     expected.add(sublist2);
@@ -614,16 +539,15 @@ public class TestMapReduceDriver {
 
   @Test
   public void testGroupingComparatorBehaviour1() throws IOException {
-    driver.withInput(new Text("A1"),new LongWritable(1L))
-      .withInput(new Text("A2"),new LongWritable(1L))
-      .withInput(new Text("B1"),new LongWritable(1L))
-      .withInput(new Text("B2"),new LongWritable(1L))
-      .withInput(new Text("C1"),new LongWritable(1L))
-      .withOutput(new Text("A2"),new LongWritable(2L))
-      .withOutput(new Text("B2"),new LongWritable(2L))
-      .withOutput(new Text("C1"),new LongWritable(1L))
-      .withKeyGroupingComparator(new FirstCharComparator())
-      .runTest(false);
+    driver.withInput(new Text("A1"), new LongWritable(1L))
+        .withInput(new Text("A2"), new LongWritable(1L))
+        .withInput(new Text("B1"), new LongWritable(1L))
+        .withInput(new Text("B2"), new LongWritable(1L))
+        .withInput(new Text("C1"), new LongWritable(1L))
+        .withOutput(new Text("A2"), new LongWritable(2L))
+        .withOutput(new Text("B2"), new LongWritable(2L))
+        .withOutput(new Text("C1"), new LongWritable(1L))
+        .withKeyGroupingComparator(new FirstCharComparator()).runTest(false);
   }
 
   @Test
@@ -632,18 +556,17 @@ public class TestMapReduceDriver {
     // grouping of reduce keys in "shuffle".
     // MapReduce doesn't group keys which aren't in a contiguous
     // range when sorted by their sorting comparator.
-    driver.withInput(new Text("1A"),new LongWritable(1L))
-      .withInput(new Text("2A"),new LongWritable(1L))
-      .withInput(new Text("1B"),new LongWritable(1L))
-      .withInput(new Text("2B"),new LongWritable(1L))
-      .withInput(new Text("1C"),new LongWritable(1L))
-      .withOutput(new Text("1A"),new LongWritable(1L))
-      .withOutput(new Text("2A"),new LongWritable(1L))
-      .withOutput(new Text("1B"),new LongWritable(1L))
-      .withOutput(new Text("2B"),new LongWritable(1L))
-      .withOutput(new Text("1C"),new LongWritable(1L))
-      .withKeyGroupingComparator(new SecondCharComparator())
-      .runTest(false);
+    driver.withInput(new Text("1A"), new LongWritable(1L))
+        .withInput(new Text("2A"), new LongWritable(1L))
+        .withInput(new Text("1B"), new LongWritable(1L))
+        .withInput(new Text("2B"), new LongWritable(1L))
+        .withInput(new Text("1C"), new LongWritable(1L))
+        .withOutput(new Text("1A"), new LongWritable(1L))
+        .withOutput(new Text("2A"), new LongWritable(1L))
+        .withOutput(new Text("1B"), new LongWritable(1L))
+        .withOutput(new Text("2B"), new LongWritable(1L))
+        .withOutput(new Text("1C"), new LongWritable(1L))
+        .withKeyGroupingComparator(new SecondCharComparator()).runTest(false);
   }
 
   @Test
@@ -651,33 +574,36 @@ public class TestMapReduceDriver {
 
     // this test should use the comparator registered inside TestWritable
     // to output the keys in reverse order
-    MapReduceDriver<TestWritable,Text,TestWritable,Text,TestWritable,Text> driver
-      = MapReduceDriver.newMapReduceDriver(new Mapper(), new Reducer());
+    MapReduceDriver<TestWritable, Text, TestWritable, Text, TestWritable, Text> driver = MapReduceDriver
+        .newMapReduceDriver(new Mapper(), new Reducer());
 
-    driver.withInput(new TestWritable("A1"), new Text("A1"))
-      .withInput(new TestWritable("A2"), new Text("A2"))
-      .withInput(new TestWritable("A3"), new Text("A3"))
-      .withKeyGroupingComparator(new TestWritable.SingleGroupComparator())
-      // these output keys are incorrect because of MRUNIT-129
-      //.withOutput(new TestWritable("A3"), new Text("A3"))
-      //.withOutput(new TestWritable("A3"), new Text("A2"))
-      //.withOutput(new TestWritable("A3"), new Text("A1"))
-      //the following are the actual correct outputs
-      .withOutput(new TestWritable("A3"), new Text("A3"))
-      .withOutput(new TestWritable("A2"), new Text("A2"))
-      .withOutput(new TestWritable("A1"), new Text("A1"))
-      .runTest(true); //ordering is important
+    driver
+        .withInput(new TestWritable("A1"), new Text("A1"))
+        .withInput(new TestWritable("A2"), new Text("A2"))
+        .withInput(new TestWritable("A3"), new Text("A3"))
+        .withKeyGroupingComparator(new TestWritable.SingleGroupComparator())
+        // these output keys are incorrect because of MRUNIT-129
+        // .withOutput(new TestWritable("A3"), new Text("A3"))
+        // .withOutput(new TestWritable("A3"), new Text("A2"))
+        // .withOutput(new TestWritable("A3"), new Text("A1"))
+        // the following are the actual correct outputs
+        .withOutput(new TestWritable("A3"), new Text("A3"))
+        .withOutput(new TestWritable("A2"), new Text("A2"))
+        .withOutput(new TestWritable("A1"), new Text("A1")).runTest(true); // ordering
+                                                                           // is
+                                                                           // important
   }
 
   @Test
   public void testRepeatRun() throws IOException {
     driver.withCombiner(new Reducer<Text, LongWritable, Text, LongWritable>())
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
-    thrown.expectMessage(IllegalStateException.class, "Driver reuse not allowed");
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+        .withInput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+    thrown.expectMessage(IllegalStateException.class,
+        "Driver reuse not allowed");
     driver.runTest();
   }
 
