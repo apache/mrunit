@@ -328,9 +328,9 @@ public class TestMultipleInputsMapReduceDriver {
 
     thrown
         .expectAssertionErrorMessage("2 Error(s): (Actual counter ("
-            + "\"org.apache.hadoop.mrunit.TestMapDriver$MapperWithCounters$Counters\",\"X\")"
-            + " was not found in expected counters, Actual counter ("
             + "\"org.apache.hadoop.mrunit.TestMultipleInputsMapReduceDriver$TokenMapperWithCounters$Counters\",\"Y\")"
+            + " was not found in expected counters, Actual counter ("
+            + "\"org.apache.hadoop.mrunit.TestMapDriver$MapperWithCounters$Counters\",\"X\")"
             + " was not found in expected counters");
 
     Mapper<Text, Text, Text, Text> mapperWithCounters = new TestMapDriver.MapperWithCounters<Text, Text, Text, Text>();
