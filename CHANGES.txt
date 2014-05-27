@@ -14,6 +14,9 @@ Release Notes - MRUnit - Version 1.1.0
     * [MRUNIT-199] - Mapper.Context and Reducer.Context are not fully mocked
     * [MRUNIT-203] - tarballs should extract to dirs with the same name as tarball
     * [MRUNIT-204] - Jira and Wiki tutorial are outdated
+    * [MRUNIT-209] - Can't use the maven dependency plugin with maven 3 on mrunit (Alexandre Normand via Dave Beech)
+    * [MRUNIT-208] - mrunit unnecessarily depends on mockito-all (Alexandre Normand via Dave Beech)
+    * [MRUNIT-207] - Test failure on trunk-hadoop1 branch (Jason E Tedor via Brock Noland)
 
 ** Improvement
     * [MRUNIT-164] - Remove duplicated InputPathStoringMapper classes
