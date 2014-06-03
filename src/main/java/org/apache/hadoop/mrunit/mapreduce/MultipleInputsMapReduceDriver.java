@@ -404,7 +404,7 @@ public class MultipleInputsMapReduceDriver<K1, V1, K2, V2>
    * 
    * @param mapper
    *          The mapper to add the input pairs to
-   * @param inputs
+   * @param input
    *          The (k, v) pairs to add
    * @param <K>
    *          The type of the key
