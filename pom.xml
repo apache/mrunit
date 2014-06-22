@@ -18,38 +18,49 @@
 *
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- To retrieve the ASF organization and the ASF license -->
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
     <version>11</version>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
+
   <groupId>org.apache.mrunit</groupId>
   <artifactId>mrunit</artifactId>
+  <packaging>jar</packaging>
   <version>1.2.0-SNAPSHOT</version>
+
   <properties>
     <envClassifier>hadoop2</envClassifier>
     <specificHadoopVersion>2.3.0</specificHadoopVersion>
   </properties>
-  <name>MRUnit</name>
-  <url>http://mrunit.apache.org</url>
+
+  <name>Apache MRUnit</name>
   <description>
-        MRUnit is a Java library that helps developers unit test Apache Hadoop map
-        reduce jobs.
+        Apache MRUnit is a Java library that helps developers unit test Apache Hadoop map reduce jobs.
   </description>
-  <issueManagement>
-    <system>JIRA</system>
-    <url>http://issues.apache.org/jira/browse/MRUNIT</url>
-  </issueManagement>
-  <ciManagement>
-    <system>Jenkins</system>
-    <url>http://builds.apache.org/job/mrunit-trunk/</url>
-  </ciManagement>
+  <url>http://mrunit.apache.org</url>
+  <inceptionYear>2009</inceptionYear>
+
   <scm>
     <connection>scm:git:http://git-wip-us.apache.org/repos/asf/mrunit.git</connection>
     <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/mrunit.git</developerConnection>
     <url>https://git-wip-us.apache.org/repos/asf?p=mrunit.git;a=summary</url>
   </scm>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://issues.apache.org/jira/browse/MRUNIT</url>
+  </issueManagement>
+  <distributionManagement>
+    <downloadUrl>http://mrunit.apache.org/general/downloads.html</downloadUrl>
+  </distributionManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>http://builds.apache.org/job/mrunit-trunk/</url>
+  </ciManagement>
+
   <mailingLists>
     <mailingList>
       <name>user</name>
@@ -73,6 +84,7 @@
       <archive>http://mail-archives.apache.org/mod_mbox/mrunit-commits</archive>
     </mailingList>
   </mailingLists>
+
   <developers>
     <developer>
       <id>kimballa.apache.org</id>
@@ -140,6 +152,7 @@
       <name>Patrick D. Hunt</name>
     </developer>
   </developers>
+
   <build>
     <plugins>
       <plugin>
@@ -285,6 +298,33 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <version>2.7</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-doap-plugin</artifactId>
+        <version>1.1</version>
+        <configuration>
+          <doapOptions>
+            <programmingLanguage>Java</programmingLanguage>
+            <license>${project.licenses[0].url}</license>
+            <homepage>${project.url}</homepage>
+            <name>${project.name}</name>
+            <created>${project.inceptionYear}-01-01</created>
+            <vendor>${project.organization.name}</vendor>
+            <shortdesc>${project.description}</shortdesc>
+            <description>The ${project.description}</description>
+            <mailingList>${project.url}/mail-lists.html</mailingList>
+            <downloadPage>${project.distributionManagement.downloadUrl}</downloadPage>
+            <bugDatabase>${project.issueManagement.url}</bugDatabase>
+          </doapOptions>
+
+          <asfExtOptions>
+            <charter>${project.description}</charter>
+            <pmc>${project.url}</pmc>
+            <name>${project.name}</name>
+            <chair>Brock Noland</chair>
+          </asfExtOptions>
+        </configuration>
       </plugin>
     </plugins>
   </build>
