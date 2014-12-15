@@ -34,7 +34,7 @@
 
   <properties>
     <envClassifier>hadoop2</envClassifier>
-    <specificHadoopVersion>2.6.0</specificHadoopVersion>
+    <specificHadoopVersion>2.3.0</specificHadoopVersion>
   </properties>
 
   <name>Apache MRUnit</name>
