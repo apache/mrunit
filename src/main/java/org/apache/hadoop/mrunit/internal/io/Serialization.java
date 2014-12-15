@@ -78,6 +78,7 @@ public class Serialization {
       final DataOutputBuffer outputBuffer = new DataOutputBuffer();
       serializer.open(outputBuffer);
       serializer.serialize(orig);
+      serializer.close();
       final DataInputBuffer inputBuffer = new DataInputBuffer();
       inputBuffer.reset(outputBuffer.getData(), outputBuffer.getLength());
       deserializer.open(inputBuffer);
