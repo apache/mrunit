@@ -113,7 +113,7 @@ public abstract class MultipleInputsMapReduceDriverBase<M, K1, V1, K2, V2, T ext
    */
   @SuppressWarnings("unchecked")
   public void setKeyGroupingComparator(
-      final RawComparator<K2> groupingComparator) {
+      final RawComparator<K1> groupingComparator) {
     keyGroupComparator = ReflectionUtils.newInstance(
         groupingComparator.getClass(), getConfiguration());
   }
@@ -126,7 +126,7 @@ public abstract class MultipleInputsMapReduceDriverBase<M, K1, V1, K2, V2, T ext
    *          Comparator to use in the shuffle stage for key grouping
    * @return this
    */
-  public T withKeyGroupingComparator(final RawComparator<K2> groupingComparator) {
+  public T withKeyGroupingComparator(final RawComparator<K1> groupingComparator) {
     setKeyGroupingComparator(groupingComparator);
     return thisAsMapReduceDriver();
   }
@@ -149,7 +149,7 @@ public abstract class MultipleInputsMapReduceDriverBase<M, K1, V1, K2, V2, T ext
    * @param orderComparator
    */
   @SuppressWarnings("unchecked")
-  public void setKeyOrderComparator(final RawComparator<K2> orderComparator) {
+  public void setKeyOrderComparator(final RawComparator<K1> orderComparator) {
     keyValueOrderComparator = ReflectionUtils.newInstance(
         orderComparator.getClass(), getConfiguration());
   }
@@ -162,7 +162,7 @@ public abstract class MultipleInputsMapReduceDriverBase<M, K1, V1, K2, V2, T ext
    *          Comparator to use in the shuffle stage for key value ordering
    * @return this
    */
-  public T withKeyOrderComparator(final RawComparator<K2> orderComparator) {
+  public T withKeyOrderComparator(final RawComparator<K1> orderComparator) {
     setKeyOrderComparator(orderComparator);
     return thisAsMapReduceDriver();
   }
