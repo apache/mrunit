@@ -61,6 +61,7 @@
     <!-- ====================================================================== -->
 
     <category rdf:resource="http://projects.apache.org/category/library"/>
+    <category rdf:resource="http://projects.apache.org/category/retired"/>
 
     <!-- ====================================================================== -->
     <!-- Anonymous Source Repository.                                           -->
@@ -232,7 +233,7 @@
     <!-- ASF extension.                                                         -->
     <!-- ====================================================================== -->
 
-    <asfext:pmc rdf:resource="http://mrunit.apache.org"/>
+    <asfext:pmc rdf:resource="http://attic.apache.org"/>
     <asfext:name>Apache MRUnit</asfext:name>
     <foaf:homepage rdf:resource="http://mrunit.apache.org"/>
     <asfext:charter>Apache MRUnit is a Java library that helps developers unit test Apache Hadoop map reduce jobs.</asfext:charter>
